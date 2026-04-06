@@ -147,6 +147,30 @@ function MarksList({ data: incomingData }) {
                     ))}
                 </tbody>
             </table>
+            <h2>Recap Sheet</h2>
+            <table>
+                <tbody>
+                    {data.map((row, rowIndex) => (
+                        rowIndex === 1 || rowIndex === 2 ? null : rowIndex === 0 ? (
+                            <tr key={`row-${rowIndex}`}>
+                                <th>SNo</th>
+                                <th>Name</th>
+                                <th>Reg.No</th>
+                                {hdr.splice(1).map((h, index) => (
+                                    <th key={`cell-${rowIndex}-${index}`} colSpan={h.span}>{h.head}</th>
+                                ))}
+                            </tr>
+                        ) : (
+                            <tr key={`row-${rowIndex}`}>
+                                {row.map((cell, cellIndex) => (
+                                    <td key={`cell-${rowIndex}-${cellIndex}`} style={{ textAlign: cellIndex === 1 && 'left' }}>{cell ?? ''}</td>
+                                ))}
+                            </tr>
+                        )
+                    ))}
+                </tbody>
+            </table>
+            {console.log(Object.entries(Object.groupBy(PLAN, ({ head }) => head)))}
             <h2>CLOs wise Head</h2>
             <form action="">
                 <label htmlFor="kpi">Set KPI Threshold (%): </label>
