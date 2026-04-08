@@ -1,5 +1,6 @@
 import { Fragment, useState } from 'react'
 import PLOChart from './PLOChart'
+import './MarksList.css'
 
 const ENUMS = Object.freeze({
     HEADS: 0,
@@ -85,7 +86,7 @@ function MarksList({ data: incomingData }) {
     }
 
     return (
-        <>
+        <div className="marks-list">
             <h2>PLAN</h2>
 
             <table>
@@ -327,7 +328,7 @@ function MarksList({ data: incomingData }) {
                 </tbody>
             </table>
 
-        </>
+        </div>
     )
 }
 

@@ -4,6 +4,8 @@ import MarksList from './components/MarksList'
 import FileUpload from './components/FileUpload'
 import { useEffect } from 'react'
 import Tabs from './components/Tabs'
+import CRRComponent from './components/CRRComponent'
+
 
 function App() {
     const [sheetData, setSheetData] = useState(null)
@@ -85,6 +87,8 @@ function App() {
             ) : (
                 <p>Please upload an Excel file to view marks.</p>
             )}
+            <CRRComponent />
+
         </main>
     )
 }
