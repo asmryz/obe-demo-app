@@ -9,6 +9,19 @@ const ENUMS = Object.freeze({
     MAX: 3
 })
 
+const grades = [  
+  { "start": 90, "end": 100, "grade": "A+", "gpa": 4},
+  { "start": 85, "end": 89, "grade": "A", "gpa": 3.75},
+  { "start": 80, "end": 84, "grade": "A-", "gpa": 3.5},
+  { "start": 75, "end": 79, "grade": "B+", "gpa": 3.25},
+  { "start": 70, "end": 74, "grade": "B", "gpa": 3},
+  { "start": 66, "end": 69, "grade": "B-", "gpa": 2.75},
+  { "start": 63, "end": 65, "grade": "C+", "gpa": 2.5},
+  { "start": 60, "end": 62, "grade": "C", "gpa": 2},
+  { "start": 55, "end": 59, "grade": "C-", "gpa": 1.5},
+  { "start": 0, "end": 54, "grade": "F", "gpa": 0  }
+]
+
 function MarksList({ data: incomingData }) {
     const [kpi, setKpi] = useState(50)
     const data = incomingData
@@ -60,6 +73,12 @@ function MarksList({ data: incomingData }) {
             return acc
         }, {})
     )
+    const recapHeads = hdr.slice(1)
+    const recapHeadRanges = recapHeads.reduce((acc, head) => {
+        const lastEnd = acc.length ? acc[acc.length - 1].end : 3
+        acc.push({ head: head.head, start: lastEnd, end: lastEnd + head.span })
+        return acc
+    }, [])
 
     sno = 1
     const cloHdr = Object.entries(Object.groupBy(PLAN, ({ clo }) => clo))
@@ -89,7 +108,7 @@ function MarksList({ data: incomingData }) {
         <div className="marks-list">
             <h2>PLAN</h2>
 
-            <table>
+            <table id="plan">
                 <tbody>
                     <tr>
                         <th>Heads/CLOs</th>
@@ -129,7 +148,7 @@ function MarksList({ data: incomingData }) {
                 </tbody>
             </table>
             <h2>Head wise CLOs</h2>
-            <table>
+            <table id="head-clo">
                 <tbody>
                     {data.map((row, rowIndex) => (
                         rowIndex === 0 ? (
@@ -149,7 +168,7 @@ function MarksList({ data: incomingData }) {
                 </tbody>
             </table>
             <h2>Recap Sheet</h2>
-            <table>
+            <table id="recapsheet">
                 <tbody>
                     {data.map((row, rowIndex) => (
                         rowIndex === 1 || rowIndex === 2 ? null : rowIndex === 0 ? (
@@ -157,22 +176,33 @@ function MarksList({ data: incomingData }) {
                                 <th>SNo</th>
                                 <th>Name</th>
                                 <th>Reg.No</th>
-                                {hdr.splice(1).map((h, index) => (
-                                    <th key={`cell-${rowIndex}-${index}`} colSpan={h.span}>{h.head}</th>
+                                {recapHeads.map((h, index) => (
+                                    <th key={`cell-${rowIndex}-${index}`}>{h.head}</th>
                                 ))}
+                                <th>Total</th>
+                                <th>Grade</th>
                             </tr>
                         ) : (
                             <tr key={`row-${rowIndex}`}>
-                                {row.map((cell, cellIndex) => (
-                                    <td key={`cell-${rowIndex}-${cellIndex}`} style={{ textAlign: cellIndex === 1 && 'left' }}>{cell ?? ''}</td>
-                                ))}
+                                <td>{row[0] ?? ''}</td>
+                                <td style={{ textAlign: 'left' }}>{row[1] ?? ''}</td>
+                                <td>{row[2] ?? ''}</td>
+                                {recapHeadRanges.map(({ head, start, end }) => {
+                                    const sum = row
+                                        .slice(start, end)
+                                        .reduce((total, mark) => total + (Number(mark) || 0), 0)
+                                    return <td key={`recap-${rowIndex}-${head}`}>{sum}</td>
+                                })}
+                                <td>{row.slice(3).reduce((total, mark) => total + (Number(mark) || 0), 0)}</td>
+                                <td>{grades.find(({ start, end }) => {
+                                    const total = row.slice(3).reduce((total, mark) => total + (Number(mark) || 0), 0)
+                                    return total >= start && total <= end
+                                })?.grade ?? ''}</td>
                             </tr>
                         )
                     ))}
                 </tbody>
             </table>
-            {console.log(Object.entries(Object.groupBy(PLAN, ({ head }) => head)))}
-            {console.log(hdr)}
             <h2>CLOs wise Head</h2>
             <form action="">
                 <label htmlFor="kpi">Set KPI Threshold (%): </label>
@@ -185,7 +215,7 @@ function MarksList({ data: incomingData }) {
                     style={{ width: '50px' }}
                 />
             </form>
-            <table>
+            <table id="clo-head">
                 <thead>
                     <tr>
                         <th colSpan={3}>CLO</th>
@@ -264,7 +294,7 @@ function MarksList({ data: incomingData }) {
                 </tbody>
             </table>
             <h2>CLO Achievement Summary</h2>
-            <table>
+            <table id="clo-summary">
                 <thead>
                     <tr>
                         <th>CLO</th>
@@ -308,7 +338,7 @@ function MarksList({ data: incomingData }) {
             </div>
 
             <h2>Summary</h2>
-            <table>
+            <table id="summary">
                 <tbody>
                     {data[ENUMS.HEADS].slice(3).map((head, index) => {
                         const currentHead = data[ENUMS.HEADS][index + 3]
