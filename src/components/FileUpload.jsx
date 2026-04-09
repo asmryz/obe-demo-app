@@ -52,7 +52,7 @@ function FileUpload({ onDataLoaded }) {
             <label htmlFor="file">Upload Excel File: </label>
             <input id="file" type="file" accept=".xlsx,.xls" onChange={handleFileChange} />
             {formattedOutput && (
-                <pre style={{ maxHeight: '200px', overflow: 'auto', textAlign: 'left' }}>{formattedOutput}</pre>
+                <pre style={{ overflowY: 'auto', textAlign: 'left' }}>{formattedOutput}</pre>
             )}
         </section>
     )

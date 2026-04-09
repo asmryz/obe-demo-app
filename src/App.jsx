@@ -2,13 +2,16 @@ import { Suspense, useState } from 'react'
 import './App.css'
 import MarksList from './components/MarksList'
 import FileUpload from './components/FileUpload'
-import { useEffect } from 'react'
+//import { useEffect } from 'react'
 import Tabs from './components/Tabs'
 import CRRComponent from './components/CRRComponent'
+import { useRef } from 'react'
+import { useReactToPrint } from "react-to-print";
 
 
 function App() {
     const [sheetData, setSheetData] = useState(null)
+    const ref = useRef();
 
     // useEffect(() => {
     //     setSheetData([
@@ -73,6 +76,11 @@ function App() {
         setSheetData(rows)
     }
 
+    const handlePrint = useReactToPrint({
+        contentRef: ref,
+        documentTitle: "My Document",
+    });
+
     return (
         <main>
             <h1>OBE Demo</h1>
@@ -87,7 +95,10 @@ function App() {
             ) : (
                 <p>Please upload an Excel file to view marks.</p>
             )}
-            <CRRComponent />
+            <button onClick={handlePrint}>Print</button>
+            <div ref={ref}>
+                <CRRComponent />
+            </div>
 
         </main>
     )

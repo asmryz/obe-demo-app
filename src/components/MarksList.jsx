@@ -172,6 +172,7 @@ function MarksList({ data: incomingData }) {
                 </tbody>
             </table>
             {console.log(Object.entries(Object.groupBy(PLAN, ({ head }) => head)))}
+            {console.log(hdr)}
             <h2>CLOs wise Head</h2>
             <form action="">
                 <label htmlFor="kpi">Set KPI Threshold (%): </label>

@@ -112,7 +112,7 @@
       }
       @page WordSection1 {
         size: 612pt 792pt;
-        margin: 0.5in 0.5in;
+        margin: 0.75in 0.75in;
       }
       div.WordSection1 {
         page: WordSection1;
