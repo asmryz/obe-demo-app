@@ -3,6 +3,7 @@ import Tabs from './Tabs';
 import { useReactToPrint } from 'react-to-print';
 import { useRef } from 'react';
 import CRRComponent from './CRRComponent'
+import { RecapSheets } from './RecapSheets';
 
 function TabsControl() {
     const ref = useRef();
@@ -13,11 +14,10 @@ function TabsControl() {
 
     const tabData = [
         {
-            label: "Home",
+            label: "Recap Sheets",
             content: (
                 <div>
-                    <h2>🏠 Home</h2>
-                    <p>Welcome to the home page.</p>
+                    <RecapSheets />
                 </div>
             ),
         },
