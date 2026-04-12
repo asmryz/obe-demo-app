@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import * as XLSX from 'xlsx'
+import { useSheetStore } from '../store/sheetStore'
 
 function formatSheetsSingleLineRows(allSheets) {
     const sheetBlocks = Object.entries(allSheets).map(([sheetName, rows]) => {
@@ -16,8 +17,9 @@ function formatSheetsSingleLineRows(allSheets) {
     return `{\n  ${sheetBlocks.join(',\n  ')}\n}`
 }
 
-function FileUpload({ onDataLoaded }) {
+function FileUpload() {
     const [formattedOutput, setFormattedOutput] = useState('')
+    const setSheetData = useSheetStore((state) => state.setSheetData)
 
     const handleFileChange = (e) => {
         const file = e.target.files?.[0]
@@ -39,9 +41,7 @@ function FileUpload({ onDataLoaded }) {
             const formatted = formatSheetsSingleLineRows(allSheets)
             setFormattedOutput(formatted)
 
-            if (onDataLoaded) {
-                onDataLoaded(allSheets)
-            }
+            setSheetData(allSheets)
         }
 
         reader.readAsArrayBuffer(file)

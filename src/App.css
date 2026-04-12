@@ -238,3 +238,15 @@
 	border-radius: 10px;
 	background: var(--bg);
 }
+a:visited {
+    color: var(--text-h);
+    
+}
+a{
+    color: var(--text);
+    text-decoration: none;
+}
+a:hover {
+	color: blue;
+	text-decoration: underline;
+}

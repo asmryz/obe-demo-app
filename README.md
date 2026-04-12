@@ -1,3 +1,7 @@
+```sh
+mkcert -key-file certs/key.pem -cert-file certs/cert.pem localhost 127.0.0.1 192.168.1.162
+```
+
 https://asmryz.github.io/obe-demo-app/
 # React + Vite
 

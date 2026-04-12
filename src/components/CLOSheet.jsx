@@ -1,6 +1,6 @@
 import { Fragment, useState } from 'react'
 import PLOChart from './PLOChart'
-import './MarksList.css'
+import './CLOSheet.css'
 
 const ENUMS = Object.freeze({
     HEADS: 0,
@@ -22,7 +22,7 @@ const grades = [
   { "start": 0, "end": 54, "grade": "F", "gpa": 0  }
 ]
 
-function MarksList({ data: incomingData }) {
+function CLOSheet({ data: incomingData }) {
     const [kpi, setKpi] = useState(50)
     const data = incomingData
 
@@ -363,4 +363,4 @@ function MarksList({ data: incomingData }) {
     )
 }
 
-export default MarksList
+export default CLOSheet
