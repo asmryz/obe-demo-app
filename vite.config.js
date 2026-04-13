@@ -20,7 +20,14 @@ export default defineConfig({
     ],
     server: {
         https: true,
-        host: true
+        host: true,
+        proxy: {
+            '/api': {
+                target: 'http://localhost:5001',
+                changeOrigin: true,
+                secure: false
+            }
+        }
     }
     //   server: {
     //     host: true,

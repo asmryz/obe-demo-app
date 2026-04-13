@@ -18,6 +18,7 @@ export const RecapSheets = () => {
     const normalizedSearch = search.trim().length >= 3 ? search.trim() : '';
     const hasCachedRecaps = Object.prototype.hasOwnProperty.call(recapsByQuery, normalizedSearch);
     const recaps = recapsByQuery[normalizedSearch] ?? [];
+    const recapList = Array.isArray(recaps) ? recaps : [];
 
     useEffect(() => {
         if (hasCachedRecaps) {
@@ -61,7 +62,7 @@ export const RecapSheets = () => {
             }} />
             {isLoading && <p>Loading recap sheets...</p>}
             {error && <p>{error}</p>}
-            {recaps.length > 0
+            {recapList.length > 0
                 ? <table>
                     <thead>
                         <tr>
@@ -73,7 +74,7 @@ export const RecapSheets = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {recaps && recaps.map((recap) => (
+                        {recapList.map((recap) => (
                             <tr key={recap.rid}>
                                 <td>{recap.batch}</td>
                                 <td>

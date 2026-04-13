@@ -2,6 +2,17 @@
 mkcert -key-file certs/key.pem -cert-file certs/cert.pem localhost 127.0.0.1 192.168.1.162
 ```
 
+```sh
+PGPASSWORD='Po@995886' pg_dump -U postgres -h localhost -p 5432 -d obe -F p --create --clean --if-exists --no-owner --no-privileges -f 
+```
+
+```sh
+PGPASSWORD='Po@995886' pg_dump -U postgres -h localhost -p 5432 -d obe -F p \
+  --create --clean --if-exists --no-owner --no-privileges \
+  --inserts --rows-per-insert=1000 \
+  -f backups/obe_create_bulk_inserts-1.sql
+```
+
 https://asmryz.github.io/obe-demo-app/
 # React + Vite
 

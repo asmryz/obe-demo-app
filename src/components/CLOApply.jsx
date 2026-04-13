@@ -1,14 +1,14 @@
 import React from 'react'
 import { use } from 'react'
 import { useState } from 'react'
-import { api } from '../../api'
+import { api } from '../api/index.js'
 import { ToggleButton } from './ToggleButton'
 
 const recapResourceCache = new Map()
 
 function getRecapResource(rid) {
     if (!recapResourceCache.has(rid)) {
-        const recapPromise = api.get(`/api/recaps/${rid}`)
+        const recapPromise = api.get(`/recaps/${rid}`)
             .then(({ data }) => ({ recap: data, error: null }))
             .catch((err) => ({
                 recap: null,

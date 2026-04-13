@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { api } from '../../api'
+import { api } from '../api/index.js'
 
 export const useRecapStore = create((set, get) => ({
     recapsByQuery: {},
@@ -18,17 +18,25 @@ export const useRecapStore = create((set, get) => ({
         set({ isLoading: true, error: null, lastQuery: normalizedQuery })
 
         try {
-            const { data } = await api.get('/api/recaps', {
+            const { data } = await api.get('/recaps', {
                 params: { q: normalizedQuery }
             })
+
+            const normalizedData = Array.isArray(data)
+                ? data
+                : Array.isArray(data?.rows)
+                    ? data.rows
+                    : Array.isArray(data?.data)
+                        ? data.data
+                        : []
 
             set((state) => ({
                 recapsByQuery: {
                     ...state.recapsByQuery,
-                    [normalizedQuery]: data
+                    [normalizedQuery]: normalizedData
                 },
                 isLoading: false,
-                error: null
+                error: Array.isArray(data) ? null : 'Unexpected recap response format.'
             }))
         } catch (err) {
             set({
