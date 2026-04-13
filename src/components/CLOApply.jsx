@@ -29,15 +29,15 @@ export const CLOApply = ({ rid }) => {
 
     const [editableIndex, setEditableIndex] = useState(-1)
     const [editColumn, setEditColumn] = useState([])
-    const [inputValues, setInputValues] = useState([])
+    //const [inputValues, setInputValues] = useState([])
     const [clipboardArray, setClipboardArray] = useState([])
     const clipboardAvailable = typeof navigator !== 'undefined' && navigator.clipboard && typeof navigator.clipboard.read === 'function'
 
-    const handleInputChange = (rowIndex, value) => {
-        const newValues = [...inputValues]
-        newValues[rowIndex] = value
-        setInputValues(newValues)
-    }
+    // const handleInputChange = (rowIndex, value) => {
+    //     const newValues = [...inputValues]
+    //     newValues[rowIndex] = value
+    //     setInputValues(newValues)
+    // }
 
     const firstRow = Array.isArray(recapRows[0]) ? recapRows[0] : []
     const firstEmptyCellIndex = firstRow.findIndex((cell) => cell === '')
@@ -160,20 +160,41 @@ export const CLOApply = ({ rid }) => {
                     <table style={{ marginTop: '12px' }}>
                         <tbody>
                             {recapRows.map((erow, rowIndex) => {
+                                const cells = [...erow.slice(0, 3), editColumn[rowIndex]]
+
+                                if (rowIndex === 1) {
+                                    return (
+                                        <React.Fragment key={`row-${rowIndex}`}>
+                                            <tr>
+                                                {cells.map((_, cellIndex) => (
+                                                    <td key={`extra-cell-${rowIndex}-${cellIndex}`}>{cellIndex === 1 ? 'CLO': null}</td>
+                                                ))}
+                                            </tr>
+                                            <tr>
+                                                {cells.map((cell, cellIndex) => {
+                                                    const cellContent = cell === null ? '' : typeof cell === 'object' ? JSON.stringify(cell) : cell;
+                                                    return <td key={`cell-${rowIndex}-${cellIndex}`}>{cellContent}</td>
+                                                })}
+                                            </tr>
+                                        </React.Fragment>
+                                    );
+                                }
+
                                 return (
                                     <tr key={`row-${rowIndex}`}>
-                                        {[...erow.slice(0, 3), editColumn[rowIndex]].map((cell, cellIndex) => {
+                                        {cells.map((cell, cellIndex) => {
                                             const cellContent = cell === null ? '' : typeof cell === 'object' ? JSON.stringify(cell) : cell;
                                             return <td key={`cell-${rowIndex}-${cellIndex}`}>{cellContent}</td>
                                         })}
-                                        <td>
-                                            <input
+                                        <td style={{width: '45px'}}>
+                                            {/* <input
                                                 type="text"
                                                 value={inputValues[rowIndex] || ''}
                                                 onChange={(e) => handleInputChange(rowIndex, e.target.value)}
-                                            />
+                                            /> */}
                                         </td>
-                                    </tr>)
+                                    </tr>
+                                );
                             })}
                         </tbody>
                     </table>
