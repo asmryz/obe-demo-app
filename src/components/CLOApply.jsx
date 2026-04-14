@@ -24,6 +24,7 @@ function getRecapResource(rid) {
 export const CLOApply = ({ rid }) => {
     const { recap, error } = use(getRecapResource(rid))
     const recapRows = Array.isArray(recap?.data) ? recap.data : []
+    const cloRows = Array.isArray(recap?.clo) ? recap.clo : []
     // const fourthElements = recapRows.map((row) => (Array.isArray(row) ? row[3] : undefined))
     const [showAllColumns, setShowAllColumns] = useState(false)
 
@@ -32,7 +33,7 @@ export const CLOApply = ({ rid }) => {
     //const [inputValues, setInputValues] = useState([])
     const [clipboardArray, setClipboardArray] = useState([])
     const clipboardAvailable = typeof navigator !== 'undefined' && navigator.clipboard && typeof navigator.clipboard.read === 'function'
-
+    console.log(recap)
     // const handleInputChange = (rowIndex, value) => {
     //     const newValues = [...inputValues]
     //     newValues[rowIndex] = value
@@ -135,6 +136,9 @@ export const CLOApply = ({ rid }) => {
                     {editableIndex !== -1 && (
                         <pre style={{ marginTop: '12px' }}>{JSON.stringify(recapRows.map((row) => row[editableIndex]))}</pre>
                     )}
+                    {/* {recap && (
+                        <pre>{JSON.stringify(recap, null, 2)}</pre>
+                    )} */}
                 </div>
             ) : (
                 <p>No recap table data available.</p>
@@ -200,6 +204,30 @@ export const CLOApply = ({ rid }) => {
                     </table>
                 </>
 
+            )}
+
+            {cloRows.length > 0 && (
+                <div style={{ overflowX: 'auto', marginTop: '16px' }}>
+                    <h4>CLOs</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                {Object.keys(cloRows[0]).map((key) => (
+                                    <th key={key}>{key}</th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {cloRows.map((row, i) => (
+                                <tr key={i}>
+                                    {Object.values(row).map((val, j) => (
+                                        <td key={j}>{val === null ? '' : typeof val === 'object' ? JSON.stringify(val) : val}</td>
+                                    ))}
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
             )}
         </section>
     )

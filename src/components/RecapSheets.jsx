@@ -71,11 +71,12 @@ export const RecapSheets = () => {
                             <th>Faculty</th>
                             <th>Semester</th>
                             <th>Year</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
-                        {recapList.map((recap) => (
-                            <tr key={recap.rid}>
+                        {recapList.map((recap, index) => (
+                            <tr key={`${recap.rid}-${recap.code ?? 'nocode'}-${index}`} style={{backgroundColor: recap.code !== null ? 'lightyellow' : 'transparent'}}>
                                 <td>{recap.batch}</td>
                                 <td>
 
@@ -86,6 +87,7 @@ export const RecapSheets = () => {
                                 <td>{recap.faculty}</td>
                                 <td>{recap.semester}</td>
                                 <td>{recap.year}</td>
+                                <td>{recap.code}</td>
                             </tr>
                         ))}
                     </tbody>
