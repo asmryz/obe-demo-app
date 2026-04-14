@@ -27,10 +27,15 @@ export const CLOApply = ({ rid }) => {
     const cloRows = Array.isArray(recap?.clo) ? recap.clo : []
     // const fourthElements = recapRows.map((row) => (Array.isArray(row) ? row[3] : undefined))
     const [showAllColumns, setShowAllColumns] = useState(false)
+    const [multiCLO, setMultiCLO] = useState([])
+    const [selCLO, setSelCLO] = useState(0)
+
 
     const [editableIndex, setEditableIndex] = useState(-1)
     const [editColumn, setEditColumn] = useState([])
+    const [total, setTotal] = useState(editColumn[1])
     //const [inputValues, setInputValues] = useState([])
+    const [clipboardCache, setClipboardCache] = useState([])
     const [clipboardArray, setClipboardArray] = useState([])
     const clipboardAvailable = typeof navigator !== 'undefined' && navigator.clipboard && typeof navigator.clipboard.read === 'function'
     console.log(recap)
@@ -59,8 +64,9 @@ export const CLOApply = ({ rid }) => {
 
     const handleEditableHead = (index) => {
         setEditableIndex(index)
-        setEditColumn(recapRows.map((row) => row[index]))
-
+        const col = recapRows.map((row) => row[index])
+        setEditColumn(col)
+        setTotal(col[1])
     }
 
     const readClipboardItems = async (e) => {
@@ -90,6 +96,7 @@ export const CLOApply = ({ rid }) => {
                         }
                         arr = arr.map(v => (isNaN(Number(v)) ? v : Number(v)));
                         setClipboardArray(arr);
+                        setClipboardCache(arr);
                     }
                 }
             }
@@ -97,6 +104,24 @@ export const CLOApply = ({ rid }) => {
             alert(`Failed to read clipboard: ${err.message}`);
         }
     };
+
+    const handleTotalChange = (e) => {
+        const value = e.target.value;
+        setTotal(value);
+    }
+
+    const handleSaveCLO = () => {
+
+        let rowsCopy = [...recapRows]
+        rowsCopy.splice(1, 0, [null, null, null])
+        const rows = rowsCopy.map((row, index) => [...row.slice(0, 3), 
+            index === 0 ? editColumn[index] 
+            : index === 1 ? Number(selCLO) 
+            : index === 2 ? total 
+            : index > 2 ? clipboardCache[index - 3] 
+            : null])
+        setMultiCLO(rows)
+    }
 
     return (
         <section>
@@ -134,7 +159,10 @@ export const CLOApply = ({ rid }) => {
                         </tbody>
                     </table>
                     {editableIndex !== -1 && (
-                        <pre style={{ marginTop: '12px' }}>{JSON.stringify(recapRows.map((row) => row[editableIndex]))}</pre>
+                        <>
+                            <pre style={{ marginTop: '12px' }}>{JSON.stringify(recapRows.map((row) => row[editableIndex]))}</pre>
+                            <pre style={{ marginTop: '12px' }}>{JSON.stringify({ total, editColumn: editColumn[1], clipboardArray, selCLO })}</pre>
+                        </>
                     )}
                     {/* {recap && (
                         <pre>{JSON.stringify(recap, null, 2)}</pre>
@@ -161,47 +189,89 @@ export const CLOApply = ({ rid }) => {
                         <pre style={{ marginTop: '8px', whiteSpace: 'pre-wrap' }}>
                             {JSON.stringify(clipboardArray)}</pre>
                     )}
-                    <table style={{ marginTop: '12px' }}>
-                        <tbody>
-                            {recapRows.map((erow, rowIndex) => {
-                                const cells = [...erow.slice(0, 3), editColumn[rowIndex]]
-
-                                if (rowIndex === 1) {
-                                    return (
-                                        <React.Fragment key={`row-${rowIndex}`}>
-                                            <tr>
-                                                {cells.map((_, cellIndex) => (
-                                                    <td key={`extra-cell-${rowIndex}-${cellIndex}`}>{cellIndex === 1 ? 'CLO': null}</td>
-                                                ))}
-                                            </tr>
-                                            <tr>
-                                                {cells.map((cell, cellIndex) => {
-                                                    const cellContent = cell === null ? '' : typeof cell === 'object' ? JSON.stringify(cell) : cell;
-                                                    return <td key={`cell-${rowIndex}-${cellIndex}`}>{cellContent}</td>
-                                                })}
-                                            </tr>
-                                        </React.Fragment>
-                                    );
-                                }
-
-                                return (
-                                    <tr key={`row-${rowIndex}`}>
-                                        {cells.map((cell, cellIndex) => {
-                                            const cellContent = cell === null ? '' : typeof cell === 'object' ? JSON.stringify(cell) : cell;
-                                            return <td key={`cell-${rowIndex}-${cellIndex}`}>{cellContent}</td>
-                                        })}
-                                        <td style={{width: '45px'}}>
-                                            {/* <input
-                                                type="text"
-                                                value={inputValues[rowIndex] || ''}
-                                                onChange={(e) => handleInputChange(rowIndex, e.target.value)}
-                                            /> */}
+                    {/* <svg class="w-[31px] h-[31px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-width="1.1" d="M11 16h2m6.707-9.293-2.414-2.414A1 1 0 0 0 16.586 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V7.414a1 1 0 0 0-.293-.707ZM16 20v-6a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v6h8ZM9 4h6v3a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1V4Z" />
+                    </svg> */}
+                    <div style={{ display: 'flex' }}>
+                        <div>
+                            <table style={{ marginTop: '12px' }}>
+                                <tbody>
+                                    <tr style={{ border: '1px solid white' }}>
+                                        <td colSpan={recapRows.length - 1} style={{ textAlign: 'right', border: 'none' }}>
+                                            <a href="#!" onClick={handleSaveCLO} >
+                                                <svg class="w-[31px] h-[31px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                                    <path stroke="currentColor" stroke-linecap="round" stroke-width="1.1" d="M11 16h2m6.707-9.293-2.414-2.414A1 1 0 0 0 16.586 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V7.414a1 1 0 0 0-.293-.707ZM16 20v-6a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v6h8ZM9 4h6v3a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1V4Z" />
+                                                </svg>
+                                            </a>
                                         </td>
                                     </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
+                                    {recapRows.map((erow, rowIndex) => {
+                                        const cells = [...erow.slice(0, 3), editColumn[rowIndex]]
+
+                                        if (rowIndex === 1) {
+                                            return (
+                                                <React.Fragment key={`row-${rowIndex}`}>
+                                                    <tr>
+                                                        {cells.map((_, cellIndex) => (
+                                                            <td key={`extra-cell-${rowIndex}-${cellIndex}`}>{cellIndex === 1 ? 'CLO' : null}</td>
+                                                        ))}
+                                                        <td>
+                                                            <select value={selCLO} onChange={(e) => setSelCLO(e.target.value)}>
+                                                                <option hidden></option>
+                                                                {cloRows.map((clo, cloIndex) => (
+                                                                    <option key={`clo-option-${cloIndex}`} value={clo.clo}>{clo.clo}</option>
+                                                                ))}
+                                                            </select>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        {cells.map((cell, cellIndex) => {
+                                                            const cellContent = cell === null ? '' : typeof cell === 'object' ? JSON.stringify(cell) : cell;
+                                                            return <td key={`cell-${rowIndex}-${cellIndex}`} style={{ color: cellIndex === 3 ? 'maroon' : '', fontWeight: 'bold' }}>{cellContent}</td>
+                                                        })}
+                                                        <td style={{ width: '45px' }}>
+                                                            <input type="text" value={total} onChange={handleTotalChange} style={{ width: '30px' }} />
+                                                        </td>
+                                                    </tr>
+                                                </React.Fragment>
+                                            );
+                                        }
+
+                                        return (
+                                            <tr key={`row-${rowIndex}`}>
+                                                {cells.map((cell, cellIndex) => {
+                                                    const cellContent = cell === null ? '' : typeof cell === 'object' ? JSON.stringify(cell) : cell;
+                                                    return <td key={`cell-${rowIndex}-${cellIndex}`} style={{
+                                                        color: cellIndex === 3 ? 'maroon' : 'inherit',
+                                                        fontWeight: cellIndex === 3 ? 'bold' : 'normal',
+                                                        width: cellIndex === 3 ? '45px' : 'auto'
+                                                    }}>{cellContent}</td>
+                                                })}
+                                                <td style={{ width: '45px' }}>
+                                                    {rowIndex === 0 ? editColumn[rowIndex] : Number(total) === editColumn[1] ? editColumn[rowIndex] : clipboardArray.length !== 0 ? clipboardArray[rowIndex - 2] : null}
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', flex: '1' }}>
+                            {multiCLO.length > 0 && (
+                                <table style={{ marginTop: '50px', marginLeft: '20px' }}>
+                                    <tbody>
+                                        {multiCLO.map((row, i) => (
+                                            <tr key={`multi-${i}`}>
+                                                {row.map((cell, j) => (
+                                                    <td key={`multi-${i}-${j}`}>{cell === null ? '' : typeof cell === 'object' ? JSON.stringify(cell) : cell}</td>
+                                                ))}
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            )}
+                        </div>
+                    </div>
                 </>
 
             )}

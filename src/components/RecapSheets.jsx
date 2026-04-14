@@ -71,7 +71,7 @@ export const RecapSheets = () => {
                             <th>Faculty</th>
                             <th>Semester</th>
                             <th>Year</th>
-                            <th></th>
+                            {/* <th></th> */}
                         </tr>
                     </thead>
                     <tbody>
@@ -87,7 +87,7 @@ export const RecapSheets = () => {
                                 <td>{recap.faculty}</td>
                                 <td>{recap.semester}</td>
                                 <td>{recap.year}</td>
-                                <td>{recap.code}</td>
+                                {/* <td>{recap.code}</td> */}
                             </tr>
                         ))}
                     </tbody>
