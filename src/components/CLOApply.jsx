@@ -3,6 +3,7 @@ import { use } from 'react'
 import { useState } from 'react'
 import { api } from '../api/index.js'
 import { ToggleButton } from './ToggleButton'
+import { useEffect } from 'react'
 
 const recapResourceCache = new Map()
 
@@ -27,6 +28,7 @@ export const CLOApply = ({ rid }) => {
     const cloRows = Array.isArray(recap?.clo) ? recap.clo : []
     // const fourthElements = recapRows.map((row) => (Array.isArray(row) ? row[3] : undefined))
     const [showAllColumns, setShowAllColumns] = useState(false)
+    const [heads, setHeads] = useState({})
 
     const [multiCLO, setMultiCLO] = useState(() => {
         // Each row should only have its first 3 elements
@@ -56,6 +58,11 @@ export const CLOApply = ({ rid }) => {
     const lastThreeColumnsStartIndex = Math.max(firstRow.length - 3, 0)
     const canHideMiddleColumns = firstEmptyCellIndex !== -1 && firstEmptyCellIndex + 1 < lastThreeColumnsStartIndex
 
+
+    useEffect(() => {
+        console.log('clipboardCache updated:', clipboardCache);
+    }, [clipboardCache]);
+
     const shouldHideColumn = (columnIndex) => {
         if (showAllColumns || !canHideMiddleColumns) {
             return false
@@ -73,6 +80,8 @@ export const CLOApply = ({ rid }) => {
         let col = recapRows.map((row) => row[index])
         col.splice(1, 0, null)
         setEditColumn(col)
+        setClipboardCache(col.slice(3))
+        setHeads({[col[0]]:[]})
         setTotal(col[2])
         console.log(editColumn)
     }
@@ -119,16 +128,24 @@ export const CLOApply = ({ rid }) => {
     }
 
     const handleSaveCLO = () => {
-
+        if (clipboardCache.length === 0) {
+            setClipboardCache(editColumn.slice(3));
+        }
         let rowsCopy = [...multiCLO]
         //rowsCopy.splice(1, 0, [null, null, null])
         const rows = rowsCopy.map((row, index) => [...row.slice(0, rowsCopy.length),
-        index === 0 ? multiCLO.length ===3 ? editColumn[index] : null
+        index === 0 ? editColumn[index]
             : index === 1 ? Number(selCLO)
                 : index === 2 ? total
                     : index > 2 ? clipboardCache[index - 3]
                         : null])
         setMultiCLO(rows)
+        console.log(rows)
+        // Assign the last element of rows to heads[editColumn[0]]
+        setHeads(prev => ({
+            ...prev,
+            [editColumn[0]]: [...heads[editColumn[0]],[editColumn[0], Number(selCLO), total, ...editColumn.slice(3)]]
+        }))
         setClipboardCache([])
     }
 
@@ -170,7 +187,7 @@ export const CLOApply = ({ rid }) => {
                     {editableIndex !== -1 && (
                         <>
                             <pre style={{ marginTop: '12px' }}>{JSON.stringify(recapRows.map((row) => row[editableIndex]))}</pre>
-                            <pre style={{ marginTop: '12px' }}>{JSON.stringify({ total, editColumn: editColumn, clipboardArray, selCLO })}</pre>
+                            <pre style={{ marginTop: '12px' }}>{JSON.stringify({ total, editColumn: editColumn, clipboardArray, selCLO, heads })}</pre>
                         </>
                     )}
 
@@ -213,7 +230,7 @@ export const CLOApply = ({ rid }) => {
                                     </tr>
                                     {multiCLO.map((erow, rowIndex) => {
                                         let cells;
-                                        
+
                                         if (erow.length > 3) {
                                             // Insert editColumn[rowIndex] at index 3, shift the rest
                                             cells = [
