@@ -46,12 +46,6 @@ export const CLOApply = ({ rid }) => {
     const [clipboardCache, setClipboardCache] = useState([])
     const [clipboardArray, setClipboardArray] = useState([])
     const clipboardAvailable = typeof navigator !== 'undefined' && navigator.clipboard && typeof navigator.clipboard.read === 'function'
-    console.log(recap)
-    // const handleInputChange = (rowIndex, value) => {
-    //     const newValues = [...inputValues]
-    //     newValues[rowIndex] = value
-    //     setInputValues(newValues)
-    // }
 
     const firstRow = Array.isArray(recapRows[0]) ? recapRows[0] : []
     const firstEmptyCellIndex = firstRow.findIndex((cell) => cell === '')
@@ -81,9 +75,14 @@ export const CLOApply = ({ rid }) => {
         col.splice(1, 0, null)
         setEditColumn(col)
         setClipboardCache(col.slice(3))
-        setHeads({[col[0]]:[]})
         setTotal(col[2])
-        console.log(editColumn)
+        // Only add a new key if it does not exist, preserving all previous keys/values
+        setHeads(prev => {
+            const key = col[0];
+            if (prev.hasOwnProperty(key)) return prev;
+            return { ...prev, [key]: [] };
+        })
+        //console.log(editColumn)
     }
 
     const readClipboardItems = async (e) => {
@@ -128,13 +127,17 @@ export const CLOApply = ({ rid }) => {
     }
 
     const handleSaveCLO = () => {
+        if (Number(selCLO) === 0 || isNaN(Number(total))) {
+            alert('Please select a valid CLO and enter a numeric total before saving.');
+            return;
+        }
         if (clipboardCache.length === 0) {
             setClipboardCache(editColumn.slice(3));
         }
         let rowsCopy = [...multiCLO]
-        //rowsCopy.splice(1, 0, [null, null, null])
+
         const rows = rowsCopy.map((row, index) => [...row.slice(0, rowsCopy.length),
-        index === 0 ? editColumn[index]
+        index === 0 ? heads[editColumn[0]].length === 0 ? editColumn[0] : null
             : index === 1 ? Number(selCLO)
                 : index === 2 ? total
                     : index > 2 ? clipboardCache[index - 3]
@@ -142,11 +145,20 @@ export const CLOApply = ({ rid }) => {
         setMultiCLO(rows)
         console.log(rows)
         // Assign the last element of rows to heads[editColumn[0]]
-        setHeads(prev => ({
-            ...prev,
-            [editColumn[0]]: [...heads[editColumn[0]],[editColumn[0], Number(selCLO), total, ...editColumn.slice(3)]]
-        }))
+
+        setHeads(prev => {
+            // If the key exists, append to its array; otherwise, create a new key with the value
+
+            const key = editColumn[0];
+            const prevArr = prev[key] || [];
+            return {
+                ...prev,
+                [key]: [...prevArr, [key, Number(selCLO), total, ...clipboardCache]]
+            };
+        })
         setClipboardCache([])
+        setTotal('')
+        setSelCLO(0)
     }
 
     return (
@@ -225,19 +237,22 @@ export const CLOApply = ({ rid }) => {
                                                     <path stroke="currentColor" strokeLinecap="round" strokeWidth="1.1" d="M11 16h2m6.707-9.293-2.414-2.414A1 1 0 0 0 16.586 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V7.414a1 1 0 0 0-.293-.707ZM16 20v-6a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v6h8ZM9 4h6v3a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1V4Z" />
                                                 </svg>
                                             </a>
-                                            {editColumn.length}
+                                            {/* {editColumn.length} */}
                                         </td>
                                     </tr>
                                     {multiCLO.map((erow, rowIndex) => {
                                         let cells;
 
                                         if (erow.length > 3) {
-                                            // Insert editColumn[rowIndex] at index 3, shift the rest
-                                            cells = [
+                                            // Insert editColumn[rowIndex] at index 3, then merge rowIndex-th subelement of all heads[editColumn[0]]
+                                            const merged = [
                                                 ...erow.slice(0, 3),
-                                                editColumn[rowIndex],
-                                                ...erow.slice(3)
+                                                editColumn[rowIndex]
                                             ];
+                                            const headArr = Array.isArray(heads[editColumn[0]]) ? heads[editColumn[0]] : [];
+                                            // For each element in heads[editColumn[0]], take the rowIndex-th subelement (if exists)
+                                            const combined = headArr.map(arr => Array.isArray(arr) && arr.length > rowIndex ? arr[rowIndex] : undefined).filter(v => v !== undefined);
+                                            cells = [...merged, ...combined];
                                         } else {
                                             cells = [...erow, editColumn[rowIndex]];
                                         }
@@ -258,15 +273,18 @@ export const CLOApply = ({ rid }) => {
                                                             ? (<select value={selCLO} onChange={(e) => setSelCLO(e.target.value)}>
                                                                 <option value=""></option>
                                                                 {cloRows.map((clo, cloIndex) => (
-                                                                    <option key={`clo-option-${cloIndex}`} value={clo.clo}>{clo.clo}</option>
+                                                                    <option key={`clo-option-${cloIndex}`} value={clo.clo}>{`CLO${clo.clo}`}</option>
                                                                 ))}
                                                             </select>)
                                                             : rowIndex === 2 ? (<input type="text" value={total} onChange={handleTotalChange} style={{ width: '30px' }} />)
                                                                 // Copy total value to all rows if total is changed, otherwise show original values or clipboard values
                                                                 : rowIndex > 2 && Number(total) === editColumn[2]
                                                                     ? editColumn[rowIndex]
-                                                                    : clipboardCache.length !== 0
-                                                                        ? clipboardCache[rowIndex - 3] : null}
+                                                                    : Number(total) !== editColumn[2]
+                                                                        ? clipboardCache.length !== 0
+                                                                            ? clipboardCache[rowIndex - 3]
+                                                                            : null
+                                                                        : null}
                                                 </td>
                                             </tr>
                                         );

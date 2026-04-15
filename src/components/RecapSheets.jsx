@@ -40,7 +40,6 @@ export const RecapSheets = () => {
     if (selectedRid !== null) {
         return (
             <>
-                
                 <a href="#!" onClick={() => setSelectedRid(null)}>
                     Back to <b>Recap Sheets</b>
                 </a>
@@ -78,13 +77,12 @@ export const RecapSheets = () => {
                         {recapList.map((recap, index) => (
                             <tr key={`${recap.rid}-${recap.code ?? 'nocode'}-${index}`} style={{backgroundColor: recap.code !== null ? 'lightyellow' : 'transparent'}}>
                                 <td>{recap.batch}</td>
-                                <td>
-
+                                <td style={{ width: '650px' }}>
                                     <a href="#!" onClick={(event) => handleRecapClick(event, recap.rid)}>
                                         {recap.course}
                                     </a>
                                 </td>
-                                <td>{recap.faculty}</td>
+                                <td style={{ width: '200px'}}>{recap.faculty}</td>
                                 <td>{recap.semester}</td>
                                 <td>{recap.year}</td>
                                 {/* <td>{recap.code}</td> */}
