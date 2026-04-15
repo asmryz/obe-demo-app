@@ -3,6 +3,7 @@ import { use } from 'react'
 import { useState } from 'react'
 import { api } from '../api/index.js'
 import { ToggleButton } from './ToggleButton'
+
 import { useEffect } from 'react'
 
 const recapResourceCache = new Map()
@@ -45,6 +46,7 @@ export const CLOApply = ({ rid }) => {
     //const [inputValues, setInputValues] = useState([])
     const [clipboardCache, setClipboardCache] = useState([])
     const [clipboardArray, setClipboardArray] = useState([])
+    const [clipboardActive, setClipboardActive] = useState(false)
     const clipboardAvailable = typeof navigator !== 'undefined' && navigator.clipboard && typeof navigator.clipboard.read === 'function'
 
     const firstRow = Array.isArray(recapRows[0]) ? recapRows[0] : []
@@ -79,7 +81,7 @@ export const CLOApply = ({ rid }) => {
         // Only add a new key if it does not exist, preserving all previous keys/values
         setHeads(prev => {
             const key = col[0];
-            if (prev.hasOwnProperty(key)) return prev;
+            if (Object.prototype.hasOwnProperty.call(prev, key)) return prev;
             return { ...prev, [key]: [] };
         })
         //console.log(editColumn)
@@ -113,6 +115,7 @@ export const CLOApply = ({ rid }) => {
                         arr = arr.map(v => (isNaN(Number(v)) ? v : Number(v)));
                         setClipboardArray(arr);
                         setClipboardCache(arr);
+                        setClipboardActive(true);
                     }
                 }
             }
@@ -127,8 +130,22 @@ export const CLOApply = ({ rid }) => {
     }
 
     const handleSaveCLO = () => {
-        if (Number(selCLO) === 0 || isNaN(Number(total))) {
-            alert('Please select a valid CLO and enter a numeric total before saving.');
+        let msg = ``;
+        if (Number(selCLO) === 0 ) {
+            msg += `Please select a valid CLO.`;
+        }
+        if (
+            
+            total === "" ||
+            total === null ||
+            total === undefined ||
+            isNaN(Number(total))
+        ) {
+            if(msg.length > 0) msg += `\n`;
+            msg += `Enter a numeric Total before saving.`;
+        }
+        if(msg.length > 0){
+            alert(msg);
             return;
         }
         if (clipboardCache.length === 0) {
@@ -157,6 +174,7 @@ export const CLOApply = ({ rid }) => {
             };
         })
         setClipboardCache([])
+        setClipboardActive(false);
         setTotal('')
         setSelCLO(0)
     }
@@ -280,7 +298,7 @@ export const CLOApply = ({ rid }) => {
                                                                 // Copy total value to all rows if total is changed, otherwise show original values or clipboard values
                                                                 : rowIndex > 2 && Number(total) === editColumn[2]
                                                                     ? editColumn[rowIndex]
-                                                                    : Number(total) !== editColumn[2]
+                                                                    : rowIndex > 2 && clipboardActive
                                                                         ? clipboardCache.length !== 0
                                                                             ? clipboardCache[rowIndex - 3]
                                                                             : null
