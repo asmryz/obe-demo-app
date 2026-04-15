@@ -27,13 +27,19 @@ export const CLOApply = ({ rid }) => {
     const cloRows = Array.isArray(recap?.clo) ? recap.clo : []
     // const fourthElements = recapRows.map((row) => (Array.isArray(row) ? row[3] : undefined))
     const [showAllColumns, setShowAllColumns] = useState(false)
-    const [multiCLO, setMultiCLO] = useState([])
+
+    const [multiCLO, setMultiCLO] = useState(() => {
+        // Each row should only have its first 3 elements
+        let arr = recapRows.map(row => Array.isArray(row) ? row.slice(0, 3) : [row]);
+        arr.splice(1, 0, [null, null, null]) // Insert an empty row for CLO selection;
+        return arr;
+    })
     const [selCLO, setSelCLO] = useState(0)
 
 
     const [editableIndex, setEditableIndex] = useState(-1)
     const [editColumn, setEditColumn] = useState([])
-    const [total, setTotal] = useState(editColumn[1])
+    const [total, setTotal] = useState(editColumn[2])
     //const [inputValues, setInputValues] = useState([])
     const [clipboardCache, setClipboardCache] = useState([])
     const [clipboardArray, setClipboardArray] = useState([])
@@ -64,9 +70,11 @@ export const CLOApply = ({ rid }) => {
 
     const handleEditableHead = (index) => {
         setEditableIndex(index)
-        const col = recapRows.map((row) => row[index])
+        let col = recapRows.map((row) => row[index])
+        col.splice(1, 0, null)
         setEditColumn(col)
-        setTotal(col[1])
+        setTotal(col[2])
+        console.log(editColumn)
     }
 
     const readClipboardItems = async (e) => {
@@ -112,15 +120,16 @@ export const CLOApply = ({ rid }) => {
 
     const handleSaveCLO = () => {
 
-        let rowsCopy = [...recapRows]
-        rowsCopy.splice(1, 0, [null, null, null])
-        const rows = rowsCopy.map((row, index) => [...row.slice(0, 3), 
-            index === 0 ? editColumn[index] 
-            : index === 1 ? Number(selCLO) 
-            : index === 2 ? total 
-            : index > 2 ? clipboardCache[index - 3] 
-            : null])
+        let rowsCopy = [...multiCLO]
+        //rowsCopy.splice(1, 0, [null, null, null])
+        const rows = rowsCopy.map((row, index) => [...row.slice(0, rowsCopy.length),
+        index === 0 ? multiCLO.length ===3 ? editColumn[index] : null
+            : index === 1 ? Number(selCLO)
+                : index === 2 ? total
+                    : index > 2 ? clipboardCache[index - 3]
+                        : null])
         setMultiCLO(rows)
+        setClipboardCache([])
     }
 
     return (
@@ -161,12 +170,10 @@ export const CLOApply = ({ rid }) => {
                     {editableIndex !== -1 && (
                         <>
                             <pre style={{ marginTop: '12px' }}>{JSON.stringify(recapRows.map((row) => row[editableIndex]))}</pre>
-                            <pre style={{ marginTop: '12px' }}>{JSON.stringify({ total, editColumn: editColumn[1], clipboardArray, selCLO })}</pre>
+                            <pre style={{ marginTop: '12px' }}>{JSON.stringify({ total, editColumn: editColumn, clipboardArray, selCLO })}</pre>
                         </>
                     )}
-                    {/* {recap && (
-                        <pre>{JSON.stringify(recap, null, 2)}</pre>
-                    )} */}
+
                 </div>
             ) : (
                 <p>No recap table data available.</p>
@@ -189,54 +196,34 @@ export const CLOApply = ({ rid }) => {
                         <pre style={{ marginTop: '8px', whiteSpace: 'pre-wrap' }}>
                             {JSON.stringify(clipboardArray)}</pre>
                     )}
-                    {/* <svg class="w-[31px] h-[31px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                        <path stroke="currentColor" stroke-linecap="round" stroke-width="1.1" d="M11 16h2m6.707-9.293-2.414-2.414A1 1 0 0 0 16.586 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V7.414a1 1 0 0 0-.293-.707ZM16 20v-6a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v6h8ZM9 4h6v3a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1V4Z" />
-                    </svg> */}
+
                     <div style={{ display: 'flex' }}>
                         <div>
                             <table style={{ marginTop: '12px' }}>
                                 <tbody>
                                     <tr style={{ border: '1px solid white' }}>
-                                        <td colSpan={recapRows.length - 1} style={{ textAlign: 'right', border: 'none' }}>
+                                        <td colSpan={multiCLO.length - 1} style={{ textAlign: 'right', border: 'none' }}>
                                             <a href="#!" onClick={handleSaveCLO} >
-                                                <svg class="w-[31px] h-[31px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                                    <path stroke="currentColor" stroke-linecap="round" stroke-width="1.1" d="M11 16h2m6.707-9.293-2.414-2.414A1 1 0 0 0 16.586 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V7.414a1 1 0 0 0-.293-.707ZM16 20v-6a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v6h8ZM9 4h6v3a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1V4Z" />
+                                                <svg className="w-[31px] h-[31px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                                    <path stroke="currentColor" strokeLinecap="round" strokeWidth="1.1" d="M11 16h2m6.707-9.293-2.414-2.414A1 1 0 0 0 16.586 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V7.414a1 1 0 0 0-.293-.707ZM16 20v-6a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v6h8ZM9 4h6v3a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1V4Z" />
                                                 </svg>
                                             </a>
+                                            {editColumn.length}
                                         </td>
                                     </tr>
-                                    {recapRows.map((erow, rowIndex) => {
-                                        const cells = [...erow.slice(0, 3), editColumn[rowIndex]]
-
-                                        if (rowIndex === 1) {
-                                            return (
-                                                <React.Fragment key={`row-${rowIndex}`}>
-                                                    <tr>
-                                                        {cells.map((_, cellIndex) => (
-                                                            <td key={`extra-cell-${rowIndex}-${cellIndex}`}>{cellIndex === 1 ? 'CLO' : null}</td>
-                                                        ))}
-                                                        <td>
-                                                            <select value={selCLO} onChange={(e) => setSelCLO(e.target.value)}>
-                                                                <option hidden></option>
-                                                                {cloRows.map((clo, cloIndex) => (
-                                                                    <option key={`clo-option-${cloIndex}`} value={clo.clo}>{clo.clo}</option>
-                                                                ))}
-                                                            </select>
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        {cells.map((cell, cellIndex) => {
-                                                            const cellContent = cell === null ? '' : typeof cell === 'object' ? JSON.stringify(cell) : cell;
-                                                            return <td key={`cell-${rowIndex}-${cellIndex}`} style={{ color: cellIndex === 3 ? 'maroon' : '', fontWeight: 'bold' }}>{cellContent}</td>
-                                                        })}
-                                                        <td style={{ width: '45px' }}>
-                                                            <input type="text" value={total} onChange={handleTotalChange} style={{ width: '30px' }} />
-                                                        </td>
-                                                    </tr>
-                                                </React.Fragment>
-                                            );
+                                    {multiCLO.map((erow, rowIndex) => {
+                                        let cells;
+                                        
+                                        if (erow.length > 3) {
+                                            // Insert editColumn[rowIndex] at index 3, shift the rest
+                                            cells = [
+                                                ...erow.slice(0, 3),
+                                                editColumn[rowIndex],
+                                                ...erow.slice(3)
+                                            ];
+                                        } else {
+                                            cells = [...erow, editColumn[rowIndex]];
                                         }
-
                                         return (
                                             <tr key={`row-${rowIndex}`}>
                                                 {cells.map((cell, cellIndex) => {
@@ -245,10 +232,24 @@ export const CLOApply = ({ rid }) => {
                                                         color: cellIndex === 3 ? 'maroon' : 'inherit',
                                                         fontWeight: cellIndex === 3 ? 'bold' : 'normal',
                                                         width: cellIndex === 3 ? '45px' : 'auto'
-                                                    }}>{cellContent}</td>
+                                                    }}>{rowIndex === 1 && cellIndex === 1 ? 'CLO' : cellContent}</td>
                                                 })}
                                                 <td style={{ width: '45px' }}>
-                                                    {rowIndex === 0 ? editColumn[rowIndex] : Number(total) === editColumn[1] ? editColumn[rowIndex] : clipboardArray.length !== 0 ? clipboardArray[rowIndex - 2] : null}
+                                                    {rowIndex === 0
+                                                        ? editColumn[rowIndex]
+                                                        : rowIndex === 1
+                                                            ? (<select value={selCLO} onChange={(e) => setSelCLO(e.target.value)}>
+                                                                <option value=""></option>
+                                                                {cloRows.map((clo, cloIndex) => (
+                                                                    <option key={`clo-option-${cloIndex}`} value={clo.clo}>{clo.clo}</option>
+                                                                ))}
+                                                            </select>)
+                                                            : rowIndex === 2 ? (<input type="text" value={total} onChange={handleTotalChange} style={{ width: '30px' }} />)
+                                                                // Copy total value to all rows if total is changed, otherwise show original values or clipboard values
+                                                                : rowIndex > 2 && Number(total) === editColumn[2]
+                                                                    ? editColumn[rowIndex]
+                                                                    : clipboardCache.length !== 0
+                                                                        ? clipboardCache[rowIndex - 3] : null}
                                                 </td>
                                             </tr>
                                         );
@@ -273,7 +274,6 @@ export const CLOApply = ({ rid }) => {
                         </div>
                     </div>
                 </>
-
             )}
 
             {cloRows.length > 0 && (
