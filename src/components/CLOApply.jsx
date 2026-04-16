@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { api } from '../api/index.js'
 import { ToggleButton } from './ToggleButton'
 
-import { useEffect } from 'react'
+// import { useEffect } from 'react'
 
 const recapResourceCache = new Map()
 
@@ -30,6 +30,7 @@ export const CLOApply = ({ rid }) => {
     // const fourthElements = recapRows.map((row) => (Array.isArray(row) ? row[3] : undefined))
     const [showAllColumns, setShowAllColumns] = useState(false)
     const [heads, setHeads] = useState({})
+    const [del, setDel] = useState({})
 
     const [multiCLO, setMultiCLO] = useState(() => {
         // Each row should only have its first 3 elements
@@ -55,9 +56,9 @@ export const CLOApply = ({ rid }) => {
     const canHideMiddleColumns = firstEmptyCellIndex !== -1 && firstEmptyCellIndex + 1 < lastThreeColumnsStartIndex
 
 
-    useEffect(() => {
-        console.log('clipboardCache updated:', clipboardCache);
-    }, [clipboardCache]);
+    // useEffect(() => {
+    //     console.log('clipboardCache updated:', clipboardCache);
+    // }, [clipboardCache]);
 
     const shouldHideColumn = (columnIndex) => {
         if (showAllColumns || !canHideMiddleColumns) {
@@ -131,20 +132,20 @@ export const CLOApply = ({ rid }) => {
 
     const handleSaveCLO = () => {
         let msg = ``;
-        if (Number(selCLO) === 0 ) {
+        if (Number(selCLO) === 0) {
             msg += `Please select a valid CLO.`;
         }
         if (
-            
+
             total === "" ||
             total === null ||
             total === undefined ||
             isNaN(Number(total))
         ) {
-            if(msg.length > 0) msg += `\n`;
+            if (msg.length > 0) msg += `\n`;
             msg += `Enter a numeric Total before saving.`;
         }
-        if(msg.length > 0){
+        if (msg.length > 0) {
             alert(msg);
             return;
         }
@@ -160,8 +161,19 @@ export const CLOApply = ({ rid }) => {
                     : index > 2 ? clipboardCache[index - 3]
                         : null])
         setMultiCLO(rows)
-        console.log(rows)
+        // console.log(rows)
         // Assign the last element of rows to heads[editColumn[0]]
+
+        setDel(prev => {
+            const key = editColumn[0];
+            const prevArr = prev[key] || [];
+            // Get the length of the array stored at prev[key] (or 0 if undefined)
+            const arrLength = prevArr.length;
+            return {
+                ...prev,
+                [key]: [...prevArr, `${multiCLO[0].length}:${arrLength}`]
+            };
+        })
 
         setHeads(prev => {
             // If the key exists, append to its array; otherwise, create a new key with the value
@@ -178,6 +190,32 @@ export const CLOApply = ({ rid }) => {
         setTotal('')
         setSelCLO(0)
     }
+
+    const handleDelete = (head, index) => () => {
+        setHeads(prev => {
+            const key = head;
+            const prevArr = prev[key] || [];
+            const newArr = prevArr.filter((_, i) => i !== index);
+            return {
+                ...prev,
+                [key]: newArr
+            };
+        })
+
+        const delLoc = del[head][index].split(':').map(Number);
+        // Utility: Delete nth index from all arrays in a 2D array
+
+        setMultiCLO(multiCLO.map(row => Array.isArray(row)
+            ? row.filter((_, idx) => idx !== delLoc[0])
+            : row))
+
+
+        // Example usage: delete the 2nd index from all rows in multiCLO
+        // const newMultiCLO = deleteNthIndexFromAll(multiCLO, 2);
+        // setMultiCLO(newMultiCLO);            
+    }
+
+
 
     return (
         <section>
@@ -250,6 +288,7 @@ export const CLOApply = ({ rid }) => {
                                 <tbody>
                                     <tr style={{ border: '1px solid white' }}>
                                         <td colSpan={multiCLO.length - 1} style={{ textAlign: 'right', border: 'none' }}>
+
                                             <a href="#!" onClick={handleSaveCLO} >
                                                 <svg className="w-[31px] h-[31px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                                                     <path stroke="currentColor" strokeLinecap="round" strokeWidth="1.1" d="M11 16h2m6.707-9.293-2.414-2.414A1 1 0 0 0 16.586 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V7.414a1 1 0 0 0-.293-.707ZM16 20v-6a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v6h8ZM9 4h6v3a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1V4Z" />
@@ -281,8 +320,28 @@ export const CLOApply = ({ rid }) => {
                                                     return <td key={`cell-${rowIndex}-${cellIndex}`} style={{
                                                         color: cellIndex === 3 ? 'maroon' : 'inherit',
                                                         fontWeight: cellIndex === 3 ? 'bold' : 'normal',
-                                                        width: cellIndex === 3 ? '45px' : 'auto'
-                                                    }}>{rowIndex === 1 && cellIndex === 1 ? 'CLO' : cellContent}</td>
+                                                        width: cellIndex === 3 ? '45px' : 'auto',
+                                                        position: rowIndex === 1 && cellIndex > 3 ? 'relative' : undefined
+                                                    }}>
+                                                        {rowIndex === 1 && cellIndex === 1 ? 'CLO' : cellContent}
+                                                        {rowIndex === 1 && cellIndex > 3 ? (
+                                                            <a href='#!' style={{
+                                                                position: 'absolute',
+                                                                top: 0,
+                                                                right: 0,
+                                                                // padding: '-2px',
+                                                                cursor: 'pointer',
+                                                                fontWeight: 'bold',
+                                                                // fontSize: '16px',
+                                                                lineHeight: 1,
+                                                            }} onClick={handleDelete(editColumn[0], cellIndex - 4)}>
+                                                                <svg width={20} height={20} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                                    <path d="M7.75732 7.75745L16.2426 16.2427" stroke="red" strokeWidth={1.6} strokeLinecap="round" className="my-path" />
+                                                                    <path d="M16.2426 7.75745L7.75732 16.2427" stroke="red" strokeWidth={1.6} strokeLinecap="round" className="my-path" />
+                                                                </svg>
+                                                            </a>
+                                                        ) : null}
+                                                    </td>
                                                 })}
                                                 <td style={{ width: '45px' }}>
                                                     {rowIndex === 0
