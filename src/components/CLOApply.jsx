@@ -80,6 +80,23 @@ export const CLOApply = ({ rid }) => {
     const lastThreeColumnsStartIndex = Math.max(firstRow.length - 3, 0)
     const canHideMiddleColumns = firstEmptyCellIndex !== -1 && firstEmptyCellIndex + 1 < lastThreeColumnsStartIndex
 
+    // function verify(key, rowIndex) {
+    //     if (!heads[key] || heads[key].length === 0) return false;
+    //     // Get the nth element from each array in heads[key]
+    //     const nthValues = heads[key].map(arr => Number(arr[rowIndex]));
+    //     // Check if all values are equal to the first value
+    //     console.log(nthValues)
+    //     return ;
+    // }
+
+    // Returns the sum of all nth elements in heads[key]
+    function verify(key, rowIndex) {
+        if (!heads[key] || heads[key].length === 0) return false;
+        // Get the nth element from each array in heads[key] and sum them
+        return heads[key].reduce((sum, arr) => sum + Number(arr[rowIndex]), 0) === editColumn[rowIndex];
+    }
+
+
 
     //     useEffect(() => {
     //         setMultiCLO([["S.No","Name","Reg.No","Final Paper 1",null,null,null],[null,null,null,1,2,3,4],[null,null,null,"10","10","10","10"],[1,"Muhammad Huzaifa Ghafoor","1945116",0,0,0,0],[2,"Muhammad Azaan Mirza","2045115",25,8,4,9],[3,"Sher  Bahadur","2045154",6,1,1,3],[4,"Abdul Mueed Shaikh","2145120",10,5,3,1],[5,"Hassin  Sikander","2245102",27.5,6,7,8],[6,"Hussain  Hasnain","2245103",36,10,9,10],[7,"Mohammad Shabbir Tarwari","2245104",31,10,7,8],[8,"Ahmad  Foad","2245110",27,7,7,9],[9,"Ali Khan Mashori","2245111",19,3,5,8],[10,"Jawwad Raza","2245115",17.5,2,6,8],[11,"Rayyan Ahmed Thakur","2245118",33,5,9,9],[12,"Syed Faaiz Raza Zaidi","2245120",18,7,4,7],[13,"Zain Ul Abedien Raza","2245123",0,0,0,0],[14,"Um E Abiha","2245124",15,2,5,8],[15,"Hunain  Muhammad Iqbal","2245126",38,10,8,10]]
@@ -404,19 +421,6 @@ export const CLOApply = ({ rid }) => {
                                                         width: cellIndex === 3 ? '45px' : 'auto',
                                                         position: (rowIndex === 1 && cellIndex > 3) || cellIndex === 3 ? 'relative' : undefined
                                                     }}>
-                                                        {/* {cellIndex === 3 && (
-                                                            <div style={{
-                                                                position: 'absolute',
-                                                                top: 0,
-                                                                right: 0,
-                                                                lineHeight: 1,
-                                                            }}>
-                                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
-                                                                    <circle cx="12" cy="12" r="10" fill="#28e23d" opacity=".15" />
-                                                                    <path d="M8.5 12.5l2 2 5-5" stroke="#058614" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-                                                                </svg>
-                                                            </div>
-                                                        )} */}
                                                         {rowIndex === 1 && cellIndex === 1 ? 'CLO' : cellContent}
                                                         {rowIndex === 1 && cellIndex > 3 ? (
                                                             <a href='#!' style={{
@@ -435,7 +439,7 @@ export const CLOApply = ({ rid }) => {
                                                                     <path d="M16.2426 7.75745L7.75732 16.2427" stroke="red" strokeWidth={1.6} strokeLinecap="round" className="my-path" />
                                                                 </svg>
                                                             </a>
-                                                        ) : cellIndex === 3 ? (
+                                                        ) : cellIndex === 3 && rowIndex > 1 && verify(editColumn[0], rowIndex) ? (
                                                             <span style={{ position: 'absolute', top: 0, right: 0, zIndex: 2 }}>
                                                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#28e23d">
                                                                     <g fill="none" stroke="#217c2b" stroke-width="1.5">
@@ -443,48 +447,52 @@ export const CLOApply = ({ rid }) => {
                                                                         <path stroke-linecap="round" stroke-linejoin="round" d="m8.5 12.5l2 2l5-5" />
                                                                     </g>
                                                                 </svg>
+
+
                                                             </span>
                                                         ) : null}
                                                     </td>
                                                 })}
-                                                <td style={{ width: '45px' }}>
-                                                    {rowIndex === 0
-                                                        ? editColumn[rowIndex]
-                                                        : rowIndex === 1
-                                                            ? (<select value={selCLO} onChange={(e) => setSelCLO(e.target.value)}>
-                                                                <option value=""></option>
-                                                                {cloRows.map((clo, cloIndex) => (
-                                                                    <option key={`clo-option-${cloIndex}`} value={clo.clo}>{`CLO${clo.clo}`}</option>
-                                                                ))}
-                                                            </select>)
-                                                            : rowIndex === 2 ? (<>
-                                                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', height: '20px' }}>
-                                                                    <input type="text" value={total} onChange={handleTotalChange} style={{ width: '30px' }} />
-                                                                    <a
-                                                                        href="#!"
-                                                                        onClick={readClipboardItems}
-                                                                        style={{
-                                                                            opacity: clipboardAvailable ? 1 : 0.5,
-                                                                            cursor: clipboardAvailable ? 'pointer' : 'not-allowed',
-                                                                            textDecoration: 'none'
-                                                                        }}
-                                                                        title={clipboardAvailable ? 'Paste from clipboard' : 'Clipboard API not available'}
-                                                                    >
+                                                {!verify(editColumn[0], rowIndex) && (
+                                                    <td style={{ width: '45px' }}>
+                                                        {rowIndex === 0
+                                                            ? editColumn[rowIndex]
+                                                            : rowIndex === 1
+                                                                ? (<select value={selCLO} onChange={(e) => setSelCLO(e.target.value)}>
+                                                                    <option value=""></option>
+                                                                    {cloRows.map((clo, cloIndex) => (
+                                                                        <option key={`clo-option-${cloIndex}`} value={clo.clo}>{`CLO${clo.clo}`}</option>
+                                                                    ))}
+                                                                </select>)
+                                                                : rowIndex === 2 ? (<>
+                                                                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', height: '20px' }}>
+                                                                        <input type="text" value={total} onChange={handleTotalChange} style={{ width: '30px' }} />
+                                                                        <a
+                                                                            href="#!"
+                                                                            onClick={readClipboardItems}
+                                                                            style={{
+                                                                                opacity: clipboardAvailable ? 1 : 0.5,
+                                                                                cursor: clipboardAvailable ? 'pointer' : 'not-allowed',
+                                                                                textDecoration: 'none'
+                                                                            }}
+                                                                            title={clipboardAvailable ? 'Paste from clipboard' : 'Clipboard API not available'}
+                                                                        >
 
-                                                                        <PasterIcon width={20} height={20} />
-                                                                    </a>
+                                                                            <PasterIcon width={20} height={20} />
+                                                                        </a>
 
-                                                                </span>
-                                                            </>)
-                                                                // Copy total value to all rows if total is changed, otherwise show original values or clipboard values
-                                                                : rowIndex > 2 && Number(total) === editColumn[2]
-                                                                    ? editColumn[rowIndex]
-                                                                    : rowIndex > 2 && clipboardActive
-                                                                        ? clipboardCache.length !== 0
-                                                                            ? clipboardCache[rowIndex - 3]
-                                                                            : null
-                                                                        : null}
-                                                </td>
+                                                                    </span>
+                                                                </>)
+                                                                    // Copy total value to all rows if total is changed, otherwise show original values or clipboard values
+                                                                    : rowIndex > 2 && Number(total) === editColumn[2]
+                                                                        ? editColumn[rowIndex]
+                                                                        : rowIndex > 2 && clipboardActive
+                                                                            ? clipboardCache.length !== 0
+                                                                                ? clipboardCache[rowIndex - 3]
+                                                                                : null
+                                                                            : null}
+                                                    </td>
+                                                )}
                                             </tr>
                                         );
                                     })}
@@ -509,7 +517,9 @@ export const CLOApply = ({ rid }) => {
                     </div>
                 </>
             )}
-            {/* <pre>{JSON.stringify(multiCLO)}</pre> */}
+            <pre>
+                {multiCLO && multiCLO.map((row) => JSON.stringify(row)).join(`,\n`)}
+            </pre>
             {cloRows.length > 0 && (
                 <div style={{ overflowX: 'auto', marginTop: '16px' }}>
                     <h4>CLOs</h4>
@@ -537,3 +547,23 @@ export const CLOApply = ({ rid }) => {
     )
 }
 
+/*
+["S.No","Name","Reg.No","Quiz 1","Quiz 2","Quiz 3","Mid Term Paper 1",null,null,null,"Final Paper 1",null,null,null,"Project 1"]
+[null,null,null,1,2,3,1,1,2,2,1,2,3,4,4]
+[null,null,null,10,10,10,5,5,5,5,10,10,10,10,10]
+[1,"Muhammad Huzaifa Ghafoor","1945116",0,0,0,0,0,0,0,0,0,0,0,0]
+[2,"Muhammad Azaan Mirza","2045115",10,9,8,1,2,4,1.5,4,8,4,9,7]
+[3,"Sher  Bahadur","2045154",6.5,6,6.5,1,2,3,0,1,1,1,3,5]
+[4,"Abdul Mueed Shaikh","2145120",10,9,10,3,2,3,1,1,5,3,1,7]
+[5,"Hassin  Sikander","2245102",10,7.5,10,5,4,4,3,6.5,6,7,8,9]
+[6,"Hussain  Hasnain","2245103",10,7.5,9,5,4,5,4.5,7,10,9,10,9]
+[7,"Mohammad Shabbir Tarwari","2245104",10,8.5,9,4,4,5,4.5,6,10,7,8,9]
+[8,"Ahmad  Foad","2245110",10,6,7,3,3,4,1,4,7,7,9,7]
+[9,"Ali Khan Mashori","2245111",10,8,9,0,2.5,2,4,3,3,5,8,6]
+[10,"Jawwad Raza","2245115",10,8.5,9,2,2.5,0,1,1.5,2,6,8,6]
+[11,"Rayyan Ahmed Thakur","2245118",10,10,8,1,4,4,3,10,5,9,9,7]
+[12,"Syed Faaiz Raza Zaidi","2245120",10,8.5,7,0,2,3,3,0,7,4,7,6]
+[13,"Zain Ul Abedien Raza","2245123",8.5,6,6,5,2,3,2,0,0,0,0,6]
+[14,"Um E Abiha","2245124",4.5,7.5,10,4,4,4,0,0,2,5,8,7]
+[15,"Hunain  Muhammad Iqbal","2245126",7.5,6,4.5,5,4,4,4,10,10,8,10,7]
+*/
