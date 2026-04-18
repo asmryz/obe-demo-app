@@ -1,66 +1,41 @@
 import React from 'react'
 import PasterIcon from './PasterIcon'
 import { use } from 'react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { api } from '../api/index.js'
+import { useRecapStore } from '../store/recapStore.js'
 import { ToggleButton } from './ToggleButton'
+
 // import { useSheetStore } from '../store/sheetStore.js'
 
 // import { useEffect } from 'react'
 
-const recapResourceCache = new Map()
 
-function getRecapResource(rid) {
-    if (!recapResourceCache.has(rid)) {
-        const recapPromise = api.get(`/recaps/${rid}`)
-            .then(({ data }) => ({ recap: data, error: null }))
-            .catch((err) => ({
-                recap: null,
-                error: err?.response?.data?.error || 'Failed to load recap data.'
-            }))
-            recapResourceCache.set(rid, recapPromise)
-        }
-        return recapResourceCache.get(rid)
-    }
-    
+
 export const CLOApply = ({ rid, closid }) => {
+    const { getRecapResource } = useRecapStore()
     const { recap, error } = use(getRecapResource(rid))
     // const { multiCLOData, headsData, statusData } = useSheetStore((state) => state);
     const recapRows = Array.isArray(recap?.data) ? recap.data : []
     const cloRows = Array.isArray(recap?.clo) ? recap.clo : []
-    
+
     // const fourthElements = recapRows.map((row) => (Array.isArray(row) ? row[3] : undefined))
     const [showAllColumns, setShowAllColumns] = useState(false)
-    const [heads, setHeads] = useState(
-        {}
-        // headsData
-        // { "Final Paper 1": [["Final Paper 1", 1, "10", 0, 25, 6, 10, 27.5, 36, 31, 27, 19, 17.5, 33, 18, 0, 15, 38], ["Final Paper 1", 2, "10", 0, 8, 1, 5, 6, 10, 10, 7, 3, 2, 5, 7, 0, 2, 10], ["Final Paper 1", 3, "10", 0, 4, 1, 3, 7, 9, 7, 7, 5, 6, 9, 4, 0, 5, 8], ["Final Paper 1", 4, "10", 0, 9, 3, 1, 8, 10, 8, 9, 8, 8, 9, 7, 0, 8, 10]] }
-    )
-
+    const [heads, setHeads] = useState({})
     const [multiCLO, setMultiCLO] = useState(
         () => {
             // Each row should only have its first 3 elements
             let arr = recapRows.map(row => Array.isArray(row) ? row.slice(0, 3) : [row]);
             arr.splice(1, 0, [null, null, null]) // Insert an empty row for CLO selection;
             return arr;
-
-            // return multiCLOData
         }
     )
     const [editableIndex, setEditableIndex] = useState(-1)
-
     const [del, setDel] = useState({})
     const [selCLO, setSelCLO] = useState(0)
-    const [status, setStatus] = useState(
-        {}
-
-        // statusData()
-    )
-
-    // const [editColumn, setEditColumn] = useState(heads["Quiz 1"][0])
+    const [status, setStatus] = useState({})
     const [editColumn, setEditColumn] = useState([])
     const [total, setTotal] = useState(editColumn[2])
-    //const [inputValues, setInputValues] = useState([])
     const [clipboardCache, setClipboardCache] = useState([])
     const [clipboardArray, setClipboardArray] = useState([])
     const [clipboardActive, setClipboardActive] = useState(false)
@@ -71,7 +46,7 @@ export const CLOApply = ({ rid, closid }) => {
     const firstEmptyCellIndex = firstRow.findIndex((cell) => cell === '')
     const lastThreeColumnsStartIndex = Math.max(firstRow.length - 3, 0)
     const canHideMiddleColumns = firstEmptyCellIndex !== -1 && firstEmptyCellIndex + 1 < lastThreeColumnsStartIndex
-    
+
     // Save CLO Sheet to backend
     const saveCLOSheet = async () => {
         try {
@@ -84,6 +59,8 @@ export const CLOApply = ({ rid, closid }) => {
             alert('Failed to save CLO Sheet: ' + (err?.response?.data?.error || err.message));
         }
     };
+
+
 
     function checkSaveStatus() {
         if (!Array.isArray(recapRows[0]) || firstEmptyCellIndex === -1) {
@@ -98,9 +75,10 @@ export const CLOApply = ({ rid, closid }) => {
     }
 
     // Re-evaluate save status whenever status or recapRows changes
-    React.useEffect(() => {
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    useEffect(() => {
         checkSaveStatus();
-    }, [status, recapRows]);
+    }, [status, recapRows, firstEmptyCellIndex]);
 
     // Returns the sum of all nth elements in heads[key]
     function verify(key, rowIndex) {

@@ -1,39 +1,49 @@
-import { Fragment, useState } from 'react'
+import { Fragment, useState, use } from 'react'
 import PLOChart from './PLOChart'
+import { useSheetStore } from '../store/sheetStore.js'
 import './CLOSheet.css'
 
 const ENUMS = Object.freeze({
     HEADS: 0,
     CLO: 1,
-    QUESTIONS: 2,
-    MAX: 3
+    // QUESTIONS: 2,
+    MAX: 2
 })
 
-const grades = [  
-  { "start": 90, "end": 100, "grade": "A+", "gpa": 4},
-  { "start": 85, "end": 89, "grade": "A", "gpa": 3.75},
-  { "start": 80, "end": 84, "grade": "A-", "gpa": 3.5},
-  { "start": 75, "end": 79, "grade": "B+", "gpa": 3.25},
-  { "start": 70, "end": 74, "grade": "B", "gpa": 3},
-  { "start": 66, "end": 69, "grade": "B-", "gpa": 2.75},
-  { "start": 63, "end": 65, "grade": "C+", "gpa": 2.5},
-  { "start": 60, "end": 62, "grade": "C", "gpa": 2},
-  { "start": 55, "end": 59, "grade": "C-", "gpa": 1.5},
-  { "start": 0, "end": 54, "grade": "F", "gpa": 0  }
+const grades = [
+    { "start": 90, "end": 100, "grade": "A+", "gpa": 4 },
+    { "start": 85, "end": 89, "grade": "A", "gpa": 3.75 },
+    { "start": 80, "end": 84, "grade": "A-", "gpa": 3.5 },
+    { "start": 75, "end": 79, "grade": "B+", "gpa": 3.25 },
+    { "start": 70, "end": 74, "grade": "B", "gpa": 3 },
+    { "start": 66, "end": 69, "grade": "B-", "gpa": 2.75 },
+    { "start": 63, "end": 65, "grade": "C+", "gpa": 2.5 },
+    { "start": 60, "end": 62, "grade": "C", "gpa": 2 },
+    { "start": 55, "end": 59, "grade": "C-", "gpa": 1.5 },
+    { "start": 0, "end": 54, "grade": "F", "gpa": 0 }
 ]
 
-function CLOSheet({ data: incomingData }) {
+function CLOSheet({ closid }) {
+    const { getCLOSheet  } = useSheetStore()
+    const { data: incomingData } = use(getCLOSheet(closid))
     const [kpi, setKpi] = useState(50)
-    const data = incomingData
+    const { data } = incomingData
 
     const arr = data[ENUMS.CLO].slice(3)
     const clo = [...new Set(arr.filter((x) => typeof x === 'number'))]
 
+    // Replace ' Paper 1' with '' in all properties of data[ENUMS.HEADS]
+    const headsCleaned = data[ENUMS.HEADS].map(h =>
+        typeof h === 'string' ? h.replace(/\s*Paper\s*1/g, '') : h
+    )
+
+    console.log(headsCleaned)
+
     let sno = 1
     let previousHead = ''
 
-    const PLAN = data[ENUMS.HEADS].slice(3).map((head, index) => {
-        const currentHead = data[ENUMS.HEADS][index + 3]
+    const PLAN = headsCleaned.slice(3).map((head, index) => {
+        const currentHead = headsCleaned[index + 3]
         if (currentHead !== null) {
             previousHead = currentHead
         }
@@ -62,10 +72,12 @@ function CLOSheet({ data: incomingData }) {
 
     previousHead = ''
     let key = ''
+    // Clean head names in hdr as well
     const hdr = Object.values(
         data[ENUMS.HEADS].reduce((acc, item) => {
-            if (item !== null) {
-                key = item
+            let cleanItem = (typeof item === 'string') ? item.replace(/\s*Paper\s*1/g, '') : item;
+            if (cleanItem !== null) {
+                key = cleanItem
                 acc[key] = { head: key, span: 1 }
             } else if (key) {
                 acc[key].span += 1
@@ -76,7 +88,7 @@ function CLOSheet({ data: incomingData }) {
     const recapHeads = hdr.slice(1)
     const recapHeadRanges = recapHeads.reduce((acc, head) => {
         const lastEnd = acc.length ? acc[acc.length - 1].end : 3
-        acc.push({ head: head.head, start: lastEnd, end: lastEnd + head.span })
+        acc.push({ head: typeof head.head === 'string' ? head.head.replace(/\s*Paper\s*1/g, '') : head.head, start: lastEnd, end: lastEnd + head.span })
         return acc
     }, [])
 
@@ -119,9 +131,12 @@ function CLOSheet({ data: incomingData }) {
                     </tr>
                     {Object.entries(Object.groupBy(PLAN, ({ head }) => head)).map(([h]) => {
                         let sumCLO = 0
+                        // Clean head for display
+                        const cleanHead = typeof h === 'string' ? h.replace(/\s*Paper\s*1/g, '') : h;
+                        console.log(cleanHead)
                         return (
                             <tr key={h}>
-                                <th style={{ textAlign: 'left' }}>{h}</th>
+                                <th style={{ textAlign: 'left' }}>{cleanHead}</th>
                                 {clo.map((number) => {
                                     const val = planByHeadAndClo[h]?.[number] ?? 0
                                     sumCLO += val
@@ -345,7 +360,8 @@ function CLOSheet({ data: incomingData }) {
                         if (currentHead !== null) {
                             previousHead = currentHead
                         }
-                        const chead = previousHead
+                        // Clean chead for display
+                        const chead = typeof previousHead === 'string' ? previousHead.replace(/\s*Paper\s*1/g, '') : previousHead
 
                         return (
                             <tr key={`row-cells-${index}`}>

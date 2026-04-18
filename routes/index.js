@@ -79,6 +79,34 @@ router.get('/recaps/:rid', async (req, res) => {
     }
 });
 
+router.get('/closheet/:closid', async (req, res) => {
+    try {
+        const closid = Number(req.params.closid);
+
+        if (!Number.isInteger(closid)) {
+            res.status(400).json({ error: 'Invalid CLO Sheet id' });
+            return;
+        }
+
+        const closheetQuery = `
+            SELECT closid, rid, data
+            FROM closheet
+            WHERE closid = $1;
+        `;
+
+        const closheetResult = await db.query(closheetQuery, [closid]);
+
+        if (closheetResult.rows.length === 0) {
+            res.status(404).json({ error: 'CLO Sheet not found' });
+            return;
+        }
+
+        res.json(closheetResult.rows[0]);
+    } catch (err) {
+        console.error('Error fetching CLO Sheet by id:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
 
 // Save CLO Sheet
 router.post('/closheet', async (req, res) => {

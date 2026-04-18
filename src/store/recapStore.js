@@ -1,11 +1,27 @@
 import { create } from 'zustand'
 import { api } from '../api/index.js'
 
+
+// Module-level cache for recap resources
+const recapResourceCache = new Map();
 export const useRecapStore = create((set, get) => ({
     recapsByQuery: {},
     lastQuery: '',
     isLoading: false,
     error: null,
+    // Resource-style recap fetcher with cache (for use() hook)
+    getRecapResource(rid) {
+        if (!recapResourceCache.has(rid)) {
+            const recapPromise = api.get(`/recaps/${rid}`)
+                .then(({ data }) => ({ recap: data, error: null }))
+                .catch((err) => ({
+                    recap: null,
+                    error: err?.response?.data?.error || 'Failed to load recap data.'
+                }))
+            recapResourceCache.set(rid, recapPromise)
+        }
+        return recapResourceCache.get(rid)
+    },
     fetchRecaps: async (query = '') => {
         const normalizedQuery = query.trim().length >= 3 ? query.trim() : ''
         const hasCachedQuery = Object.prototype.hasOwnProperty.call(get().recapsByQuery, normalizedQuery)
@@ -46,3 +62,4 @@ export const useRecapStore = create((set, get) => ({
         }
     }
 }))
+

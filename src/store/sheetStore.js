@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { api } from '../api/index.js'
 
 
 const defaultSheetData = [
@@ -23,6 +24,7 @@ const defaultSheetData = [
 
 
 ]
+
 
 
 function generateHeadsData(multiCLOData) {
@@ -53,30 +55,19 @@ function generateHeadsData(multiCLOData) {
     return headsData;
 }
 
-// ["Heads", null, null, "Quiz 1", "Quiz 2", "Midterm", null, null, null, "Quiz 3", "CEP", "Final Exam", null, null, null],
-// ["CLO", null, null, 1, 2, 1, 1, 2, 2, 3, 4, 1, 2, 3, 4],
-// ["Questions", null, null, null, null, "Q1", "Q2", "Q3", "Q4", null, null, "Q1", "Q2", "Q3", "Q4"],
-// ["SNo", "Name", "Reg.No", 10, 10, 5, 5, 5, 5, 10, 10, 10, 10, 10, 10],
-// [1, "Muhammad Huzaifa Ghafoor", 1945116, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-// [2, "Muhammad Azaan Mirza", 2045115, 10, 9, 1, 2, 4, 1.5, 8, 7, 4, 8, 4, 9],
-// [3, "Sher Bahadur", 2045154, 6.5, 6, 1, 2, 3, 0, 6.5, 5, 1, 1, 1, 3],
-// [4, "Abdul Mueed Shaikh", 2145120, 10, 9, 3, 2, 3, 1, 10, 7, 1, 5, 3, 1],
-// [5, "Hassin Sikander", 2245102, 10, 7.5, 5, 4, 4, 3, 10, 9, 6.5, 6, 7, 8],
-// [6, "Hussain Hasnain", 2245103, 10, 7.5, 5, 4, 5, 4.5, 9, 9, 7, 10, 9, 10],
-// [7, "Mohammad Shabbir Tarwari", 2245104, 10, 8.5, 4, 4, 5, 4.5, 9, 9, 6, 10, 7, 8],
-// [8, "Ahmad Foad", 2245110, 10, 6, 3, 3, 4, 1, 7, 7, 4, 7, 7, 9],
-// [9, "Ali Khan Mashori", 2245111, 10, 8, 0, 2.5, 2, 4, 9, 6, 3, 3, 5, 8],
-// [10, "Jawwad Raza", 2245115, 10, 8.5, 2, 2.5, 0, 1, 9, 6, 1.5, 2, 6, 8],
-// [11, "Rayyan Ahmed Thakur", 2245118, 10, 10, 1, 4, 4, 3, 8, 7, 10, 5, 9, 9],
-// [12, "Syed Faaiz Raza Zaidi", 2245120, 10, 8.5, 0, 2, 3, 3, 7, 6, 0, 7, 4, 7],
-// [13, "Zain Ul Abedien Raza", 2245123, 8.5, 6, 5, 2, 3, 2, 6, 6, 0, 0, 0, 0],
-// [14, "Um E Abiha", 2245124, 4.5, 7.5, 4, 4, 4, 0, 10, 7, 0, 2, 5, 8],
-// [15, "Hunain Muhammad Iqbal", 2245126, 7.5, 6, 5, 4, 4, 4, 4.5, 7, 10, 10, 8, 10]
+
+// Module-level cache for CLO Sheet resources (for use() compatibility)
+const cloSheetResourceCache = new Map();
+
 export const useSheetStore = create((set) => {
     const multiCLOData = defaultSheetData.slice(0, 2).concat(defaultSheetData.slice(2));
     return {
         sheetData: defaultSheetData,
         multiCLOData,
+        cloSid: null,
+        rid:null,
+        setCLOSid: (cloSid) => set({ cloSid }),
+        setRID: (rid) => set({ rid }),
         statusData: () => {
             let status = {};
             defaultSheetData[0].slice(3).filter(x => x !== null)
@@ -95,6 +86,20 @@ export const useSheetStore = create((set) => {
             const firstSheetName = Object.keys(allSheets || {})[0]
             const rows = firstSheetName ? allSheets[firstSheetName] : null
             set({ sheetData: rows })
+        },
+        // Resource-style fetcher for CLO Sheet (for use() hook)
+        getCLOSheet(closid) {
+            console.log(`closid >> ${closid}`)
+            if (!cloSheetResourceCache.has(closid)) {
+                const cloSheetPromise = api.get(`/closheet/${closid}`)
+                    .then(({ data }) => ({ data, error: null }))
+                    .catch((err) => ({
+                        data: null,
+                        error: err?.response?.data?.error || err.message
+                    }));
+                cloSheetResourceCache.set(closid, cloSheetPromise);
+            }
+            return cloSheetResourceCache.get(closid);
         }
     }
 })

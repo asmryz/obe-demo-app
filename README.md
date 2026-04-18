@@ -10,7 +10,7 @@ PGPASSWORD='Po@995886' pg_dump -U postgres -h localhost -p 5432 -d obe -F p --cr
 PGPASSWORD='Po@995886' pg_dump -U postgres -h localhost -p 5432 -d obe -F p \
   --create --clean --if-exists --no-owner --no-privileges \
   --inserts --rows-per-insert=1000 \
-  -f backups/obe_create_bulk_inserts-1.sql
+  -f backups/obe_2026-04-18T16:29:46.947Z.sql
 ```
 
 https://asmryz.github.io/obe-demo-app/

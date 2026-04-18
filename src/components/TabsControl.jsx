@@ -11,6 +11,7 @@ import { useSheetStore } from '../store/sheetStore';
 
 function TabsControl() {
     const ref = useRef();
+    const { cloSid } = useSheetStore()
     const sheetData = useSheetStore((state) => state.sheetData);
     const handlePrint = useReactToPrint({
         contentRef: ref,
@@ -34,7 +35,7 @@ function TabsControl() {
                     {sheetData ? (
                         <Suspense fallback={<p>Loading student marks...</p>}>
                             <div style={{ textAlign: 'center', padding: '20px' }}>
-                                <CLOSheet data={sheetData} />
+                                <CLOSheet closid={cloSid} />
                             </div>
                         </Suspense>
                     ) : (

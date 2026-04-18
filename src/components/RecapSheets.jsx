@@ -5,10 +5,14 @@ import { useEffect } from 'react';
 import './RecapSheets.css';
 import { useRecapStore } from '../store/recapStore';
 import { CLOApply } from './CLOApply';
+import CLOSheet from './CLOSheet';
+import { useSheetStore } from '../store/sheetStore';
 
 
 export const RecapSheets = () => {
-    const [selectedRid, setSelectedRid] = useState(null);
+    const { rid, setRID, cloSid, setCLOSid } = useSheetStore()
+    // const [selectedRid, setSelectedRid] = useState(null);
+    // const [cloSid, setCloSid] = useState(null);
     const recapsByQuery = useRecapStore((state) => state.recapsByQuery);
     const lastQuery = useRecapStore((state) => state.lastQuery);
     const isLoading = useRecapStore((state) => state.isLoading);
@@ -32,20 +36,25 @@ export const RecapSheets = () => {
         return () => clearTimeout(timeoutId);
     }, [normalizedSearch, hasCachedRecaps, fetchRecaps]);
 
-    const handleRecapClick = (event, rid) => {
+    const handleRecapClick = (event, rid, closid) => {
         event.preventDefault();
-        setSelectedRid(rid);
+        setRID(rid);
+        setCLOSid(closid);
     };
 
-    if (selectedRid !== null) {
+    if (rid !== null) {
         return (
             <>
-                <a href="#!" onClick={() => setSelectedRid(null)}>
+                <a href="#" onClick={() => { setRID(null); setCLOSid(null); }}>
                     Back to <b>Recap Sheets</b>
                 </a>
-                <Suspense fallback={<p>Loading recap JSONB data...</p>}>
-                    <CLOApply rid={selectedRid} closid={recapList.find(recap => recap.rid === selectedRid)?.closid} />
-                </Suspense>
+                
+                    {cloSid ? (
+                        <CLOSheet closid={cloSid} />
+                    ) : (
+                        <CLOApply rid={rid} />
+                    )}
+                
             </>
         );
     }
@@ -75,14 +84,14 @@ export const RecapSheets = () => {
                     </thead>
                     <tbody>
                         {recapList.map((recap, index) => (
-                            <tr key={`${recap.rid}-${recap.code ?? 'nocode'}-${index}`} style={{backgroundColor: recap.closid !== null ? 'lightgreen' : recap.code !== null ? 'lightyellow' : 'transparent'  }}>
+                            <tr key={`${recap.rid}-${recap.code ?? 'nocode'}-${index}`} style={{ backgroundColor: recap.closid !== null ? 'lightgreen' : recap.code !== null ? 'lightyellow' : 'transparent' }}>
                                 <td>{recap.batch}</td>
                                 <td style={{ width: '650px' }}>
-                                    <a href="#!" onClick={(event) => handleRecapClick(event, recap.rid)}>
+                                    <a href="#!" onClick={(event) => handleRecapClick(event, recap.rid, recap.closid)}>
                                         {recap.course}
                                     </a>
                                 </td>
-                                <td style={{ width: '200px'}}>{recap.faculty}</td>
+                                <td style={{ width: '200px' }}>{recap.faculty}</td>
                                 <td>{recap.semester}</td>
                                 <td>{recap.year}</td>
                                 {/* <td>{recap.closid}</td> */}
