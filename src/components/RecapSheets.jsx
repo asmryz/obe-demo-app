@@ -44,7 +44,7 @@ export const RecapSheets = () => {
                     Back to <b>Recap Sheets</b>
                 </a>
                 <Suspense fallback={<p>Loading recap JSONB data...</p>}>
-                    <CLOApply rid={selectedRid} />
+                    <CLOApply rid={selectedRid} closid={recapList.find(recap => recap.rid === selectedRid)?.closid} />
                 </Suspense>
             </>
         );
@@ -75,7 +75,7 @@ export const RecapSheets = () => {
                     </thead>
                     <tbody>
                         {recapList.map((recap, index) => (
-                            <tr key={`${recap.rid}-${recap.code ?? 'nocode'}-${index}`} style={{backgroundColor: recap.code !== null ? 'lightyellow' : 'transparent'}}>
+                            <tr key={`${recap.rid}-${recap.code ?? 'nocode'}-${index}`} style={{backgroundColor: recap.closid !== null ? 'lightgreen' : recap.code !== null ? 'lightyellow' : 'transparent'  }}>
                                 <td>{recap.batch}</td>
                                 <td style={{ width: '650px' }}>
                                     <a href="#!" onClick={(event) => handleRecapClick(event, recap.rid)}>
@@ -85,7 +85,7 @@ export const RecapSheets = () => {
                                 <td style={{ width: '200px'}}>{recap.faculty}</td>
                                 <td>{recap.semester}</td>
                                 <td>{recap.year}</td>
-                                {/* <td>{recap.code}</td> */}
+                                {/* <td>{recap.closid}</td> */}
                             </tr>
                         ))}
                     </tbody>

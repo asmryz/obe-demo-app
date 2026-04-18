@@ -4,6 +4,7 @@ import { use } from 'react'
 import { useState } from 'react'
 import { api } from '../api/index.js'
 import { ToggleButton } from './ToggleButton'
+// import { useSheetStore } from '../store/sheetStore.js'
 
 // import { useEffect } from 'react'
 
@@ -17,24 +18,24 @@ function getRecapResource(rid) {
                 recap: null,
                 error: err?.response?.data?.error || 'Failed to load recap data.'
             }))
-
-        recapResourceCache.set(rid, recapPromise)
+            recapResourceCache.set(rid, recapPromise)
+        }
+        return recapResourceCache.get(rid)
     }
-
-    return recapResourceCache.get(rid)
-}
-
-export const CLOApply = ({ rid }) => {
+    
+export const CLOApply = ({ rid, closid }) => {
     const { recap, error } = use(getRecapResource(rid))
+    // const { multiCLOData, headsData, statusData } = useSheetStore((state) => state);
     const recapRows = Array.isArray(recap?.data) ? recap.data : []
     const cloRows = Array.isArray(recap?.clo) ? recap.clo : []
+    
     // const fourthElements = recapRows.map((row) => (Array.isArray(row) ? row[3] : undefined))
     const [showAllColumns, setShowAllColumns] = useState(false)
     const [heads, setHeads] = useState(
         {}
+        // headsData
         // { "Final Paper 1": [["Final Paper 1", 1, "10", 0, 25, 6, 10, 27.5, 36, 31, 27, 19, 17.5, 33, 18, 0, 15, 38], ["Final Paper 1", 2, "10", 0, 8, 1, 5, 6, 10, 10, 7, 3, 2, 5, 7, 0, 2, 10], ["Final Paper 1", 3, "10", 0, 4, 1, 3, 7, 9, 7, 7, 5, 6, 9, 4, 0, 5, 8], ["Final Paper 1", 4, "10", 0, 9, 3, 1, 8, 10, 8, 9, 8, 8, 9, 7, 0, 8, 10]] }
     )
-    const [del, setDel] = useState({})
 
     const [multiCLO, setMultiCLO] = useState(
         () => {
@@ -42,52 +43,64 @@ export const CLOApply = ({ rid }) => {
             let arr = recapRows.map(row => Array.isArray(row) ? row.slice(0, 3) : [row]);
             arr.splice(1, 0, [null, null, null]) // Insert an empty row for CLO selection;
             return arr;
+
+            // return multiCLOData
         }
-
-        // [["S.No", "Name", "Reg.No", "Final Paper 1", null, null, null],
-        // [null, null, null, 1, 2, 3, 4],
-        // [null, null, null, "10", "10", "10", "10"],
-        // [1, "Muhammad Huzaifa Ghafoor", "1945116", 0, 0, 0, 0],
-        // [2, "Muhammad Azaan Mirza", "2045115", 25, 8, 4, 9],
-        // [3, "Sher  Bahadur", "2045154", 6, 1, 1, 3],
-        // [4, "Abdul Mueed Shaikh", "2145120", 10, 5, 3, 1],
-        // [5, "Hassin  Sikander", "2245102", 27.5, 6, 7, 8],
-        // [6, "Hussain  Hasnain", "2245103", 36, 10, 9, 10],
-        // [7, "Mohammad Shabbir Tarwari", "2245104", 31, 10, 7, 8],
-        // [8, "Ahmad  Foad", "2245110", 27, 7, 7, 9],
-        // [9, "Ali Khan Mashori", "2245111", 19, 3, 5, 8],
-        // [10, "Jawwad Raza", "2245115", 17.5, 2, 6, 8],
-        // [11, "Rayyan Ahmed Thakur", "2245118", 33, 5, 9, 9],
-        // [12, "Syed Faaiz Raza Zaidi", "2245120", 18, 7, 4, 7],
-        // [13, "Zain Ul Abedien Raza", "2245123", 0, 0, 0, 0],
-        // [14, "Um E Abiha", "2245124", 15, 2, 5, 8],
-        // [15, "Hunain  Muhammad Iqbal", "2245126", 38, 10, 8, 10]]
     )
-    const [selCLO, setSelCLO] = useState(0)
-
-
     const [editableIndex, setEditableIndex] = useState(-1)
+
+    const [del, setDel] = useState({})
+    const [selCLO, setSelCLO] = useState(0)
+    const [status, setStatus] = useState(
+        {}
+
+        // statusData()
+    )
+
+    // const [editColumn, setEditColumn] = useState(heads["Quiz 1"][0])
     const [editColumn, setEditColumn] = useState([])
     const [total, setTotal] = useState(editColumn[2])
     //const [inputValues, setInputValues] = useState([])
     const [clipboardCache, setClipboardCache] = useState([])
     const [clipboardArray, setClipboardArray] = useState([])
     const [clipboardActive, setClipboardActive] = useState(false)
+    const [save, setSave] = useState(false)
     const clipboardAvailable = typeof navigator !== 'undefined' && navigator.clipboard && typeof navigator.clipboard.read === 'function'
 
     const firstRow = Array.isArray(recapRows[0]) ? recapRows[0] : []
     const firstEmptyCellIndex = firstRow.findIndex((cell) => cell === '')
     const lastThreeColumnsStartIndex = Math.max(firstRow.length - 3, 0)
     const canHideMiddleColumns = firstEmptyCellIndex !== -1 && firstEmptyCellIndex + 1 < lastThreeColumnsStartIndex
+    
+    // Save CLO Sheet to backend
+    const saveCLOSheet = async () => {
+        try {
+            await api.post('/closheet', {
+                rid,
+                multiCLO
+            });
+            alert('CLO Sheet saved successfully!');
+        } catch (err) {
+            alert('Failed to save CLO Sheet: ' + (err?.response?.data?.error || err.message));
+        }
+    };
 
-    // function verify(key, rowIndex) {
-    //     if (!heads[key] || heads[key].length === 0) return false;
-    //     // Get the nth element from each array in heads[key]
-    //     const nthValues = heads[key].map(arr => Number(arr[rowIndex]));
-    //     // Check if all values are equal to the first value
-    //     console.log(nthValues)
-    //     return ;
-    // }
+    function checkSaveStatus() {
+        if (!Array.isArray(recapRows[0]) || firstEmptyCellIndex === -1) {
+            setSave(false);
+            return;
+        }
+        const noOfHeads = recapRows[0].slice(3, firstEmptyCellIndex);
+        const shouldSave =
+            noOfHeads.length === Object.keys(status).length &&
+            Object.values(status).every((v) => v === true);
+        setSave(shouldSave);
+    }
+
+    // Re-evaluate save status whenever status or recapRows changes
+    React.useEffect(() => {
+        checkSaveStatus();
+    }, [status, recapRows]);
 
     // Returns the sum of all nth elements in heads[key]
     function verify(key, rowIndex) {
@@ -95,8 +108,6 @@ export const CLOApply = ({ rid }) => {
         // Get the nth element from each array in heads[key] and sum them
         return heads[key].reduce((sum, arr) => sum + Number(arr[rowIndex]), 0) === editColumn[rowIndex];
     }
-
-
 
     //     useEffect(() => {
     //         setMultiCLO([["S.No","Name","Reg.No","Final Paper 1",null,null,null],[null,null,null,1,2,3,4],[null,null,null,"10","10","10","10"],[1,"Muhammad Huzaifa Ghafoor","1945116",0,0,0,0],[2,"Muhammad Azaan Mirza","2045115",25,8,4,9],[3,"Sher  Bahadur","2045154",6,1,1,3],[4,"Abdul Mueed Shaikh","2145120",10,5,3,1],[5,"Hassin  Sikander","2245102",27.5,6,7,8],[6,"Hussain  Hasnain","2245103",36,10,9,10],[7,"Mohammad Shabbir Tarwari","2245104",31,10,7,8],[8,"Ahmad  Foad","2245110",27,7,7,9],[9,"Ali Khan Mashori","2245111",19,3,5,8],[10,"Jawwad Raza","2245115",17.5,2,6,8],[11,"Rayyan Ahmed Thakur","2245118",33,5,9,9],[12,"Syed Faaiz Raza Zaidi","2245120",18,7,4,7],[13,"Zain Ul Abedien Raza","2245123",0,0,0,0],[14,"Um E Abiha","2245124",15,2,5,8],[15,"Hunain  Muhammad Iqbal","2245126",38,10,8,10]]
@@ -178,13 +189,7 @@ export const CLOApply = ({ rid }) => {
         if (Number(selCLO) === 0) {
             msg += `Please select a valid CLO.`;
         }
-        if (
-
-            total === "" ||
-            total === null ||
-            total === undefined ||
-            isNaN(Number(total))
-        ) {
+        if (total === "" || total === null || total === undefined || isNaN(Number(total))) {
             if (msg.length > 0) msg += `\n`;
             msg += `Enter a numeric Total before saving.`;
         }
@@ -192,23 +197,26 @@ export const CLOApply = ({ rid }) => {
             alert(msg);
             return;
         }
+        let saveCache = clipboardCache;
         if (clipboardCache.length === 0) {
-            setClipboardCache(editColumn.slice(3));
+            // If clipboardCache is empty, save an empty row of the correct length
+            saveCache = new Array(editColumn.length - 3).fill('');
         }
         let rowsCopy = [...multiCLO]
-
-        const rows = rowsCopy.map((row, index) => [...row.slice(0, rowsCopy.length),
-        index === 0 ? heads[editColumn[0]].length === 0 ? editColumn[0] : null
-            : index === 1 ? Number(selCLO)
-                : index === 2 ? Number(total)
-                    : index > 2 ? clipboardCache[index - 3]
-                        : null])
+        const rows = rowsCopy.map((row, index) => [
+            ...row.slice(0, rowsCopy.length),
+            index === 0 ? heads[editColumn[0]].length === 0 ? editColumn[0] : null
+                : index === 1 ? Number(selCLO)
+                    : index === 2 ? Number(total)
+                        : index > 2 ? saveCache[index - 3]
+                            : null
+        ])
         setMultiCLO(rows)
         // console.log(rows)
         // Assign the last element of rows to heads[editColumn[0]]
 
+        const key = editColumn[0];
         setDel(prev => {
-            const key = editColumn[0];
             const prevArr = prev[key] || [];
             // Get the length of the array stored at prev[key] (or 0 if undefined)
             const arrLength = prevArr.length;
@@ -219,19 +227,29 @@ export const CLOApply = ({ rid }) => {
         })
 
         setHeads(prev => {
-            // If the key exists, append to its array; otherwise, create a new key with the value
-
-            const key = editColumn[0];
             const prevArr = prev[key] || [];
-            return {
+            const newHeads = {
                 ...prev,
                 [key]: [...prevArr, [key, Number(selCLO), total, ...clipboardCache]]
             };
+            // After updating heads, update status using the new heads value
+            if (newHeads[key] && newHeads[key].length > 0) {
+                let check = true;
+                editColumn.slice(3).forEach((val, idx) => {
+                    const sum = newHeads[key].reduce((sum, arr) => sum + Number(arr[idx + 3]), 0);
+                    if (sum !== val) {
+                        check = false;
+                    }
+                });
+                setStatus(prevStatus => ({ ...prevStatus, [key]: check }));
+            }
+            return newHeads;
         })
-        setClipboardCache([])
+        // setClipboardCache([])
         setClipboardActive(false);
         setTotal('')
         setSelCLO(0)
+        checkSaveStatus();
     }
 
     const handleDelete = (head, index) => () => {
@@ -239,10 +257,27 @@ export const CLOApply = ({ rid }) => {
             const key = head;
             const prevArr = prev[key] || [];
             const newArr = prevArr.filter((_, i) => i !== index);
-            return {
+            const newHeads = {
                 ...prev,
                 [key]: newArr
             };
+            // After updating heads, update status using the new heads value
+            if (newHeads[key]) {
+                let check = true;
+                // Only check if there are any heads left for this key
+                if (newHeads[key].length > 0) {
+                    editColumn.slice(3).forEach((val, idx) => {
+                        const sum = newHeads[key].reduce((sum, arr) => sum + Number(arr[idx + 3]), 0);
+                        if (sum !== val) {
+                            check = false;
+                        }
+                    });
+                } else {
+                    check = false;
+                }
+                setStatus(prevStatus => ({ ...prevStatus, [key]: check }));
+            }
+            return newHeads;
         })
 
         const delLoc = del[head][index].split(':').map(Number);
@@ -289,7 +324,7 @@ export const CLOApply = ({ rid }) => {
             return (
                 '{\n' +
                 entries.map(([key, value]) =>
-                    pad + '     ' + key + ':' + printObject(value, indent + 2)
+                    pad + '     ' + key + ':' + printObject(value, indent + 1)
                 ).join(',\n') +
                 '\n' + pad + '}'
             );
@@ -301,6 +336,7 @@ export const CLOApply = ({ rid }) => {
     return (
         <section>
             {/* Hidden input to capture Ctrl+V and onPaste events */}
+            {closid}
             <input
                 style={{ position: 'absolute', left: '-9999px', width: 0, height: 0, opacity: 0 }}
                 tabIndex={-1}
@@ -349,7 +385,7 @@ export const CLOApply = ({ rid }) => {
                         <>
                             <pre style={{ marginTop: '12px' }}>{JSON.stringify(recapRows.map((row) => row[editableIndex]))}</pre>
                             <pre style={{ marginTop: '12px' }}>
-                                {printObject({ total, editColumn, clipboardArray, clipboardCache, selCLO, heads })}
+                                {printObject({ editableIndex, total, editColumn, clipboardArray, clipboardCache, selCLO, heads, status, save })}
                                 {/* {JSON.stringify({ total, editColumn, clipboardArray, clipboardCache, selCLO, heads })} */}
                             </pre>
 
@@ -425,15 +461,9 @@ export const CLOApply = ({ rid }) => {
                                                         {rowIndex === 1 && cellIndex > 3 ? (
                                                             <a href='#!' style={{
                                                                 position: 'absolute',
-                                                                top: 0,
-                                                                right: 0,
-                                                                // padding: '-2px',
-                                                                cursor: 'pointer',
-                                                                fontWeight: 'bold',
-                                                                // fontSize: '16px',
-                                                                lineHeight: 1,
+                                                                top: 0, right: 0, cursor: 'pointer',
+                                                                fontWeight: 'bold', lineHeight: 1,
                                                             }} onClick={handleDelete(editColumn[0], cellIndex - 4)}>
-
                                                                 <svg width={20} height={20} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                                     <path d="M7.75732 7.75745L16.2426 16.2427" stroke="red" strokeWidth={1.6} strokeLinecap="round" className="my-path" />
                                                                     <path d="M16.2426 7.75745L7.75732 16.2427" stroke="red" strokeWidth={1.6} strokeLinecap="round" className="my-path" />
@@ -442,18 +472,16 @@ export const CLOApply = ({ rid }) => {
                                                         ) : cellIndex === 3 && rowIndex > 1 && verify(editColumn[0], rowIndex) ? (
                                                             <span style={{ position: 'absolute', top: 0, right: 0, zIndex: 2 }}>
                                                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#28e23d">
-                                                                    <g fill="none" stroke="#217c2b" stroke-width="1.5">
+                                                                    <g fill="none" stroke="#217c2b" strokeWidth="1.5">
                                                                         <circle cx="12" cy="12" r="10" opacity=".5" />
-                                                                        <path stroke-linecap="round" stroke-linejoin="round" d="m8.5 12.5l2 2l5-5" />
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" d="m8.5 12.5l2 2l5-5" />
                                                                     </g>
                                                                 </svg>
-
-
                                                             </span>
                                                         ) : null}
                                                     </td>
                                                 })}
-                                                {!verify(editColumn[0], rowIndex) && (
+                                                {!status[editColumn[0]] && (
                                                     <td style={{ width: '45px' }}>
                                                         {rowIndex === 0
                                                             ? editColumn[rowIndex]
@@ -501,17 +529,39 @@ export const CLOApply = ({ rid }) => {
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'flex-end', flex: '1' }}>
                             {multiCLO.length > 0 && (
-                                <table style={{ marginTop: '50px', marginLeft: '20px' }}>
-                                    <tbody>
-                                        {multiCLO.map((row, i) => (
-                                            <tr key={`multi-${i}`}>
-                                                {row.map((cell, j) => (
-                                                    <td key={`multi-${i}-${j}`}>{cell === null ? '' : typeof cell === 'object' ? JSON.stringify(cell) : cell}</td>
+                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                    <div style={{ height: '50px', border: '1px solid #d3d3d3', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                        {save ? <span style={{ color: 'green', fontWeight: 'bold' }}>All CLOs saved!</span> : <span style={{ color: 'red', fontWeight: 'bold' }}>CLOs not saved</span>}
+                                        <button onClick={saveCLOSheet} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }} title="Save CLO Sheet">
+                                            <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+                                                <defs>
+                                                    <path id="SVGJ5kDdewH" fill="#fff" d="M24 19c10.217 0 18.5-3.582 18.5-8S34.217 3 24 3S5.5 6.582 5.5 11s8.283 8 18.5 8" />
+                                                </defs>
+                                                <g fill="none" strokeWidth="3">
+                                                    <path fill="#8fbffa" d="M5.5 11c0-4.418 8.283-8 18.5-8s18.5 3.582 18.5 8c0 0 .5 5 .5 13s-.5 13-.5 13c0 4.418-8.283 8-18.5 8S5.5 41.418 5.5 37c0 0-.5-5-.5-13s.5-13 .5-13" />
+                                                    <use href="#SVGJ5kDdewH" />
+                                                    <use href="#SVGJ5kDdewH" />
+                                                    <path stroke="#2859c5" strokeLinecap="round" strokeLinejoin="round" d="M42.5 11c0 4.418-8.283 8-18.5 8S5.5 15.418 5.5 11M43 24.205C43 28.51 34.493 32 24 32S5 28.51 5 24.205M11.5 24a.5.5 0 0 0 0-1m0 1a.5.5 0 0 1 0-1" />
+                                                    <path stroke="#2859c5" strokeLinecap="round" strokeLinejoin="round" d="M5.5 11c0-4.418 8.283-8 18.5-8s18.5 3.582 18.5 8c0 0 .5 5 .5 13s-.5 13-.5 13c0 4.418-8.283 8-18.5 8S5.5 41.418 5.5 37c0 0-.5-5-.5-13s.5-13 .5-13" />
+                                                    <path stroke="#2859c5" strokeLinecap="round" strokeLinejoin="round" d="M11.5 37a.5.5 0 0 0 0-1m0 1a.5.5 0 0 1 0-1M18 25.75a.5.5 0 0 0 0-1m0 1a.5.5 0 0 1 0-1m0 14a.5.5 0 0 0 0-1m0 1a.5.5 0 0 1 0-1" />
+                                                </g>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div>
+                                        <table style={{ marginLeft: '20px' }}>
+                                            <tbody>
+                                                {multiCLO.map((row, i) => (
+                                                    <tr key={`multi-${i}`}>
+                                                        {row.map((cell, j) => (
+                                                            <td key={`multi-${i}-${j}`}>{cell === null ? '' : typeof cell === 'object' ? JSON.stringify(cell) : cell}</td>
+                                                        ))}
+                                                    </tr>
                                                 ))}
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
                             )}
                         </div>
                     </div>

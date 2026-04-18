@@ -1,3 +1,4 @@
+
 import express from 'express';
 const router = express.Router();
 import { db } from '../db.js';
@@ -8,9 +9,10 @@ router.get('/recaps', async (req, res) => {
         const search = (req.query.q || '').toString().trim();
         const effectiveSearch = search.length >= 3 ? search : '';
         const query = `
-            SELECT r.rid, r.batch, r.course, r.faculty, r.semester, r.year, c.code
+            SELECT r.rid, r.batch, r.course, r.faculty, r.semester, r.year, c.code, cs.closid
             FROM recaps r JOIN rcourse vr ON r.rid = vr.rid
             LEFT OUTER JOIN course c ON vr.code = trim(c.code)
+            LEFT OUTER JOIN closheet cs ON cs.rid = r.rid
             WHERE r.batch NOT LIKE 'MSME%'
               AND r.batch NOT LIKE 'BSASAI%'
               AND (
@@ -78,5 +80,23 @@ router.get('/recaps/:rid', async (req, res) => {
 });
 
 
+// Save CLO Sheet
+router.post('/closheet', async (req, res) => {
+    try {
+        const { rid, multiCLO } = req.body;
+        if (!rid || !multiCLO) {
+            return res.status(400).json({ error: 'Missing rid or multiCLO' });
+        }
+        const insertQuery = `
+            INSERT INTO closheet (rid, data)
+            VALUES ($1, $2::jsonb) RETURNING *;
+        `;
+        const result = await db.query(insertQuery, [rid, JSON.stringify(multiCLO)]);
+        res.json({ success: true, closheet: result.rows[0] });
+    } catch (err) {
+        console.error('Error saving CLO Sheet:', err);
+        res.status(500).json({ error: 'Failed to save CLO Sheet' });
+    }
+});
 
 export default router;
