@@ -1,10 +1,22 @@
+
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import process from 'node:process';
 import indexRouter from './routes/index.js';
+import https from 'https';
+import fs from 'fs';
+
 
 const app = express();
 const PORT = process.env.PORT || 5001;
+
+// Read SSL certificate and key
+const sslOptions = {
+    key: fs.readFileSync('certs/key.pem'),
+    cert: fs.readFileSync('certs/cert.pem'),
+};
+
 
 
 app.use(cors());
@@ -14,6 +26,8 @@ app.use(express.static('dist'));
 app.use('/api', indexRouter);
 
 
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+
+// Start HTTPS server
+https.createServer(sslOptions, app).listen(PORT, () => {
+    console.log(`HTTPS server is running on https://localhost:${PORT}`);
 });
