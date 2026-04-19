@@ -8,7 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "start:server": "node --watch server.js",
+    "start:server": "node --watch serverold.js",
     "start:client": "vite --host",
     "dev": "concurrently \"pnpm:start:*\"",
     "predeploy": "npm run build",

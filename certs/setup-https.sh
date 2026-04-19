@@ -25,6 +25,6 @@ mkcert -install
 mkdir -p certs
 
 echo "📜 Generating certificates..."
-mkcert -key-file certs/key.pem -cert-file certs/cert.pem localhost 127.0.0.1 $IP
+mkcert -key-file certs/key.pem -cert-file certs/cert.pem localhost 127.0.0.1 $IP 45.140.185.63
 
 echo "✅ Certificates generated in ./certs"
