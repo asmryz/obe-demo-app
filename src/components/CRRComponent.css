@@ -312,7 +312,7 @@
       }
       .inl-26 {
         font-family: "Segoe UI Symbol", sans-serif;
-        mso-bidi-font-family: "Segoe UI Symbol";
+        /* mso-bidi-font-family: "Segoe UI Symbol"; */
         color: #222222;
         background: white;
       }

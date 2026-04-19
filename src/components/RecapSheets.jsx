@@ -50,7 +50,7 @@ export const RecapSheets = () => {
                 </a>
                 
                     {cloSid ? (
-                        <CLOSheet closid={cloSid} />
+                        <CLOSheet closid={cloSid} rid={rid} />
                     ) : (
                         <CLOApply rid={rid} />
                     )}

@@ -1,6 +1,7 @@
 import { Fragment, useState, use } from 'react'
 import PLOChart from './PLOChart'
 import { useSheetStore } from '../store/sheetStore.js'
+import { useRecapStore } from '../store/recapStore.js'
 import './CLOSheet.css'
 
 const ENUMS = Object.freeze({
@@ -23,8 +24,12 @@ const grades = [
     { "start": 0, "end": 54, "grade": "F", "gpa": 0 }
 ]
 
-function CLOSheet({ closid }) {
-    const { getCLOSheet  } = useSheetStore()
+
+function CLOSheet({ closid, rid }) {
+    const { getCLOSheet } = useSheetStore()
+    const { getRecapResource } = useRecapStore()
+    const { recap } = use(getRecapResource(rid))
+
     const { data: incomingData } = use(getCLOSheet(closid))
     const [kpi, setKpi] = useState(50)
     const { data } = incomingData
@@ -32,12 +37,22 @@ function CLOSheet({ closid }) {
     const arr = data[ENUMS.CLO].slice(3)
     const clo = [...new Set(arr.filter((x) => typeof x === 'number'))]
 
+    // grade counts keyed by grade name
+    let gradeChart = Object.fromEntries(grades.map((g) => [g.grade, 0]))
+    //console.log(gradeChart)
+    // // unique numeric CLOs sorted ascending
+    // const clo = Array.from(new Set(arr.map((x) => {
+    //     const n = Number(x)
+    //     return Number.isNaN(n) ? null : n
+    // }).filter((x) => x !== null))).sort((a, b) => a - b)
+
+
     // Replace ' Paper 1' with '' in all properties of data[ENUMS.HEADS]
     const headsCleaned = data[ENUMS.HEADS].map(h =>
         typeof h === 'string' ? h.replace(/\s*Paper\s*1/g, '') : h
     )
 
-    console.log(headsCleaned)
+    //console.log(`headsCleaned:`, headsCleaned)
 
     let sno = 1
     let previousHead = ''
@@ -56,6 +71,8 @@ function CLOSheet({ closid }) {
             total: data[ENUMS.MAX][index + 3] ?? ''
         }
     })
+
+    //console.log(PLAN.sort((a, b) => a.clo - b.clo))
 
     const planByHeadAndClo = PLAN.reduce((acc, item) => {
         if (!acc[item.head]) {
@@ -115,7 +132,7 @@ function CLOSheet({ closid }) {
             }, {})
         )
     }
-
+    console.log(recap)
     return (
         <div className="marks-list">
             <h2>PLAN</h2>
@@ -129,11 +146,11 @@ function CLOSheet({ closid }) {
                         ))}
                         <th>Total</th>
                     </tr>
-                    {Object.entries(Object.groupBy(PLAN, ({ head }) => head)).map(([h]) => {
+                    {Object.entries(Object.groupBy(PLAN.sort((a, b) => a.clo - b.clo), ({ head }) => head)).map(([h]) => {
                         let sumCLO = 0
                         // Clean head for display
                         const cleanHead = typeof h === 'string' ? h.replace(/\s*Paper\s*1/g, '') : h;
-                        console.log(cleanHead)
+                        //console.log(cleanHead)
                         return (
                             <tr key={h}>
                                 <th style={{ textAlign: 'left' }}>{cleanHead}</th>
@@ -194,6 +211,7 @@ function CLOSheet({ closid }) {
                                 {recapHeads.map((h, index) => (
                                     <th key={`cell-${rowIndex}-${index}`}>{h.head}</th>
                                 ))}
+                                <th>100%</th>
                                 <th>Total</th>
                                 <th>Grade</th>
                             </tr>
@@ -208,16 +226,23 @@ function CLOSheet({ closid }) {
                                         .reduce((total, mark) => total + (Number(mark) || 0), 0)
                                     return <td key={`recap-${rowIndex}-${head}`}>{sum}</td>
                                 })}
-                                <td>{row.slice(3).reduce((total, mark) => total + (Number(mark) || 0), 0)}</td>
-                                <td>{grades.find(({ start, end }) => {
-                                    const total = row.slice(3).reduce((total, mark) => total + (Number(mark) || 0), 0)
-                                    return total >= start && total <= end
-                                })?.grade ?? ''}</td>
+                                <td>{row.slice(3).reduce((total, mark) => total + (Number(mark) || 0), 0).toFixed(2)}</td>
+                                <td>{Math.round(row.slice(3).reduce((total, mark) => total + (Number(mark) || 0), 0).toFixed(2))}</td>
+                                <td>{(() => {
+                                    const total = Math.round(row.slice(3).reduce((total, mark) => total + (Number(mark) || 0), 0).toFixed(2))
+                                    const gradeObj = grades.find(({ start, end }) => total >= start && total <= end)
+                                    const gradeName = gradeObj?.grade ?? ''
+                                    if (gradeName) {
+                                        gradeChart[gradeName] = (gradeChart[gradeName] || 0) + 1
+                                    }
+                                    return gradeName
+                                })()}</td>
                             </tr>
                         )
                     ))}
                 </tbody>
             </table>
+            {console.log(gradeChart)}
             <h2>CLOs wise Head</h2>
             <form action="">
                 <label htmlFor="kpi">Set KPI Threshold (%): </label>
@@ -268,11 +293,11 @@ function CLOSheet({ closid }) {
                     </tr>
                 </thead>
                 <tbody>
-                    {data.slice(4).map((row, rowIndex) => {
+                    {data.slice(3).map((row, rowIndex) => {
                         stdCLOs.regno = row[2].toString()
                         stdCLOs.name = row[1]
                         const cloCells = cloHdr.flatMap(([cloKey, items]) => {
-                            const stdTotal = items.reduce((sum, item) => sum + (Number(row[item.sno + 2]) || 0), 0)
+                            const stdTotal = items.reduce((sum, item) => sum + (Number(row[item.sno + 2]) || 0), 0).toFixed(2)
                             const cloTotal = items.reduce((sum, item) => sum + (Number(item.total) || 0), 0)
                             const achieved = cloTotal ? (stdTotal / cloTotal * 100).toFixed(2) + '%' : '0%'
                             stdCLOs[`CLO${cloKey}`] = parseFloat(achieved) <= kpi ? 0 : 1

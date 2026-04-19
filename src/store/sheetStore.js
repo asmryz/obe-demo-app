@@ -66,6 +66,8 @@ export const useSheetStore = create((set) => {
         multiCLOData,
         cloSid: null,
         rid:null,
+        recap: null,
+        setRecap: (recap) => set({ recap }),
         setCLOSid: (cloSid) => set({ cloSid }),
         setRID: (rid) => set({ rid }),
         statusData: () => {

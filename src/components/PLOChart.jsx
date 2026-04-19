@@ -27,8 +27,8 @@ const PLOChart = ({label, achieved, notAchieved}) => {
     labels: ["% Achieved", "% Not Achieved"],
     datasets: [
       {
-        data: [achieved, notAchieved],
-        backgroundColor: "#4e79a7",
+        data: [achieved.toFixed(2), notAchieved.toFixed(2)],
+        backgroundColor: ["#52ed69", "#149fef"],
         borderRadius: 4,
         barPercentage: 0.5,
       },
