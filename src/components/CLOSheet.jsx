@@ -1,4 +1,5 @@
-import { Fragment, useState, use } from 'react'
+
+import { Fragment, useState, use, useEffect } from 'react'
 import PLOChart from './PLOChart'
 import { useSheetStore } from '../store/sheetStore.js'
 import { useRecapStore } from '../store/recapStore.js'
@@ -26,6 +27,26 @@ const grades = [
 
 
 function CLOSheet({ closid, rid }) {
+    // Group PLAN rows by first word and sum their totals
+    // ...existing code...
+    // PLAN is defined here
+    // ...existing code...
+    // const PLAN = headsCleaned.slice(3).map((head, index) => {
+    //     const currentHead = headsCleaned[index + 3]
+    //     if (currentHead !== null) {
+    //         previousHead = currentHead
+    //     }
+    //     const chead = previousHead
+
+    //     return {
+    //         sno: sno++,
+    //         head: chead,
+    //         clo: data[ENUMS.CLO][index + 3] ?? '',
+    //         total: data[ENUMS.MAX][index + 3] ?? ''
+    //     }
+    // })
+
+    // Group and sum marks by first word for display
     const { getCLOSheet } = useSheetStore()
     const { getRecapResource } = useRecapStore()
     const { recap } = use(getRecapResource(rid))
@@ -34,25 +55,51 @@ function CLOSheet({ closid, rid }) {
     const [kpi, setKpi] = useState(50)
     const { data } = incomingData
 
+
     const arr = data[ENUMS.CLO].slice(3)
-    const clo = [...new Set(arr.filter((x) => typeof x === 'number'))]
+    // const clo = [...new Set(arr.filter((x) => typeof x === 'number'))]
 
-    // grade counts keyed by grade name
-    let gradeChart = Object.fromEntries(grades.map((g) => [g.grade, 0]))
-    //console.log(gradeChart)
-    // // unique numeric CLOs sorted ascending
-    // const clo = Array.from(new Set(arr.map((x) => {
-    //     const n = Number(x)
-    //     return Number.isNaN(n) ? null : n
-    // }).filter((x) => x !== null))).sort((a, b) => a - b)
+    // Access gradeChart and setter from zustand store
+    const { gradeChart, setGradeChart, recap: globalRecap, setRecap, groupedPlanTotals: globalGroupedPlanTotals, setGroupedPlanTotals } = useSheetStore(state => state)
+    // setGradeChart(localGradeChart)
+
+    // unique numeric CLOs sorted ascending
+    const clo = Array.from(new Set(arr.map((x) => {
+        const n = Number(x)
+        return Number.isNaN(n) ? null : n
+    }).filter((x) => x !== null))).sort((a, b) => a - b)
 
 
+    function groupPlanByFirstWord(planRows) {
+        const result = {};
+        planRows.forEach(row => {
+            if (typeof row.head !== 'string' || !row.head) return;
+            const key = row.head.split(' ')[0]; // Split by non-breaking space and take the first part
+            // console.log(row.head.split(' ')[0])
+            const mark = Number(row.total) || 0;
+            result[key] = (result[key] || 0) + mark;
+        });
+
+        return result;
+    }
+    // Utility to group and sum marks by first word of the first column
+    function groupAndSumByFirstWord(rows) {
+        const result = {};
+        rows.forEach(row => {
+            if (!row[0] || typeof row[0] !== 'string') return;
+            const key = row[0].split(' ')[0];
+            const mark = Number(row[1]) || 0; // Adjust index if needed
+            result[key] = (result[key] || 0) + mark;
+        });
+        return result;
+    }
+
+    //const groupedTotals = groupAndSumByFirstWord(data[0]);
+    // console.log(groupedTotals)
     // Replace ' Paper 1' with '' in all properties of data[ENUMS.HEADS]
     const headsCleaned = data[ENUMS.HEADS].map(h =>
         typeof h === 'string' ? h.replace(/\s*Paper\s*1/g, '') : h
     )
-
-    //console.log(`headsCleaned:`, headsCleaned)
 
     let sno = 1
     let previousHead = ''
@@ -72,7 +119,43 @@ function CLOSheet({ closid, rid }) {
         }
     })
 
-    //console.log(PLAN.sort((a, b) => a.clo - b.clo))
+    console.log(PLAN)
+
+    // Now safe to calculate groupedPlanTotals
+    const groupedPlanTotals = groupPlanByFirstWord(PLAN);
+    // Update groupedPlanTotals in store if changed
+    if (JSON.stringify(groupedPlanTotals) !== JSON.stringify(globalGroupedPlanTotals)) {
+        setGroupedPlanTotals(groupedPlanTotals);
+    }
+    console.log(groupedPlanTotals)
+    // Update gradeChart in zustand store after rendering recap sheet
+    useEffect(() => {
+        // Calculate localGradeChart only when data changes
+        const safeData = Array.isArray(data) ? data : []
+        const safeGradeChart = gradeChart || {}
+        const newGradeChart = Object.fromEntries(grades.map((g) => [g.grade, 0]))
+        safeData.forEach((row, rowIndex) => {
+            // Only process student rows (skip headers)
+            if (rowIndex > 2) {
+                const total = Math.round(row.slice(3).reduce((total, mark) => total + (Number(mark) || 0), 0).toFixed(2))
+                const gradeObj = grades.find(({ start, end }) => total >= start && total <= end)
+                const gradeName = gradeObj?.grade
+                if (gradeName) {
+                    newGradeChart[gradeName] = (newGradeChart[gradeName] || 0) + 1
+                }
+            }
+        })
+        // Only update if changed
+        const chartChanged = JSON.stringify(newGradeChart) !== JSON.stringify(safeGradeChart)
+        if (chartChanged) {
+            setGradeChart(newGradeChart)
+        }
+
+        // Update recap in store if changed
+        if (recap && JSON.stringify(recap) !== JSON.stringify(globalRecap)) {
+            setRecap(recap)
+        }
+    }, [data, gradeChart, setGradeChart, recap, globalRecap, setRecap])
 
     const planByHeadAndClo = PLAN.reduce((acc, item) => {
         if (!acc[item.head]) {
@@ -132,9 +215,27 @@ function CLOSheet({ closid, rid }) {
             }, {})
         )
     }
-    console.log(recap)
+    // console.log(recap)
     return (
         <div className="marks-list">
+
+            <h3>Grouped PLAN Totals by First Word</h3>
+            <table id="grouped-plan-totals">
+                <thead>
+                    <tr>
+                        <th>Group</th>
+                        <th>Total Marks</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {Object.entries(groupedPlanTotals).map(([group, total]) => (
+                        <tr key={group}>
+                            <td>{group}</td>
+                            <td>{total}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
             <h2>PLAN</h2>
 
             <table id="plan">
@@ -146,7 +247,7 @@ function CLOSheet({ closid, rid }) {
                         ))}
                         <th>Total</th>
                     </tr>
-                    {Object.entries(Object.groupBy(PLAN.sort((a, b) => a.clo - b.clo), ({ head }) => head)).map(([h]) => {
+                    {Object.entries(Object.groupBy(PLAN, ({ head }) => head)).map(([h]) => {
                         let sumCLO = 0
                         // Clean head for display
                         const cleanHead = typeof h === 'string' ? h.replace(/\s*Paper\s*1/g, '') : h;
@@ -179,6 +280,24 @@ function CLOSheet({ closid, rid }) {
                     </tr>
                 </tbody>
             </table>
+            {/* <h2>Grouped Totals by First Word</h2>
+            <table id="grouped-totals">
+                <thead>
+                    <tr>
+                        <th>Group</th>
+                        <th>Total Marks</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {Object.entries(groupedTotals).map(([group, total]) => (
+                        <tr key={group}>
+                            <td>{group}</td>
+                            <td>{total}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table> */}
+
             <h2>Head wise CLOs</h2>
             <table id="head-clo">
                 <tbody>
@@ -232,9 +351,6 @@ function CLOSheet({ closid, rid }) {
                                     const total = Math.round(row.slice(3).reduce((total, mark) => total + (Number(mark) || 0), 0).toFixed(2))
                                     const gradeObj = grades.find(({ start, end }) => total >= start && total <= end)
                                     const gradeName = gradeObj?.grade ?? ''
-                                    if (gradeName) {
-                                        gradeChart[gradeName] = (gradeChart[gradeName] || 0) + 1
-                                    }
                                     return gradeName
                                 })()}</td>
                             </tr>

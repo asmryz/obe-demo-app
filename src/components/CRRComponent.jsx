@@ -1,7 +1,31 @@
 import './CRRComponent.css'
 import logo from '../assets/logo.jpg'
+import { useSheetStore } from '../store/sheetStore'
+
 
 function CRRComponent() {
+    const { gradeChart, recap, groupedPlanTotals } = useSheetStore()
+    console.log(gradeChart)
+    console.log(recap)
+    console.log(groupedPlanTotals)
+    // gradeChart['D+'] = 0;
+    // gradeChart['D'] = 0;
+    // gradeChart['D-'] = 0;
+
+// Pluralize a word, excluding certain exceptions
+function toPlural(word) {
+  if (!word) return '';
+  const exceptions = ['Final', 'Mid Term', 'Project'];
+  if (exceptions.includes(word)) return word;
+  // Basic rules for English plurals
+  if (word.endsWith('y') && !/[aeiou]y$/i.test(word)) {
+    return word.slice(0, -1) + 'ies';
+  }
+  if (word.endsWith('s') || word.endsWith('x') || word.endsWith('z') || word.endsWith('ch') || word.endsWith('sh')) {
+    return word + 'es';
+  }
+  return word + 's';
+}    
     return (
         <section className="crr-page inl-1">
             <div className="WordSection1">
@@ -75,7 +99,7 @@ function CRRComponent() {
                             </td>
                             <td width="14%" valign="top" className="inl-18">
                                 <p className="MsoNormal">
-                                    <span lang="EN-US" className="inl-10">ME2405T</span>
+                                    <span lang="EN-US" className="inl-10">{recap.course.split(' ')[0]}</span>
                                 </p>
                             </td>
                             <td width="18%" valign="top" className="inl-19">
@@ -85,7 +109,7 @@ function CRRComponent() {
                             </td>
                             <td width="43%" colSpan="3" valign="top" className="inl-20">
                                 <p className="MsoNormal">
-                                    <span lang="EN-US" className="inl-10">Thermodynamics</span>
+                                    <span lang="EN-US" className="inl-10">{recap.course.split(' ').splice(1, 2).join(' ')}</span>
                                 </p>
                             </td>
                         </tr>
@@ -97,7 +121,7 @@ function CRRComponent() {
                             </td>
                             <td width="14%" valign="top" className="inl-23">
                                 <p className="MsoNormal">
-                                    <span lang="EN-US" className="inl-10">2024</span>
+                                    <span lang="EN-US" className="inl-10">{recap.year}</span>
                                 </p>
                             </td>
                             <td width="18%" valign="top" className="inl-24">
@@ -105,17 +129,17 @@ function CRRComponent() {
                                     <span lang="EN-US" className="inl-10">Semester</span>
                                 </p>
                             </td>
-                            <td width="11%" valign="top" className="inl-25">
-                                <p className="MsoNormal" style={{ paddingTop: '5px' }}>
-                                    <span lang="EN-US" className="inl-10">Fall</span
-                                    ><span lang="EN-US" className="inl-26" style={{ Top: '45px', fontSize: '18pt' }}>&#10003;</span
-                                    ><span lang="EN-US" className="inl-10"
-                                    ><br className="inl-27" />
-                                        <br className="inl-27" />
-                                    </span>
-                                </p>
-                            </td>
-                            <td width="15%" valign="top" className="inl-28">
+                            {["Fall", "Spring", "Summer"].map((sem, index) => (
+                                <td key={index} width="11%" valign="top" className="inl-25">
+                                    <p className="MsoNormal" style={{ paddingTop: '5px' }}>
+                                        <span lang="EN-US" className="inl-10">{sem}</span>
+                                        {recap.semester === sem && (
+                                            <span lang="EN-US" className="inl-26" style={{ Top: '45px', fontSize: '18pt' }}>&#10003;</span>
+                                        )}
+                                    </p>
+                                </td>
+                            ))}
+                            {/* <td width="15%" valign="top" className="inl-28">
                                 <p className="MsoNormal" style={{ paddingTop: '5px' }}>
                                     <span lang="EN-US" className="inl-10">Spring</span>
                                 </p>
@@ -124,7 +148,7 @@ function CRRComponent() {
                                 <p className="MsoNormal" style={{ paddingTop: '5px' }}>
                                     <span lang="EN-US" className="inl-10">Summer</span>
                                 </p>
-                            </td>
+                            </td>*/}
                         </tr>
                         <tr className="inl-30">
                             <td width="23%" valign="top" className="inl-31">
@@ -133,7 +157,7 @@ function CRRComponent() {
                                 </p>
                             </td>
                             <td width="14%" valign="top" className="inl-32">
-                                <p className="MsoNormal"><span lang="EN-US" className="inl-10">2</span></p>
+                                <p className="MsoNormal"><span lang="EN-US" className="inl-10">{recap.course.split(' ').splice(recap.course.split(' ').length - 2, 2)[0][1]}</span></p>
                             </td>
                             <td width="18%" valign="top" className="inl-33">
                                 <p className="MsoNormal">
@@ -155,7 +179,7 @@ function CRRComponent() {
                             </td>
                             <td width="16%" valign="top" className="inl-37">
                                 <p className="MsoNormal">
-                                    <span lang="EN-US" className="inl-10"
+                                    <span lang="EN-US" className="inl-10" style={{ color: 'red' }}
                                     >ME1203-T Engineering Physics</span
                                     >
                                 </p>
@@ -169,7 +193,7 @@ function CRRComponent() {
                             </td>
                             <td width="14%" rowSpan="2" valign="top" className="inl-40">
                                 <p className="MsoNormal">
-                                    <span lang="EN-US" className="inl-10">Muhammad Umar Siddiqui</span>
+                                    <span lang="EN-US" className="inl-10">{recap.faculty}</span>
                                 </p>
                             </td>
                             <td width="18%" valign="top" className="inl-41">
@@ -178,7 +202,7 @@ function CRRComponent() {
                                 </p>
                             </td>
                             <td width="43%" colSpan="3" valign="top" className="inl-42">
-                                <p className="MsoNormal"><span lang="EN-US" className="inl-10">17</span></p>
+                                <p className="MsoNormal"><span lang="EN-US" className="inl-10">{recap.data.length - 2}</span></p>
                             </td>
                         </tr>
                         <tr className="inl-43">
@@ -190,7 +214,7 @@ function CRRComponent() {
                                 </p>
                             </td>
                             <td width="43%" colSpan="3" valign="top" className="inl-45">
-                                <p className="MsoNormal"><span lang="EN-US" className="inl-10">32</span></p>
+                                <p className="MsoNormal"><span lang="EN-US" className="inl-10">{Number(recap.course.split(' ').splice(recap.course.split(' ').length - 2, 2)[0][1]) * 16}</span></p>
                             </td>
                         </tr>
                         <tr className="inl-46">
@@ -207,7 +231,14 @@ function CRRComponent() {
                                 </p>
                             </td>
                             <td width="61%" colSpan="4" valign="top" className="inl-49">
-                                <p className="MsoNormal">
+                                {groupedPlanTotals &&
+                                    Object.entries(groupedPlanTotals).sort((a, b) => b[1] - a[1])
+                                        .map(([key, value], index) => (
+                                            <p className="MsoNormal" key={index}>
+                                                <span lang="EN-US" className="inl-10">{toPlural(key)} {value}%</span>
+                                            </p>
+                                        ))}
+                                {/* <p className="MsoNormal">
                                     <span lang="EN-US" className="inl-10">Quizzes 30%</span>
                                 </p>
                                 <p className="MsoNormal">
@@ -218,7 +249,7 @@ function CRRComponent() {
                                 </p>
                                 <p className="MsoNormal">
                                     <span lang="EN-US" className="inl-10">Final 40%</span>
-                                </p>
+                                </p> */}
                             </td>
                         </tr>
                     </tbody>
@@ -226,7 +257,7 @@ function CRRComponent() {
                 <p className="MsoNormal inl-50">
                     <br clear="ALL" className="inl-52" />
                     <b className="inl-7"
-                    ><span lang="EN-US" className="inl-53">Course Result</span></b
+                    ><span lang="EN-US" style={{color : 'black'}}>Course Result</span></b
                     ><span lang="EN-US" className="inl-54"></span>
                 </p>
                 <table
@@ -243,7 +274,14 @@ function CRRComponent() {
                                     <span lang="EN-US" className="inl-58">&nbsp;</span>
                                 </p>
                             </td>
-                            <td width="5%" className="inl-59">
+                            {gradeChart && Object.entries(gradeChart).map(([key, value], index) => (
+                                <td key={index} width="5%" className="inl-59">
+                                    <p className="MsoNormal inl-6" align="center">
+                                        <span lang="EN-US" className="inl-58">{key}</span>
+                                    </p>
+                                </td>
+                            ))}
+                            {/* <td width="5%" className="inl-59">
                                 <p className="MsoNormal inl-6" align="center">
                                     <span lang="EN-US" className="inl-58">A+</span>
                                 </p>
@@ -307,7 +345,7 @@ function CRRComponent() {
                                 <p className="MsoNormal inl-6" align="center">
                                     <span lang="EN-US" className="inl-58">F</span>
                                 </p>
-                            </td>
+                            </td> */}
                             <td width="7%" valign="top" className="inl-71">
                                 <p className="MsoNormal inl-72" align="center">
                                     <span lang="EN-US" className="inl-58">W</span
@@ -327,7 +365,14 @@ function CRRComponent() {
                                     <span lang="EN-US" className="inl-77">Number of Students</span>
                                 </p>
                             </td>
-                            <td width="5%" className="inl-78">
+                            {gradeChart && Object.entries(gradeChart).map(([key, value], index) => (
+                                <td key={index} width="5%" className="inl-59">
+                                    <p className="MsoNormal inl-6" align="center">
+                                        <span lang="EN-US" className="inl-58">{value}</span>
+                                    </p>
+                                </td>
+                            ))}                            
+                            {/* <td width="5%" className="inl-78">
                                 <p className="MsoNormal inl-6" align="center">
                                     <span lang="EN-US" className="inl-58">2</span>
                                 </p>
@@ -376,8 +421,8 @@ function CRRComponent() {
                                 <p className="MsoNormal inl-6" align="center">
                                     <span lang="EN-US" className="inl-58">0</span>
                                 </p>
-                            </td>
-                            <td width="3%" className="inl-87">
+                            </td> */}
+                            {/* <td width="3%" className="inl-87">
                                 <p className="MsoNormal inl-6" align="center">
                                     <span lang="EN-US" className="inl-58">0</span>
                                 </p>
@@ -391,17 +436,17 @@ function CRRComponent() {
                                 <p className="MsoNormal inl-6" align="center">
                                     <span lang="EN-US" className="inl-58">1</span>
                                 </p>
-                            </td>
+                            </td>*/}
                             <td width="7%" className="inl-89">
                                 <p className="MsoNormal inl-6" align="center">
                                     <span lang="EN-US" className="inl-58">0</span>
                                 </p>
-                            </td>
+                            </td> 
                             <td width="7%" className="inl-90">
                                 <p className="MsoNormal inl-6" align="center">
-                                    <span lang="EN-US" className="inl-58">17</span>
+                                    <span lang="EN-US" className="inl-58">{recap.data.length - 2}</span>
                                 </p>
-                            </td>
+                            </td> 
                         </tr>
                         <tr className="inl-91">
                             <td width="20%" className="inl-92">
