@@ -2,10 +2,10 @@
 -- PostgreSQL database dump
 --
 
-\restrict fwhTexkITmJNTza7DYh8LHRgiuTDhL3c5CPOT3gKmDBN0J2e83BOpDcVskjA780
+\restrict lQUJwXOL0lcIbRpzxeJr5t8fLsDoDjKpUIloNnC3oludzlSxZHuY3jPc40Pnfqo
 
 -- Dumped from database version 18.1 (Debian 18.1-1.pgdg13+2)
--- Dumped by pg_dump version 18.1 (Ubuntu 18.1-1.pgdg24.04+2)
+-- Dumped by pg_dump version 18.3 (Ubuntu 18.3-1.pgdg24.04+1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -27,9 +27,9 @@ DROP DATABASE IF EXISTS obe;
 CREATE DATABASE obe WITH TEMPLATE = template0 ENCODING = 'UTF8' LOCALE_PROVIDER = libc LOCALE = 'en_US.utf8';
 
 
-\unrestrict fwhTexkITmJNTza7DYh8LHRgiuTDhL3c5CPOT3gKmDBN0J2e83BOpDcVskjA780
+\unrestrict lQUJwXOL0lcIbRpzxeJr5t8fLsDoDjKpUIloNnC3oludzlSxZHuY3jPc40Pnfqo
 \connect obe
-\restrict fwhTexkITmJNTza7DYh8LHRgiuTDhL3c5CPOT3gKmDBN0J2e83BOpDcVskjA780
+\restrict lQUJwXOL0lcIbRpzxeJr5t8fLsDoDjKpUIloNnC3oludzlSxZHuY3jPc40Pnfqo
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -101,8 +101,7 @@ CREATE TABLE public.course (
     cid integer NOT NULL,
     code text,
     title text,
-    theory integer,
-    lab integer
+    semester integer
 );
 
 
@@ -174,71 +173,6 @@ CREATE SEQUENCE public.curiculum_curid_seq
 --
 
 ALTER SEQUENCE public.curiculum_curid_seq OWNED BY public.curriculum.curid;
-
-
---
--- Name: curriculum_courses; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.curriculum_courses (
-    ccid integer NOT NULL,
-    cid integer NOT NULL,
-    curid integer NOT NULL,
-    semester integer
-);
-
-
---
--- Name: curriculum_courses_ccid_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE public.curriculum_courses_ccid_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: curriculum_courses_ccid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE public.curriculum_courses_ccid_seq OWNED BY public.curriculum_courses.ccid;
-
-
---
--- Name: plo; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.plo (
-    ploid integer NOT NULL,
-    plo integer CONSTRAINT plo_code_not_null NOT NULL,
-    title character varying(100) NOT NULL,
-    description text NOT NULL,
-    curid integer NOT NULL
-);
-
-
---
--- Name: plo_ploid_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE public.plo_ploid_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: plo_ploid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE public.plo_ploid_seq OWNED BY public.plo.ploid;
 
 
 --
@@ -346,20 +280,6 @@ ALTER TABLE ONLY public.course ALTER COLUMN cid SET DEFAULT nextval('public.cour
 --
 
 ALTER TABLE ONLY public.curriculum ALTER COLUMN curid SET DEFAULT nextval('public.curiculum_curid_seq'::regclass);
-
-
---
--- Name: curriculum_courses ccid; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.curriculum_courses ALTER COLUMN ccid SET DEFAULT nextval('public.curriculum_courses_ccid_seq'::regclass);
-
-
---
--- Name: plo ploid; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.plo ALTER COLUMN ploid SET DEFAULT nextval('public.plo_ploid_seq'::regclass);
 
 
 --
@@ -712,85 +632,85 @@ INSERT INTO public.closheet VALUES
 --
 
 INSERT INTO public.course VALUES
-	(1, 'ME1101', 'Communication & Presentation Skills', NULL, NULL),
-	(2, 'ME1104', 'Engineering Mathematics-I', NULL, NULL),
-	(3, 'ME1106', 'Islamic Studies', NULL, NULL),
-	(4, 'ME1109', 'Engineering Drawing-I', NULL, NULL),
-	(5, 'ME1111-L', 'Electric Ciruits', NULL, NULL),
-	(6, 'ME1111-T', 'Electric Ciruits', NULL, NULL),
-	(7, 'ME1116', 'Humnities', NULL, NULL),
-	(8, 'ME1203-L', 'Engineering Physics', NULL, NULL),
-	(9, 'ME1203-T', 'Engineering Physics', NULL, NULL),
-	(10, 'ME1209', 'Computer Programming', NULL, NULL),
-	(11, 'ME1110', 'Teching Holuy Quran', NULL, NULL),
-	(12, 'ME1201-L', 'Electronic Devices and Circuits', NULL, NULL),
-	(13, 'ME1201-T', 'Electronic Devices and Circuits', NULL, NULL),
-	(14, 'ME1202', 'Engineering Mathematics – II: Linear Algebra & Ordinary Differential Equations', NULL, NULL),
-	(15, 'ME1203', 'Engineering Mathematics – II: Linear Algebra & Ordinary Differential Equations', NULL, NULL),
-	(16, 'ME1204', 'Engineering Statics', NULL, NULL),
-	(17, 'ME1207', 'Engineering Workshop', NULL, NULL),
-	(18, 'ME1208', 'Materials and Manufacturing Processes', NULL, NULL),
-	(19, 'ME2306', 'Pakistan Studies', NULL, NULL),
-	(20, 'ME2312', 'Data Structures & Object Oriented Programming', NULL, NULL),
-	(21, 'ME1211', 'Ideology and Constitution of Pakistan', NULL, NULL),
-	(22, 'ME2302-L', 'Digital Logic Design', NULL, NULL),
-	(23, 'ME2302-T', 'Digital Logic Design', NULL, NULL),
-	(24, 'ME2303', 'Engineering Dynamics', NULL, NULL),
-	(25, 'ME2304', 'Engineering Mathematics – III: 3D Geometry & Vector Calculus', NULL, NULL),
-	(26, 'ME2308-L', 'Fundamentals of Thermal Sciences', NULL, NULL),
-	(27, 'ME2308-T', 'Fundamentals of Thermal Sciences', NULL, NULL),
-	(28, 'ME2309', 'Eng. Drawing- II', NULL, NULL),
-	(29, 'ME2311', 'Network Analysis', NULL, NULL),
-	(30, 'ME2310', 'Community Service', NULL, NULL),
-	(31, 'ME2401-L', 'Electronics Circuit Design', NULL, NULL),
-	(32, 'ME2401-T', 'Electronics Circuit Design', NULL, NULL),
-	(33, 'ME2403', 'Engineering Mathematics – IV Transformation Techniques', NULL, NULL),
-	(34, 'ME2406-L', 'Strength of Materials', NULL, NULL),
-	(35, 'ME2406-T', 'Strength of Materials', NULL, NULL),
-	(36, 'ME2407-L', 'Actuating Systems', NULL, NULL),
-	(37, 'ME2407-T', 'Actuating Systems', NULL, NULL),
-	(40, 'ME3601', 'Solid Modeling', NULL, NULL),
-	(41, 'ME2408', 'Signals and Systems', NULL, NULL),
-	(42, 'ME3501', 'Engineering Mathematics – V Numerical Methods', NULL, NULL),
-	(43, 'ME3507-L', 'Theory of Machines', NULL, NULL),
-	(44, 'ME3507-T', 'Theory of Machines', NULL, NULL),
-	(45, 'ME3508-L', 'Artificial Intelligence in Engineering', NULL, NULL),
-	(46, 'ME3508-L', 'Instrumentation and Measurements', NULL, NULL),
-	(47, 'ME3508-T', 'Artificial Intelligence in Engineering', NULL, NULL),
-	(48, 'ME3508-T', 'Instrumentation and Measurements', NULL, NULL),
-	(49, 'ME3509-L', 'Microprocessor and Microcontroller Based Systems', NULL, NULL),
-	(50, 'ME3509-T', 'Microprocessor and Microcontroller Based Systems', NULL, NULL),
-	(51, 'ME3602-L', 'Control System', NULL, NULL),
-	(52, 'ME3602-T', 'Control System', NULL, NULL),
-	(53, 'ME3603', 'Engineering Mathematics VI: Probability & Statistics', NULL, NULL),
-	(54, 'ME3604', 'Machine Design', NULL, NULL),
-	(55, 'ME3605-L', 'Power Electronics', NULL, NULL),
-	(56, 'ME3605-T', 'Power Electronics', NULL, NULL),
-	(57, 'ME4705-L', 'Mechatronics System Design', NULL, NULL),
-	(58, 'ME4705-T', 'Mechatronics System Design', NULL, NULL),
-	(59, 'ME1205', 'Technical Writing Skills', NULL, NULL),
-	(60, 'ME4702', 'Engineering Economics & Project Management', NULL, NULL),
-	(61, 'ME4706', 'Professional Practices', NULL, NULL),
-	(62, 'ME4709', 'Final Design Project- I *', NULL, NULL),
-	(63, 'ME4711', 'Finite Element Analysis', NULL, NULL),
-	(64, 'ME4727', 'Engineering Elective –I ( Digital Control Systems)', NULL, NULL),
-	(65, 'ME4802-L', 'Robotics', NULL, NULL),
-	(66, 'ME4802-T', 'Robotics', NULL, NULL),
-	(67, 'ME4826', 'Embedded Systems', NULL, NULL),
-	(68, 'ME2xxx', 'Social Sciences', NULL, NULL),
-	(69, 'ME3608', 'Technopreneurship', NULL, NULL),
-	(70, 'ME4721', 'Engineering Elective –II (Modeling and Simulation)', NULL, NULL),
-	(71, 'ME4722', 'Engineering Elective –II (Digital Signal Processing)', NULL, NULL),
-	(72, 'ME4725', 'Management Sciences Elective (Leadership and Motivation Technique)', NULL, NULL),
-	(73, 'ME4807-L', 'Manufacturing Automation', NULL, NULL),
-	(74, 'ME4807-T', 'Manufacturing Automation', NULL, NULL),
-	(75, 'ME4809', 'Final Design Project- II *', NULL, NULL),
-	(76, 'ME4821', 'Engineering Elective –II (Digital Image Processing)', NULL, NULL),
-	(77, 'ME4823', 'Engineering Management', NULL, NULL),
-	(78, 'ME4823', 'Management Sciences Elective ( Engineering and Management)', NULL, NULL),
-	(79, 'ME4824', 'Social Sciences (Organizational Behaviour)', NULL, NULL),
-	(39, 'ME3502-T', 'Fluid Mechanics', NULL, NULL),
-	(38, 'ME3502-L', 'Fluid Mechanics', NULL, NULL);
+	(1, 'ME1101', 'Communication & Presentation Skills', 1),
+	(2, 'ME1104', 'Engineering Mathematics-I', 1),
+	(3, 'ME1106', 'Islamic Studies', 1),
+	(4, 'ME1109', 'Engineering Drawing-I', 1),
+	(5, 'ME1111-L', 'Electric Ciruits', 1),
+	(6, 'ME1111-T', 'Electric Ciruits', 1),
+	(7, 'ME1116', 'Humnities', 1),
+	(8, 'ME1203-L', 'Engineering Physics', 1),
+	(9, 'ME1203-T', 'Engineering Physics', 1),
+	(10, 'ME1209', 'Computer Programming', 1),
+	(11, 'ME1110', 'Teching Holuy Quran', 2),
+	(12, 'ME1201-L', 'Electronic Devices and Circuits', 2),
+	(13, 'ME1201-T', 'Electronic Devices and Circuits', 2),
+	(14, 'ME1202', 'Engineering Mathematics – II: Linear Algebra & Ordinary Differential Equations', 2),
+	(15, 'ME1203', 'Engineering Mathematics – II: Linear Algebra & Ordinary Differential Equations', 2),
+	(16, 'ME1204', 'Engineering Statics', 2),
+	(17, 'ME1207', 'Engineering Workshop', 2),
+	(18, 'ME1208', 'Materials and Manufacturing Processes', 2),
+	(19, 'ME2306', 'Pakistan Studies', 2),
+	(20, 'ME2312', 'Data Structures & Object Oriented Programming', 2),
+	(21, 'ME1211', 'Ideology and Constitution of Pakistan', 3),
+	(22, 'ME2302-L', 'Digital Logic Design', 3),
+	(23, 'ME2302-T', 'Digital Logic Design', 3),
+	(24, 'ME2303', 'Engineering Dynamics', 3),
+	(25, 'ME2304', 'Engineering Mathematics – III: 3D Geometry & Vector Calculus', 3),
+	(26, 'ME2308-L', 'Fundamentals of Thermal Sciences', 3),
+	(27, 'ME2308-T', 'Fundamentals of Thermal Sciences', 3),
+	(28, 'ME2309', 'Eng. Drawing- II', 3),
+	(29, 'ME2311', 'Network Analysis', 3),
+	(30, 'ME2310', 'Community Service', 4),
+	(31, 'ME2401-L', 'Electronics Circuit Design', 4),
+	(32, 'ME2401-T', 'Electronics Circuit Design', 4),
+	(33, 'ME2403', 'Engineering Mathematics – IV Transformation Techniques', 4),
+	(34, 'ME2406-L', 'Strength of Materials', 4),
+	(35, 'ME2406-T', 'Strength of Materials', 4),
+	(36, 'ME2407-L', 'Actuating Systems', 4),
+	(37, 'ME2407-T', 'Actuating Systems', 4),
+	(40, 'ME3601', 'Solid Modeling', 4),
+	(41, 'ME2408', 'Signals and Systems', 5),
+	(42, 'ME3501', 'Engineering Mathematics – V Numerical Methods', 5),
+	(43, 'ME3507-L', 'Theory of Machines', 5),
+	(44, 'ME3507-T', 'Theory of Machines', 5),
+	(45, 'ME3508-L', 'Artificial Intelligence in Engineering', 5),
+	(46, 'ME3508-L', 'Instrumentation and Measurements', 5),
+	(47, 'ME3508-T', 'Artificial Intelligence in Engineering', 5),
+	(48, 'ME3508-T', 'Instrumentation and Measurements', 5),
+	(49, 'ME3509-L', 'Microprocessor and Microcontroller Based Systems', 5),
+	(50, 'ME3509-T', 'Microprocessor and Microcontroller Based Systems', 5),
+	(51, 'ME3602-L', 'Control System', 6),
+	(52, 'ME3602-T', 'Control System', 6),
+	(53, 'ME3603', 'Engineering Mathematics VI: Probability & Statistics', 6),
+	(54, 'ME3604', 'Machine Design', 6),
+	(55, 'ME3605-L', 'Power Electronics', 6),
+	(56, 'ME3605-T', 'Power Electronics', 6),
+	(57, 'ME4705-L', 'Mechatronics System Design', 6),
+	(58, 'ME4705-T', 'Mechatronics System Design', 6),
+	(59, 'ME1205', 'Technical Writing Skills', 7),
+	(60, 'ME4702', 'Engineering Economics & Project Management', 7),
+	(61, 'ME4706', 'Professional Practices', 7),
+	(62, 'ME4709', 'Final Design Project- I *', 7),
+	(63, 'ME4711', 'Finite Element Analysis', 7),
+	(64, 'ME4727', 'Engineering Elective –I ( Digital Control Systems)', 7),
+	(65, 'ME4802-L', 'Robotics', 7),
+	(66, 'ME4802-T', 'Robotics', 7),
+	(67, 'ME4826', 'Embedded Systems', 7),
+	(68, 'ME2xxx', 'Social Sciences', 8),
+	(69, 'ME3608', 'Technopreneurship', 8),
+	(70, 'ME4721', 'Engineering Elective –II (Modeling and Simulation)', 8),
+	(71, 'ME4722', 'Engineering Elective –II (Digital Signal Processing)', 8),
+	(72, 'ME4725', 'Management Sciences Elective (Leadership and Motivation Technique)', 8),
+	(73, 'ME4807-L', 'Manufacturing Automation', 8),
+	(74, 'ME4807-T', 'Manufacturing Automation', 8),
+	(75, 'ME4809', 'Final Design Project- II *', 8),
+	(76, 'ME4821', 'Engineering Elective –II (Digital Image Processing)', 8),
+	(77, 'ME4823', 'Engineering Management', 8),
+	(78, 'ME4823', 'Management Sciences Elective ( Engineering and Management)', 8),
+	(79, 'ME4824', 'Social Sciences (Organizational Behaviour)', 8),
+	(39, 'ME3502-T', 'Fluid Mechanics', 4),
+	(38, 'ME3502-L', 'Fluid Mechanics', 4);
 
 
 --
@@ -800,111 +720,6 @@ INSERT INTO public.course VALUES
 INSERT INTO public.curriculum VALUES
 	(1, 2024, 2),
 	(2, 2025, 2);
-
-
---
--- Data for Name: curriculum_courses; Type: TABLE DATA; Schema: public; Owner: -
---
-
-INSERT INTO public.curriculum_courses VALUES
-	(2, 1, 1, 1),
-	(3, 2, 1, 1),
-	(4, 3, 1, 1),
-	(5, 4, 1, 1),
-	(6, 5, 1, 1),
-	(7, 6, 1, 1),
-	(8, 7, 1, 1),
-	(9, 8, 1, 1),
-	(10, 9, 1, 1),
-	(11, 10, 1, 1),
-	(12, 11, 1, 2),
-	(13, 12, 1, 2),
-	(14, 13, 1, 2),
-	(15, 14, 1, 2),
-	(16, 15, 1, 2),
-	(17, 16, 1, 2),
-	(18, 17, 1, 2),
-	(19, 18, 1, 2),
-	(20, 19, 1, 2),
-	(21, 20, 1, 2),
-	(22, 21, 1, 3),
-	(23, 22, 1, 3),
-	(24, 23, 1, 3),
-	(25, 24, 1, 3),
-	(26, 25, 1, 3),
-	(27, 26, 1, 3),
-	(28, 27, 1, 3),
-	(29, 28, 1, 3),
-	(30, 29, 1, 3),
-	(31, 30, 1, 4),
-	(32, 31, 1, 4),
-	(33, 32, 1, 4),
-	(34, 33, 1, 4),
-	(35, 34, 1, 4),
-	(36, 35, 1, 4),
-	(37, 36, 1, 4),
-	(38, 37, 1, 4),
-	(39, 40, 1, 4),
-	(40, 41, 1, 5),
-	(41, 42, 1, 5),
-	(42, 43, 1, 5),
-	(43, 44, 1, 5),
-	(44, 45, 1, 5),
-	(45, 46, 1, 5),
-	(46, 47, 1, 5),
-	(47, 48, 1, 5),
-	(48, 49, 1, 5),
-	(49, 50, 1, 5),
-	(50, 51, 1, 6),
-	(51, 52, 1, 6),
-	(52, 53, 1, 6),
-	(53, 54, 1, 6),
-	(54, 55, 1, 6),
-	(55, 56, 1, 6),
-	(56, 57, 1, 6),
-	(57, 58, 1, 6),
-	(58, 59, 1, 7),
-	(59, 60, 1, 7),
-	(60, 61, 1, 7),
-	(61, 62, 1, 7),
-	(62, 63, 1, 7),
-	(63, 64, 1, 7),
-	(64, 65, 1, 7),
-	(65, 66, 1, 7),
-	(66, 67, 1, 7),
-	(67, 68, 1, 8),
-	(68, 69, 1, 8),
-	(69, 70, 1, 8),
-	(70, 71, 1, 8),
-	(71, 72, 1, 8),
-	(72, 73, 1, 8),
-	(73, 74, 1, 8),
-	(74, 75, 1, 8),
-	(75, 76, 1, 8),
-	(76, 77, 1, 8),
-	(77, 78, 1, 8),
-	(78, 79, 1, 8),
-	(79, 39, 1, 4),
-	(80, 38, 1, 4);
-
-
---
--- Data for Name: plo; Type: TABLE DATA; Schema: public; Owner: -
---
-
-INSERT INTO public.plo VALUES
-	(1, 1, 'Engineering Knowledge', 'An ability to apply knowledge of mathematics, science, engineering fundamentals and an engineering specialization to the solution of complex engineering problems.', 1),
-	(2, 2, 'Problem Analysis', 'An ability to identify, formulate, research literature, and analyze complex engineering problems reaching substantiated conclusions using first principles of mathematics, natural sciences and engineering sciences.', 1),
-	(3, 3, 'Design/Development of Solutions', 'An ability to design solutions for complex engineering problems and design systems, components or processes that meet specified needs with appropriate consideration for public health and safety, cultural, societal, and environmental considerations.', 1),
-	(4, 4, 'Investigation', 'An ability to investigate complex engineering problems in a methodical way including literature survey, design and conduct of experiments, analysis and interpretation of experimental data, and synthesis of information to derive valid conclusions.', 1),
-	(5, 5, 'Modern Tool Usage', 'An ability to create, select and apply appropriate techniques, resources, and modern engineering and IT tools, including prediction and modeling, to complex engineering activities, with an understanding of the limitations.', 1),
-	(6, 6, 'The Engineer and Society', 'An ability to apply reasoning informed by contextual knowledge to assess societal, health, safety, legal and cultural issues and the consequent responsibilities relevant to professional engineering practice and solution to complex engineering problems.', 1),
-	(7, 7, 'Environment and Sustainability', 'An ability to understand the impact of professional engineering solutions in societal and environmental contexts and demonstrate knowledge of and need for sustainable development.', 1),
-	(8, 8, 'Ethics', 'Apply ethical principles and commit to professional ethics and responsibilities and norms of engineering practice.', 1),
-	(9, 9, 'Individual and Teamwork', 'An ability to work effectively, as an individual or in a team, on multifaceted and /or multidisciplinary settings.', 1),
-	(10, 10, 'Communication', 'An ability to communicate effectively, orally as well as in writing, on complex engineering activities with the engineering community and with society at large, such as being able to comprehend and write effective reports and design documentation, make effective presentations, and give and receive clear instructions.', 1),
-	(11, 11, 'Project Management', 'An ability to demonstrate management skills and apply engineering principles to one’s own work, as a member and/or leader in a team, to manage projects in a multidisciplinary environment.', 1),
-	(12, 12, 'Lifelong Learning', 'An ability to recognize the need for, and have the preparation and ability to engage in, independent and life-long learning in the broadest context of technological change.', 1);
 
 
 --
@@ -1474,20 +1289,6 @@ SELECT pg_catalog.setval('public.curiculum_curid_seq', 2, true);
 
 
 --
--- Name: curriculum_courses_ccid_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('public.curriculum_courses_ccid_seq', 80, true);
-
-
---
--- Name: plo_ploid_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('public.plo_ploid_seq', 12, true);
-
-
---
 -- Name: programs_prgid_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
@@ -1534,22 +1335,6 @@ ALTER TABLE ONLY public.curriculum
 
 
 --
--- Name: curriculum_courses curriculum_courses_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.curriculum_courses
-    ADD CONSTRAINT curriculum_courses_pkey PRIMARY KEY (ccid);
-
-
---
--- Name: plo plo_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.plo
-    ADD CONSTRAINT plo_pkey PRIMARY KEY (ploid);
-
-
---
 -- Name: programs programs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1590,32 +1375,8 @@ ALTER TABLE ONLY public.curriculum
 
 
 --
--- Name: curriculum_courses curriculum_courses_cid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.curriculum_courses
-    ADD CONSTRAINT curriculum_courses_cid_fkey FOREIGN KEY (cid) REFERENCES public.course(cid);
-
-
---
--- Name: curriculum_courses curriculum_courses_curid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.curriculum_courses
-    ADD CONSTRAINT curriculum_courses_curid_fkey FOREIGN KEY (curid) REFERENCES public.curriculum(curid);
-
-
---
--- Name: plo plo_curid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.plo
-    ADD CONSTRAINT plo_curid_fkey FOREIGN KEY (curid) REFERENCES public.curriculum(curid);
-
-
---
 -- PostgreSQL database dump complete
 --
 
-\unrestrict fwhTexkITmJNTza7DYh8LHRgiuTDhL3c5CPOT3gKmDBN0J2e83BOpDcVskjA780
+\unrestrict lQUJwXOL0lcIbRpzxeJr5t8fLsDoDjKpUIloNnC3oludzlSxZHuY3jPc40Pnfqo
 
