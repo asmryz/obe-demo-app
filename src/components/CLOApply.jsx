@@ -78,7 +78,7 @@ export const CLOApply = ({ rid, closid }) => {
     }
 
     // Re-evaluate save status whenever status or recapRows changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
     useEffect(() => {
         checkSaveStatus();
     }, [status, recapRows, firstEmptyCellIndex]);

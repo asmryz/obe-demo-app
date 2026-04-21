@@ -1,10 +1,12 @@
 import './CRRComponent.css'
 import logo from '../assets/logo.jpg'
 import { useSheetStore } from '../store/sheetStore'
+import { useState } from 'react'
 
 
 function CRRComponent() {
     const { gradeChart, recap, groupedPlanTotals } = useSheetStore()
+    const [reason, setReason] = useState('')
     console.log(gradeChart)
     console.log(recap)
     console.log(groupedPlanTotals)
@@ -12,20 +14,20 @@ function CRRComponent() {
     // gradeChart['D'] = 0;
     // gradeChart['D-'] = 0;
 
-// Pluralize a word, excluding certain exceptions
-function toPlural(word) {
-  if (!word) return '';
-  const exceptions = ['Final', 'Mid Term', 'Project'];
-  if (exceptions.includes(word)) return word;
-  // Basic rules for English plurals
-  if (word.endsWith('y') && !/[aeiou]y$/i.test(word)) {
-    return word.slice(0, -1) + 'ies';
-  }
-  if (word.endsWith('s') || word.endsWith('x') || word.endsWith('z') || word.endsWith('ch') || word.endsWith('sh')) {
-    return word + 'es';
-  }
-  return word + 's';
-}    
+    // Pluralize a word, excluding certain exceptions
+    function toPlural(word) {
+        if (!word) return '';
+        const exceptions = ['Final', 'Mid Term', 'Project'];
+        if (exceptions.includes(word)) return word;
+        // Basic rules for English plurals
+        if (word.endsWith('y') && !/[aeiou]y$/i.test(word)) {
+            return word.slice(0, -1) + 'ies';
+        }
+        if (word.endsWith('s') || word.endsWith('x') || word.endsWith('z') || word.endsWith('ch') || word.endsWith('sh')) {
+            return word + 'es';
+        }
+        return word + 's';
+    }
     return (
         <section className="crr-page inl-1">
             <div className="WordSection1">
@@ -257,7 +259,7 @@ function toPlural(word) {
                 <p className="MsoNormal inl-50">
                     <br clear="ALL" className="inl-52" />
                     <b className="inl-7"
-                    ><span lang="EN-US" style={{color : 'black'}}>Course Result</span></b
+                    ><span lang="EN-US" style={{ color: 'black' }}>Course Result</span></b
                     ><span lang="EN-US" className="inl-54"></span>
                 </p>
                 <table
@@ -274,7 +276,7 @@ function toPlural(word) {
                                     <span lang="EN-US" className="inl-58">&nbsp;</span>
                                 </p>
                             </td>
-                            {gradeChart && Object.entries(gradeChart).map(([key, value], index) => (
+                            {gradeChart && Object.entries(gradeChart).map(([key], index) => (
                                 <td key={index} width="5%" className="inl-59">
                                     <p className="MsoNormal inl-6" align="center">
                                         <span lang="EN-US" className="inl-58">{key}</span>
@@ -346,7 +348,7 @@ function toPlural(word) {
                                     <span lang="EN-US" className="inl-58">F</span>
                                 </p>
                             </td> */}
-                            <td width="7%" valign="top" className="inl-71">
+                            <td width="7%" className="inl-71">
                                 <p className="MsoNormal inl-72" align="center">
                                     <span lang="EN-US" className="inl-58">W</span
                                     ><span lang="EN-US" className="inl-10">*</span
@@ -365,13 +367,13 @@ function toPlural(word) {
                                     <span lang="EN-US" className="inl-77">Number of Students</span>
                                 </p>
                             </td>
-                            {gradeChart && Object.entries(gradeChart).map(([key, value], index) => (
+                            {gradeChart && Object.entries(gradeChart).map(([, value], index) => (
                                 <td key={index} width="5%" className="inl-59">
                                     <p className="MsoNormal inl-6" align="center">
                                         <span lang="EN-US" className="inl-58">{value}</span>
                                     </p>
                                 </td>
-                            ))}                            
+                            ))}
                             {/* <td width="5%" className="inl-78">
                                 <p className="MsoNormal inl-6" align="center">
                                     <span lang="EN-US" className="inl-58">2</span>
@@ -441,16 +443,16 @@ function toPlural(word) {
                                 <p className="MsoNormal inl-6" align="center">
                                     <span lang="EN-US" className="inl-58">0</span>
                                 </p>
-                            </td> 
+                            </td>
                             <td width="7%" className="inl-90">
                                 <p className="MsoNormal inl-6" align="center">
                                     <span lang="EN-US" className="inl-58">{recap.data.length - 2}</span>
                                 </p>
-                            </td> 
+                            </td>
                         </tr>
                         <tr className="inl-91">
                             <td width="20%" className="inl-92">
-                                <p className="MsoNormal">
+                                <p className="MsoNormal" valign="top">
                                     <span lang="EN-US" className="inl-77"
                                     >Reason(s) if F's percentage is more than 25</span
                                     >
@@ -458,25 +460,28 @@ function toPlural(word) {
                             </td>
                             <td width="79%" colSpan="15" valign="top" className="inl-93">
                                 <p className="MsoNormal inl-94" align="center">
-                                    <span lang="EN-US" className="inl-58">Nil</span>
+                                    <span lang="EN-US" className="inl-58">
+                                        {/* editable on screen */}
+                                        <textarea name="reason" value={reason} onChange={e => setReason(e.target.value)} />
+                                        {/* visible only when printing */}
+                                        <div className="print-text">{reason}</div>
+                                    </span>
                                 </p>
                             </td>
                         </tr>
                     </tbody>
                 </table>
                 <p className="MsoNormal inl-95">
-                    <span lang="EN-US" className="inl-10"
-                    >* Either withdrew from course or didn't appear in Final Exam</span
-                    >
+                    <span lang="EN-US" className="inl-10">
+                        * Either withdrew from course or didn't appear in Final Exam
+                    </span>
                 </p>
                 <p className="MsoNormal inl-96">
-                    <b className="inl-97"
-                    ><u
-                    ><span lang="EN-US" className="inl-54"
-                    ><span className="inl-98">&nbsp;</span></span
-                            ></u
-                        ></b
-                    >
+                    <b className="inl-97">
+                        <span lang="EN-US" className="inl-54">
+                            &nbsp;</span>
+
+                    </b>
                 </p>
                 <p className="MsoNormal inl-96">
                     <b className="inl-97"
