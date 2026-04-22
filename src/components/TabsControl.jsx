@@ -8,6 +8,7 @@ import { Suspense } from 'react';
 import FileUpload from './FileUpload';
 import CLOSheet from './CLOSheet';
 import { useSheetStore } from '../store/sheetStore';
+import CLOList from './CLOList';
 
 function TabsControl() {
     const ref = useRef();
@@ -63,7 +64,18 @@ function TabsControl() {
                     </div>
                 </>
             ),
-        }
+        }, 
+        {
+            label: "CLO List",
+            content: (
+                <>
+                    
+                    <div ref={ref}>
+                        <CLOList />
+                    </div>
+                </>
+            ),
+        }        
 
     ];
 

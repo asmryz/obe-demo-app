@@ -1,14 +1,12 @@
-
-import express from 'express';
+import express from "express";
 const router = express.Router();
-import { db } from '../db.js';
+import { db } from "../db.js";
 
-
-router.get('/recaps', async (req, res) => {
-    try {
-        const search = (req.query.q || '').toString().trim();
-        const effectiveSearch = search.length >= 3 ? search : '';
-        const query = `
+router.get("/recaps", async (req, res) => {
+  try {
+    const search = (req.query.q || "").toString().trim();
+    const effectiveSearch = search.length >= 3 ? search : "";
+    const query = `
             SELECT r.rid, r.batch, r.course, r.faculty, r.semester, r.year, c.code, cs.closid
             FROM recaps r JOIN rcourse vr ON r.rid = vr.rid
             LEFT OUTER JOIN course c ON vr.code = trim(c.code)
@@ -29,29 +27,45 @@ router.get('/recaps', async (req, res) => {
               )
             ORDER BY r.rid;
         `;
-        const result = await db.query(query, [effectiveSearch]);
-        res.json(result.rows);
-    } catch (err) {
-        console.error('Error fetching marks:', err);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
+    const result = await db.query(query, [effectiveSearch]);
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Error fetching marks:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 });
 
-router.get('/recaps/:rid', async (req, res) => {
-    try {
-        const rid = Number(req.params.rid);
+router.get("/clolist", async (req, res) => {
+  const query = `
+        SELECT c.cid, c.code, c.title, clo.clo, clo.statment, clo."domain", clo.taxonomy, clo.plo 
+        FROM course c
+        JOIN clo ON clo.cid = c.cid
+        ORDER BY c.code, clo.clo;
+    `;
+  try {
+    const result = await db.query(query);
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Error fetching CLO list:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  } 
+});
 
-        if (!Number.isInteger(rid)) {
-            res.status(400).json({ error: 'Invalid recap id' });
-            return;
-        }
+router.get("/recaps/:rid", async (req, res) => {
+  try {
+    const rid = Number(req.params.rid);
 
-        const recapQuery = `
+    if (!Number.isInteger(rid)) {
+      res.status(400).json({ error: "Invalid recap id" });
+      return;
+    }
+
+    const recapQuery = `
             SELECT rid, batch, course, faculty, semester, year, data
             FROM recaps
             WHERE rid = $1;
         `;
-        const cloQuery = `
+    const cloQuery = `
             SELECT cl.*
             FROM rcourse r
             JOIN course c ON r.code = c.code
@@ -59,72 +73,72 @@ router.get('/recaps/:rid', async (req, res) => {
             WHERE r.rid = $1;
         `;
 
-        const [recapResult, cloResult] = await Promise.all([
-            db.query(recapQuery, [rid]),
-            db.query(cloQuery, [rid])
-        ]);
+    const [recapResult, cloResult] = await Promise.all([
+      db.query(recapQuery, [rid]),
+      db.query(cloQuery, [rid]),
+    ]);
 
-        if (recapResult.rows.length === 0) {
-            res.status(404).json({ error: 'Recap not found' });
-            return;
-        }
-
-        res.json({
-            ...recapResult.rows[0],
-            clo: cloResult.rows
-        });
-    } catch (err) {
-        console.error('Error fetching recap by id:', err);
-        res.status(500).json({ error: 'Internal Server Error' });
+    if (recapResult.rows.length === 0) {
+      res.status(404).json({ error: "Recap not found" });
+      return;
     }
+
+    res.json({
+      ...recapResult.rows[0],
+      clo: cloResult.rows,
+    });
+  } catch (err) {
+    console.error("Error fetching recap by id:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 });
 
-router.get('/closheet/:closid', async (req, res) => {
-    try {
-        const closid = Number(req.params.closid);
+router.get("/closheet/:closid", async (req, res) => {
+  try {
+    const closid = Number(req.params.closid);
 
-        if (!Number.isInteger(closid)) {
-            res.status(400).json({ error: 'Invalid CLO Sheet id' });
-            return;
-        }
+    if (!Number.isInteger(closid)) {
+      res.status(400).json({ error: "Invalid CLO Sheet id" });
+      return;
+    }
 
-        const closheetQuery = `
+    const closheetQuery = `
             SELECT closid, rid, data
             FROM closheet
             WHERE closid = $1;
         `;
 
-        const closheetResult = await db.query(closheetQuery, [closid]);
+    const closheetResult = await db.query(closheetQuery, [closid]);
 
-        if (closheetResult.rows.length === 0) {
-            res.status(404).json({ error: 'CLO Sheet not found' });
-            return;
-        }
-
-        res.json(closheetResult.rows[0]);
-    } catch (err) {
-        console.error('Error fetching CLO Sheet by id:', err);
-        res.status(500).json({ error: 'Internal Server Error' });
+    if (closheetResult.rows.length === 0) {
+      res.status(404).json({ error: "CLO Sheet not found" });
+      return;
     }
+
+    res.json(closheetResult.rows[0]);
+  } catch (err) {
+    console.error("Error fetching CLO Sheet by id:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 });
 
 // Save CLO Sheet
-router.post('/closheet', async (req, res) => {
-    try {
-        const { rid, multiCLO } = req.body;
-        if (!rid || !multiCLO) {
-            return res.status(400).json({ error: 'Missing rid or multiCLO' });
-        }
-        const insertQuery = `
+router.post("/closheet", async (req, res) => {
+  try {
+    const { rid, multiCLO } = req.body;
+    if (!rid || !multiCLO) {
+      return res.status(400).json({ error: "Missing rid or multiCLO" });
+    }
+    const insertQuery = `
             INSERT INTO closheet (rid, data)
             VALUES ($1, $2::jsonb) RETURNING *;
         `;
-        const result = await db.query(insertQuery, [rid, JSON.stringify(multiCLO)]);
-        res.json({ success: true, closheet: result.rows[0] });
-    } catch (err) {
-        console.error('Error saving CLO Sheet:', err);
-        res.status(500).json({ error: 'Failed to save CLO Sheet' });
-    }
+    const result = await db.query(insertQuery, [rid, JSON.stringify(multiCLO)]);
+    res.json({ success: true, closheet: result.rows[0] });
+  } catch (err) {
+    console.error("Error saving CLO Sheet:", err);
+    res.status(500).json({ error: "Failed to save CLO Sheet" });
+  }
 });
 
 export default router;

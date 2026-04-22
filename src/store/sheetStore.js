@@ -176,6 +176,7 @@ export const useSheetStore = create((set) => {
       const rows = firstSheetName ? allSheets[firstSheetName] : null;
       set({ sheetData: rows });
     },
+
     // Resource-style fetcher for CLO Sheet (for use() hook)
     getCLOSheet(closid) {
       console.log(`closid >> ${closid}`);
@@ -191,5 +192,15 @@ export const useSheetStore = create((set) => {
       }
       return cloSheetResourceCache.get(closid);
     },
+    // Fetch and cache CLO list for use() hook
+      getCLOList: (() => {
+        let cache;
+        return function() {
+          if (!cache) {
+            cache = api.get("/clolist").then((res) => res.data);
+          }
+          return cache;
+        };
+      })(),
   };
 });
