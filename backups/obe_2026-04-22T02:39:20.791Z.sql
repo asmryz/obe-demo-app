@@ -2,10 +2,10 @@
 -- PostgreSQL database dump
 --
 
-\restrict apUXgJcVDPTE7i1CbSGkOl9bb0wPaDKgQRqEicoorPbfGKPFjS2sIvOvbDBkHdG
+\restrict fwhTexkITmJNTza7DYh8LHRgiuTDhL3c5CPOT3gKmDBN0J2e83BOpDcVskjA780
 
 -- Dumped from database version 18.1 (Debian 18.1-1.pgdg13+2)
--- Dumped by pg_dump version 18.3 (Ubuntu 18.3-1.pgdg24.04+1)
+-- Dumped by pg_dump version 18.1 (Ubuntu 18.1-1.pgdg24.04+2)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -25,11 +25,11 @@ DROP DATABASE IF EXISTS obe;
 --
 
 CREATE DATABASE obe WITH TEMPLATE = template0 ENCODING = 'UTF8' LOCALE_PROVIDER = libc LOCALE = 'en_US.utf8';
+GRANT ALL PRIVILEGES ON DATABASE obe TO obe;
 
-
-\unrestrict apUXgJcVDPTE7i1CbSGkOl9bb0wPaDKgQRqEicoorPbfGKPFjS2sIvOvbDBkHdG
+\unrestrict fwhTexkITmJNTza7DYh8LHRgiuTDhL3c5CPOT3gKmDBN0J2e83BOpDcVskjA780
 \connect obe
-\restrict apUXgJcVDPTE7i1CbSGkOl9bb0wPaDKgQRqEicoorPbfGKPFjS2sIvOvbDBkHdG
+\restrict fwhTexkITmJNTza7DYh8LHRgiuTDhL3c5CPOT3gKmDBN0J2e83BOpDcVskjA780
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -67,10 +67,9 @@ CREATE TABLE public.clo (
 --
 
 CREATE TABLE public.closheet (
-    offid integer
     closid integer NOT NULL,
     rid integer,
-    data jsonb,
+    data jsonb
 );
 
 
@@ -182,9 +181,10 @@ ALTER SEQUENCE public.curiculum_curid_seq OWNED BY public.curriculum.curid;
 --
 
 CREATE TABLE public.curriculum_courses (
-	ccid integer NOT NULL,
-	cid integer NOT NULL,
-	curid integer NOT NULL
+    ccid integer NOT NULL,
+    cid integer NOT NULL,
+    curid integer NOT NULL,
+    semester integer
 );
 
 
@@ -206,71 +206,6 @@ CREATE SEQUENCE public.curriculum_courses_ccid_seq
 --
 
 ALTER SEQUENCE public.curriculum_courses_ccid_seq OWNED BY public.curriculum_courses.ccid;
-
-
---
--- Name: faculty; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.faculty (
-    fid integer NOT NULL,
-    name character varying
-);
-
-
---
--- Name: faculty_fid_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE public.faculty_fid_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: faculty_fid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE public.faculty_fid_seq OWNED BY public.faculty.fid;
-
-
---
--- Name: offered_courses; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.offered_courses (
-    offid integer NOT NULL
-    ccid integer,
-    fid integer,
-    semester character varying(10),
-    year integer,
-    batch character varying(50),
-    rid integer,
-);
-
-
---
--- Name: offered_courses_offid_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE public.offered_courses_offid_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: offered_courses_offid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE public.offered_courses_offid_seq OWNED BY public.offered_courses.offid;
 
 
 --
@@ -418,20 +353,6 @@ ALTER TABLE ONLY public.curriculum ALTER COLUMN curid SET DEFAULT nextval('publi
 --
 
 ALTER TABLE ONLY public.curriculum_courses ALTER COLUMN ccid SET DEFAULT nextval('public.curriculum_courses_ccid_seq'::regclass);
-
-
---
--- Name: faculty fid; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.faculty ALTER COLUMN fid SET DEFAULT nextval('public.faculty_fid_seq'::regclass);
-
-
---
--- Name: offered_courses offid; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.offered_courses ALTER COLUMN offid SET DEFAULT nextval('public.offered_courses_offid_seq'::regclass);
 
 
 --
@@ -781,9 +702,9 @@ ii. The operation of logic gates, flip flops, memory, sequential circuits and pr
 --
 
 INSERT INTO public.closheet VALUES
-	(1, 352, '[["S.No", "Name", "Reg.No", "Quiz 1", "Quiz 2", "Quiz 3", "Mid Term Paper 1", null, null, null, "Final Paper 1", null, null, null, "Project 1"], [null, null, null, 1, 2, 3, 1, 1, 2, 2, 1, 2, 3, 4, 4], [null, null, null, 10, 10, 10, 5, 5, 5, 5, 10, 10, 10, 10, 10], [1, "Muhammad Huzaifa Ghafoor", "1945116", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [2, "Muhammad Azaan Mirza", "2045115", 10, 9, 8, 1, 2, 4, 1.5, 4, 8, 4, 9, 7], [3, "Sher  Bahadur", "2045154", 6.5, 6, 6.5, 1, 2, 3, 0, 1, 1, 1, 3, 5], [4, "Abdul Mueed Shaikh", "2145120", 10, 9, 10, 3, 2, 3, 1, 1, 5, 3, 1, 7], [5, "Hassin  Sikander", "2245102", 10, 7.5, 10, 5, 4, 4, 3, 6.5, 6, 7, 8, 9], [6, "Hussain  Hasnain", "2245103", 10, 7.5, 9, 5, 4, 5, 4.5, 7, 10, 9, 10, 9], [7, "Mohammad Shabbir Tarwari", "2245104", 10, 8.5, 9, 4, 4, 5, 4.5, 6, 10, 7, 8, 9], [8, "Ahmad  Foad", "2245110", 10, 6, 7, 3, 3, 4, 1, 4, 7, 7, 9, 7], [9, "Ali Khan Mashori", "2245111", 10, 8, 9, 0, 2.5, 2, 4, 3, 3, 5, 8, 6], [10, "Jawwad Raza", "2245115", 10, 8.5, 9, 2, 2.5, 0, 1, 1.5, 2, 6, 8, 6], [11, "Rayyan Ahmed Thakur", "2245118", 10, 10, 8, 1, 4, 4, 3, 10, 5, 9, 9, 7], [12, "Syed Faaiz Raza Zaidi", "2245120", 10, 8.5, 7, 0, 2, 3, 3, 0, 7, 4, 7, 6], [13, "Zain Ul Abedien Raza", "2245123", 8.5, 6, 6, 5, 2, 3, 2, 0, 0, 0, 0, 6], [14, "Um E Abiha", "2245124", 4.5, 7.5, 10, 4, 4, 4, 0, 0, 2, 5, 8, 7], [15, "Hunain  Muhammad Iqbal", "2245126", 7.5, 6, 4.5, 5, 4, 4, 4, 10, 10, 8, 10, 7]]', 337),
-	(3, 403, '[["S.No", "Name", "Reg.No", "Assignment 1", null, "Lab Work 1", "Final Paper 1", "manual 1", null, "General Viva 1", "Project 1", null, null], [null, null, null, 1, 4, 1, 1, 1, 5, 5, 2, 3, 4], [null, null, null, 10, 4, 5, 30, 7, 7, 5, 9, 13, 10], [1, "Shahmeer", "1845143", 1, 4, 2, 22.5, 4.75, 5.25, 3, 9, 9, 5], [2, "Hassin  Sikander", "2245102", 10, 4, 5, 20.5, 5.25, 4.75, 4, 9, 9, 5], [3, "Hussain  Hasnain", "2245103", 8, 3, 3, 20, 6.75, 7, 3, 9, 10, 5], [4, "Mohammad Shabbir Tarwari", "2245104", 10, 4, 5, 25, 6.25, 6.75, 4, 9, 10, 5], [5, "Ahmad  Foad", "2245110", 8, 4, 4, 21, 6.25, 6.25, 3, 9, 10, 5], [6, "Rayyan Ahmed Thakur", "2245118", 10, 4, 5, 17, 4, 4, 3, 9, 10, 5], [7, "Syed Faaiz Raza Zaidi", "2245120", 10, 4, 5, 19, 3.25, 4, 3, 9, 9, 5], [8, "Um E Abiha", "2245124", 8, 4, 4, 20.5, 4.75, 5.75, 3, 9, 9, 5], [9, "Hunain  Muhammad Iqbal", "2245126", 10, 4, 5, 25, 6, 6.25, 3, 9, 9, 5]]', 388),
-	(2, 449, '[["S.No", "Name", "Reg.No", "Assignment 1", "Assignment 2", "Test 1", null, "Test 2", "Mid Term Paper 1", null, "Final Paper 1", null], [null, null, null, 2, 2, 1, 2, 2, 1, 2, 1, 2], [null, null, null, 5, 5, 6, 9, 15, 10, 15, 10, 25], [1, "Sohaib Ali Surhio", "1945122", 3, 3, 6, 9, 10.5, 5, 3, 2.5, 12.8], [2, "Jawwad Raza", "2245115", 5, 5, 5.5, 4, 9.1, 5.5, 6, 5, 10.6], [3, "Ameen  Naushad", "2345105", 2.5, 2.5, 3.5, 6.5, 11, 7, 10.5, 6.5, 20.6], [4, "Muhammad  Muhib", "2345118", 2.5, 2.5, 5, 9, 6.5, 7.5, 13.5, 8.5, 20.6], [5, "Mohammad Aqeel Anjarwala", "2345132", 2.5, 2.5, 5.5, 9, 9.2, 8.5, 15, 7.5, 15.6], [6, "Abdul Basit Hussain", "2345135", 4.45, 4.45, 4, 5, 8.7, 6.5, 11, 5.5, 10.6], [7, "Aleeza  Shahbaz", "2445101", 4, 4, 4.5, 5.5, 6.8, 5.5, 7.5, 5, 12.2], [8, "Geeta  Khurana", "2445108", 5, 5, 6, 6.5, 7.2, 6.5, 7, 5.5, 11.6], [9, "Hussain  Hasnain", "2445110", 5, 5, 5.5, 9, 11, 7.5, 15, 4, 18.4], [10, "Kaydin Asher Alfred Lobo", "2445111", 4, 4, 5, 9, 9, 6, 11.5, 6, 20.6], [11, "Muhammad Hamza Yaqoob", "2445112", 0, 0, 0, 0, 0, 0, 0, 0, 0], [12, "Muhammad Huzaifa", "2445113", 3, 3, 5, 9, 8.6, 7, 15, 4, 21.1], [13, "Murtaza Ali Yousuf Ali Bohra", "2445116", 5, 5, 5, 9, 12, 7, 13.5, 7, 17.3], [14, "Roshni", "2445118", 4.7, 4.7, 5, 6, 11.7, 5.5, 10, 6.5, 16.2], [15, "Salahuddin Dossal", "2445119", 4.45, 4.45, 6, 9, 7.4, 5, 9.5, 4.5, 13.4], [16, "Hasan  Gohar Ahmed", "2445132", 5, 5, 4.5, 9, 4.8, 7, 13, 5.5, 16.2], [17, "Wasib Aizaz Khan", "2445147", 3, 3, 5.5, 7.5, 4, 6.5, 6.5, 3.5, 15.6], [18, "Sabih  Ahmed", "2445150", 5, 5, 4.5, 6.5, 9.6, 7, 8.5, 4.5, 12.8]]', 431);
+	(1, 352, '[["S.No", "Name", "Reg.No", "Quiz 1", "Quiz 2", "Quiz 3", "Mid Term Paper 1", null, null, null, "Final Paper 1", null, null, null, "Project 1"], [null, null, null, 1, 2, 3, 1, 1, 2, 2, 1, 2, 3, 4, 4], [null, null, null, 10, 10, 10, 5, 5, 5, 5, 10, 10, 10, 10, 10], [1, "Muhammad Huzaifa Ghafoor", "1945116", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [2, "Muhammad Azaan Mirza", "2045115", 10, 9, 8, 1, 2, 4, 1.5, 4, 8, 4, 9, 7], [3, "Sher  Bahadur", "2045154", 6.5, 6, 6.5, 1, 2, 3, 0, 1, 1, 1, 3, 5], [4, "Abdul Mueed Shaikh", "2145120", 10, 9, 10, 3, 2, 3, 1, 1, 5, 3, 1, 7], [5, "Hassin  Sikander", "2245102", 10, 7.5, 10, 5, 4, 4, 3, 6.5, 6, 7, 8, 9], [6, "Hussain  Hasnain", "2245103", 10, 7.5, 9, 5, 4, 5, 4.5, 7, 10, 9, 10, 9], [7, "Mohammad Shabbir Tarwari", "2245104", 10, 8.5, 9, 4, 4, 5, 4.5, 6, 10, 7, 8, 9], [8, "Ahmad  Foad", "2245110", 10, 6, 7, 3, 3, 4, 1, 4, 7, 7, 9, 7], [9, "Ali Khan Mashori", "2245111", 10, 8, 9, 0, 2.5, 2, 4, 3, 3, 5, 8, 6], [10, "Jawwad Raza", "2245115", 10, 8.5, 9, 2, 2.5, 0, 1, 1.5, 2, 6, 8, 6], [11, "Rayyan Ahmed Thakur", "2245118", 10, 10, 8, 1, 4, 4, 3, 10, 5, 9, 9, 7], [12, "Syed Faaiz Raza Zaidi", "2245120", 10, 8.5, 7, 0, 2, 3, 3, 0, 7, 4, 7, 6], [13, "Zain Ul Abedien Raza", "2245123", 8.5, 6, 6, 5, 2, 3, 2, 0, 0, 0, 0, 6], [14, "Um E Abiha", "2245124", 4.5, 7.5, 10, 4, 4, 4, 0, 0, 2, 5, 8, 7], [15, "Hunain  Muhammad Iqbal", "2245126", 7.5, 6, 4.5, 5, 4, 4, 4, 10, 10, 8, 10, 7]]'),
+	(2, 449, '[["S.No", "Name", "Reg.No", "Assignment 1", "Assignment 2", "Test 1", null, "Test 2", "Mid Term Paper 1", null, "Final Paper 1", null], [null, null, null, 2, 2, 1, 2, 2, 1, 2, 1, 2], [null, null, null, 5, 5, 6, 9, 15, 10, 15, 10, 25], [1, "Sohaib Ali Surhio", "1945122", 3, 3, 6, 9, 10.5, 5, 3, 2.5, 12.8], [2, "Jawwad Raza", "2245115", 5, 5, 5.5, 4, 9.1, 5.5, 6, 5, 10.6], [3, "Ameen  Naushad", "2345105", 2.5, 2.5, 3.5, 6.5, 11, 7, 10.5, 6.5, 20.6], [4, "Muhammad  Muhib", "2345118", 2.5, 2.5, 5, 9, 6.5, 7.5, 13.5, 8.5, 20.6], [5, "Mohammad Aqeel Anjarwala", "2345132", 2.5, 2.5, 5.5, 9, 9.2, 8.5, 15, 7.5, 15.6], [6, "Abdul Basit Hussain", "2345135", 4.45, 4.45, 4, 5, 8.7, 6.5, 11, 5.5, 10.6], [7, "Aleeza  Shahbaz", "2445101", 4, 4, 4.5, 5.5, 6.8, 5.5, 7.5, 5, 12.2], [8, "Geeta  Khurana", "2445108", 5, 5, 6, 6.5, 7.2, 6.5, 7, 5.5, 11.6], [9, "Hussain  Hasnain", "2445110", 5, 5, 5.5, 9, 11, 7.5, 15, 4, 18.4], [10, "Kaydin Asher Alfred Lobo", "2445111", 4, 4, 5, 9, 9, 6, 11.5, 6, 20.6], [11, "Muhammad Hamza Yaqoob", "2445112", 0, 0, 0, 0, 0, 0, 0, 0, 0], [12, "Muhammad Huzaifa", "2445113", 3, 3, 5, 9, 8.6, 7, 15, 4, 21.1], [13, "Murtaza Ali Yousuf Ali Bohra", "2445116", 5, 5, 5, 9, 12, 7, 13.5, 7, 17.3], [14, "Roshni", "2445118", 4.7, 4.7, 5, 6, 11.7, 5.5, 10, 6.5, 16.2], [15, "Salahuddin Dossal", "2445119", 4.45, 4.45, 6, 9, 7.4, 5, 9.5, 4.5, 13.4], [16, "Hasan  Gohar Ahmed", "2445132", 5, 5, 4.5, 9, 4.8, 7, 13, 5.5, 16.2], [17, "Wasib Aizaz Khan", "2445147", 3, 3, 5.5, 7.5, 4, 6.5, 6.5, 3.5, 15.6], [18, "Sabih  Ahmed", "2445150", 5, 5, 4.5, 6.5, 9.6, 7, 8.5, 4.5, 12.8]]'),
+	(3, 403, '[["S.No", "Name", "Reg.No", "Assignment 1", null, "Lab Work 1", "Final Paper 1", "manual 1", null, "General Viva 1", "Project 1", null, null], [null, null, null, 1, 4, 1, 1, 1, 5, 5, 2, 3, 4], [null, null, null, 10, 4, 5, 30, 7, 7, 5, 9, 13, 10], [1, "Shahmeer", "1845143", 1, 4, 2, 22.5, 4.75, 5.25, 3, 9, 9, 5], [2, "Hassin  Sikander", "2245102", 10, 4, 5, 20.5, 5.25, 4.75, 4, 9, 9, 5], [3, "Hussain  Hasnain", "2245103", 8, 3, 3, 20, 6.75, 7, 3, 9, 10, 5], [4, "Mohammad Shabbir Tarwari", "2245104", 10, 4, 5, 25, 6.25, 6.75, 4, 9, 10, 5], [5, "Ahmad  Foad", "2245110", 8, 4, 4, 21, 6.25, 6.25, 3, 9, 10, 5], [6, "Rayyan Ahmed Thakur", "2245118", 10, 4, 5, 17, 4, 4, 3, 9, 10, 5], [7, "Syed Faaiz Raza Zaidi", "2245120", 10, 4, 5, 19, 3.25, 4, 3, 9, 9, 5], [8, "Um E Abiha", "2245124", 8, 4, 4, 20.5, 4.75, 5.75, 3, 9, 9, 5], [9, "Hunain  Muhammad Iqbal", "2245126", 10, 4, 5, 25, 6, 6.25, 3, 9, 9, 5]]');
 
 
 --
@@ -894,7 +815,7 @@ INSERT INTO public.curriculum_courses VALUES
 	(6, 6, 1, 1),
 	(7, 7, 1, 1),
 	(8, 8, 1, 1),
-	(9, 9, 1, 1),
+	(9,  9, 1, 1),
 	(10, 10, 1, 1),
 	(11, 11, 1, 2),
 	(12, 12, 1, 2),
@@ -965,545 +886,6 @@ INSERT INTO public.curriculum_courses VALUES
 	(77, 79, 1, 8),
 	(78, 39, 1, 4),
 	(79, 38, 1, 4);
-
-
---
--- Data for Name: faculty; Type: TABLE DATA; Schema: public; Owner: -
---
-
-INSERT INTO public.faculty VALUES
-	(1, 'Hiba Mir'),
-	(2, 'Atif Saeed'),
-	(3, 'Tanzila Younas'),
-	(4, 'Dr. Faraz Junejo'),
-	(5, 'Hafsah Mir'),
-	(6, 'Khurram Raza'),
-	(7, 'Abdul Basit Aftab'),
-	(8, 'Abdul Hussain Saeed'),
-	(9, 'Inam ur Rehman'),
-	(10, 'Azeem Anwer'),
-	(11, 'Moosa Lakhani'),
-	(12, 'Muhammad Zubair Uddin Khan'),
-	(13, 'Muhammad Nabeel'),
-	(14, 'Sadaf Bano'),
-	(15, 'Iqra Bashir'),
-	(16, 'Faiza Farhan'),
-	(17, 'Syed Waqas Ali'),
-	(18, 'Kainat Amin'),
-	(19, 'Humera Rafique'),
-	(20, 'Elia Qazilbash'),
-	(21, 'Mashal Tariq'),
-	(22, 'Dr. Saim Ahmed'),
-	(23, 'Ijlal Hussain'),
-	(24, 'Muhammad Fahad Qadeer'),
-	(25, 'Amarta Valecha'),
-	(26, 'Tayyaba Jamali'),
-	(27, 'Aneel Ahmed'),
-	(28, 'Naveed Ghani'),
-	(29, 'Ali Zaman'),
-	(30, 'Muhammad Adeel (Mech)'),
-	(31, 'Syeda Aliza Haider'),
-	(32, 'Kashif Iqbal'),
-	(33, 'Dr. Adeel Ansari'),
-	(34, 'Dr Farhan Mumtaz'),
-	(35, 'Dr. Muhammad Umar Siddiqui'),
-	(36, 'Dr. Syed Attaullah Bukhari'),
-	(37, 'Yasir Ali Jamwari'),
-	(38, 'Usama Waqar'),
-	(39, 'Hamza Ahmed'),
-	(40, 'Dr. Husnain Mansoor Ali'),
-	(41, 'Javaid Iqbal Qureshi'),
-	(42, 'Dr. Nida Shoaib'),
-	(43, 'Zara Nizar Damani'),
-	(44, 'Zehara Sultana'),
-	(45, 'Dr. Bela Nawaz'),
-	(46, 'Rija Bakhtiar'),
-	(47, 'Adnan Ahmed Khan'),
-	(48, 'Muhammad Ismail Mansoor'),
-	(49, 'Dr. Talha Ahmed'),
-	(50, 'Nasreen Bano'),
-	(51, 'Fakharuddin Soomro'),
-	(52, 'Noreen Novroz Ali'),
-	(53, 'Farhat Fatima'),
-	(54, 'Sarwat Tamer'),
-	(55, 'Abbas Shabbir');
-
-
---
--- Data for Name: offered_courses; Type: TABLE DATA; Schema: public; Owner: -
---
-
-INSERT INTO public.offered_courses VALUES
-	(12, 48, 'Spring', 2022, 'BEME 2 - Section A', 1, 1),
-	(13, 8, 'Spring', 2022, 'BEME 2 - Section A', 2, 2),
-	(14, 5, 'Spring', 2022, 'BEME 2 - Section A', 3, 3),
-	(16, 35, 'Spring', 2022, 'BEME 2 - Section A', 4, 4),
-	(17, 3, 'Spring', 2022, 'BEME 2 - Section A', 5, 5),
-	(10, 13, 'Spring', 2022, 'BEME 2 - Section A', 6, 6),
-	(19, 46, 'Spring', 2022, 'BEME 2 - Section A', 7, 7),
-	(NULL, 38, 'Spring', 2022, 'BEME 2 - Section A', 8, 8),
-	(NULL, 43, 'Spring', 2022, 'BEME 2 - Section A', 9, 9),
-	(31, 39, 'Spring', 2022, 'BEME 4 - Section A', 10, 10),
-	(32, 5, 'Spring', 2022, 'BEME 4 - Section A', 11, 11),
-	(33, 21, 'Spring', 2022, 'BEME 4 - Section A', 12, 12),
-	(36, 7, 'Spring', 2022, 'BEME 4 - Section A', 13, 13),
-	(37, 50, 'Spring', 2022, 'BEME 4 - Section A', 14, 14),
-	(39, 19, 'Spring', 2022, 'BEME 4 - Section A', 15, 15),
-	(NULL, 55, 'Spring', 2022, 'BEME 4 - Section A', 16, 16),
-	(NULL, 4, 'Spring', 2022, 'BEME 4 - Section A', 17, 17),
-	(NULL, 2, 'Spring', 2022, 'BEME 4 - Section A', 18, 18),
-	(31, 39, 'Spring', 2022, 'BEME 4 - Section B', 19, 19),
-	(32, 5, 'Spring', 2022, 'BEME 4 - Section B', 20, 20),
-	(33, 21, 'Spring', 2022, 'BEME 4 - Section B', 21, 21),
-	(36, 7, 'Spring', 2022, 'BEME 4 - Section B', 22, 22),
-	(37, 50, 'Spring', 2022, 'BEME 4 - Section B', 23, 23),
-	(39, 19, 'Spring', 2022, 'BEME 4 - Section B', 24, 24),
-	(NULL, 55, 'Spring', 2022, 'BEME 4 - Section B', 25, 25),
-	(NULL, 4, 'Spring', 2022, 'BEME 4 - Section B', 26, 26),
-	(NULL, 2, 'Spring', 2022, 'BEME 4 - Section B', 27, 27),
-	(49, 48, 'Spring', 2022, 'BEME 6 - Section A', 28, 28),
-	(50, 22, 'Spring', 2022, 'BEME 6 - Section A', 29, 29),
-	(51, 27, 'Spring', 2022, 'BEME 6 - Section A', 30, 30),
-	(52, 2, 'Spring', 2022, 'BEME 6 - Section A', 31, 31),
-	(53, 39, 'Spring', 2022, 'BEME 6 - Section A', 32, 32),
-	(54, 8, 'Spring', 2022, 'BEME 6 - Section A', 33, 33),
-	(67, 16, 'Spring', 2022, 'BEME 6 - Section A', 34, 34),
-	(55, 7, 'Spring', 2022, 'BEME 6 - Section A', 35, 35),
-	(56, 3, 'Spring', 2022, 'BEME 6 - Section A', 36, 36),
-	(49, 48, 'Spring', 2022, 'BEME 6 - Section B', 37, 37),
-	(50, 22, 'Spring', 2022, 'BEME 6 - Section B', 38, 38),
-	(51, 27, 'Spring', 2022, 'BEME 6 - Section B', 39, 39),
-	(52, 2, 'Spring', 2022, 'BEME 6 - Section B', 40, 40),
-	(53, 39, 'Spring', 2022, 'BEME 6 - Section B', 41, 41),
-	(54, 8, 'Spring', 2022, 'BEME 6 - Section B', 42, 42),
-	(67, 16, 'Spring', 2022, 'BEME 6 - Section B', 43, 43),
-	(55, 7, 'Spring', 2022, 'BEME 6 - Section B', 44, 44),
-	(56, 50, 'Spring', 2022, 'BEME 6 - Section B', 45, 45),
-	(NULL, 30, 'Spring', 2022, 'BEME 8 - Section A', 46, 46),
-	(NULL, 35, 'Spring', 2022, 'BEME 8 - Section A', 47, 47),
-	(71, 13, 'Spring', 2022, 'BEME 8 - Section A', 48, 48),
-	(72, 10, 'Spring', 2022, 'BEME 8 - Section A', 49, 49),
-	(73, 3, 'Spring', 2022, 'BEME 8 - Section A', 50, 50),
-	(NULL, 30, 'Spring', 2022, 'BEME 8 - Section B', 51, 51),
-	(NULL, 35, 'Spring', 2022, 'BEME 8 - Section B', 52, 52),
-	(71, 13, 'Spring', 2022, 'BEME 8 - Section B', 53, 53),
-	(72, 10, 'Spring', 2022, 'BEME 8 - Section B', 54, 54),
-	(73, 3, 'Spring', 2022, 'BEME 8 - Section B', 55, 55),
-	(68, 29, 'Spring', 2022, 'BEME - Elective', 56, 56),
-	(70, 26, 'Spring', 2022, 'BEME - Elective', 57, 57),
-	(74, 19, 'Spring', 2022, 'BEME - Elective', 58, 58),
-	(30, 42, 'Spring', 2022, 'BEME - Open', 59, 59),
-	(29, 50, 'Spring', 2022, 'BEME - Open', 60, 60),
-	(34, 55, 'Spring', 2022, 'BEME - Open', 61, 61),
-	(NULL, 13, 'Spring', 2022, 'BEME - Open', 62, 62),
-	(NULL, 10, 'Spring', 2022, 'BEME - Open', 63, 63),
-	(NULL, 20, 'Summer', 2022, 'BEME - Elective', 70, 64),
-	(NULL, 22, 'Summer', 2022, 'BEME - Elective', 71, 65),
-	(2, 5, 'Summer', 2022, 'BEME - Open', 72, 66),
-	(25, 55, 'Summer', 2022, 'BEME - Open', 73, 67),
-	(NULL, 10, 'Summer', 2022, 'BEME - Open', 74, 68),
-	(36, 7, 'Summer', 2022, 'BEME - Open', 75, 69),
-	(37, 50, 'Summer', 2022, 'BEME - Open', 76, 70),
-	(39, 19, 'Summer', 2022, 'BEME - Open', 77, 71),
-	(79, 30, 'Summer', 2022, 'BEME - Open', 78, 72),
-	(78, 35, 'Summer', 2022, 'BEME - Open', 79, 73),
-	(NULL, 13, 'Summer', 2022, 'BEME - Open', 80, 74),
-	(NULL, 13, 'Summer', 2022, 'BEME - Open', 81, 75),
-	(47, 13, 'Summer', 2022, 'BEME - Open', 82, 76),
-	(48, 13, 'Summer', 2022, 'BEME - Open', 83, 77),
-	(49, 48, 'Summer', 2022, 'BEME - Open', 84, 78),
-	(67, 20, 'Summer', 2022, 'BEME - Open', 85, 79),
-	(58, 53, 'Summer', 2022, 'BEME - Open', 86, 80),
-	(NULL, 30, 'Summer', 2022, 'BEME - Open', 87, 81),
-	(71, 39, 'Summer', 2022, 'BEME - Open', 88, 82),
-	(1, 54, 'Fall', 2022, 'BEME 1 - Section A', 89, 83),
-	(2, 27, 'Fall', 2022, 'BEME 1 - Section A', 90, 84),
-	(3, 36, 'Fall', 2022, 'BEME 1 - Section A', 91, 85),
-	(4, 7, 'Fall', 2022, 'BEME 1 - Section A', 92, 86),
-	(5, 39, 'Fall', 2022, 'BEME 1 - Section A', 93, 87),
-	(6, 8, 'Fall', 2022, 'BEME 1 - Section A', 94, 88),
-	(8, 30, 'Fall', 2022, 'BEME 1 - Section A', 95, 89),
-	(9, 5, 'Fall', 2022, 'BEME 1 - Section A', 96, 90),
-	(22, 39, 'Fall', 2022, 'BEME 3 - Section A', 97, 91),
-	(23, 8, 'Fall', 2022, 'BEME 3 - Section A', 98, 92),
-	(24, 2, 'Fall', 2022, 'BEME 3 - Section A', 99, 93),
-	(25, 41, 'Fall', 2022, 'BEME 3 - Section A', 100, 94),
-	(28, 7, 'Fall', 2022, 'BEME 3 - Section A', 101, 95),
-	(29, 27, 'Fall', 2022, 'BEME 3 - Section A', 102, 96),
-	(20, 13, 'Fall', 2022, 'BEME 3 - Section A', 103, 97),
-	(NULL, 30, 'Fall', 2022, 'BEME 3 - Section A', 104, 98),
-	(NULL, 35, 'Fall', 2022, 'BEME 3 - Section A', 105, 99),
-	(40, 50, 'Fall', 2022, 'BEME 5 - Section A', 106, 100),
-	(79, 30, 'Fall', 2022, 'BEME 5 - Section A', 107, 101),
-	(78, 35, 'Fall', 2022, 'BEME 5 - Section A', 108, 102),
-	(NULL, 3, 'Fall', 2022, 'BEME 5 - Section A', 109, 103),
-	(41, 55, 'Fall', 2022, 'BEME 5 - Section A', 110, 104),
-	(42, 55, 'Fall', 2022, 'BEME 5 - Section A', 111, 105),
-	(44, 48, 'Fall', 2022, 'BEME 5 - Section A', 112, 106),
-	(43, 48, 'Fall', 2022, 'BEME 5 - Section A', 112, 107),
-	(46, 19, 'Fall', 2022, 'BEME 5 - Section A', 113, 108),
-	(45, 19, 'Fall', 2022, 'BEME 5 - Section A', 113, 109),
-	(47, 13, 'Fall', 2022, 'BEME 5 - Section A', 114, 110),
-	(48, 5, 'Fall', 2022, 'BEME 5 - Section A', 115, 111),
-	(40, 50, 'Fall', 2022, 'BEME 5 - Section B', 116, 112),
-	(79, 30, 'Fall', 2022, 'BEME 5 - Section B', 117, 113),
-	(78, 35, 'Fall', 2022, 'BEME 5 - Section B', 118, 114),
-	(NULL, 3, 'Fall', 2022, 'BEME 5 - Section B', 119, 115),
-	(41, 55, 'Fall', 2022, 'BEME 5 - Section B', 120, 116),
-	(42, 55, 'Fall', 2022, 'BEME 5 - Section B', 121, 117),
-	(44, 48, 'Fall', 2022, 'BEME 5 - Section B', 122, 118),
-	(43, 48, 'Fall', 2022, 'BEME 5 - Section B', 122, 119),
-	(46, 19, 'Fall', 2022, 'BEME 5 - Section B', 123, 120),
-	(45, 19, 'Fall', 2022, 'BEME 5 - Section B', 123, 121),
-	(47, 13, 'Fall', 2022, 'BEME 5 - Section B', 124, 122),
-	(48, 5, 'Fall', 2022, 'BEME 5 - Section B', 125, 123),
-	(57, 50, 'Fall', 2022, 'BEME 7 - Section A', 126, 124),
-	(58, 26, 'Fall', 2022, 'BEME 7 - Section A', 127, 125),
-	(59, 21, 'Fall', 2022, 'BEME 7 - Section A', 128, 126),
-	(60, 3, 'Fall', 2022, 'BEME 7 - Section A', 129, 127),
-	(61, 2, 'Fall', 2022, 'BEME 7 - Section A', 130, 128),
-	(63, 48, 'Fall', 2022, 'BEME 7 - Section A', 131, 129),
-	(64, 10, 'Fall', 2022, 'BEME 7 - Section A', 132, 130),
-	(57, 50, 'Fall', 2022, 'BEME 7 - Section B', 133, 131),
-	(58, 26, 'Fall', 2022, 'BEME 7 - Section B', 134, 132),
-	(59, 21, 'Fall', 2022, 'BEME 7 - Section B', 135, 133),
-	(60, 3, 'Fall', 2022, 'BEME 7 - Section B', 136, 134),
-	(61, 2, 'Fall', 2022, 'BEME 7 - Section B', 137, 135),
-	(63, 48, 'Fall', 2022, 'BEME 7 - Section B', 138, 136),
-	(64, 10, 'Fall', 2022, 'BEME 7 - Section B', 139, 137),
-	(69, 19, 'Fall', 2022, 'BEME - Elective', 140, 138),
-	(74, 4, 'Fall', 2022, 'BEME - Elective', 141, 139),
-	(23, 8, 'Fall', 2022, 'BEME - Open', 142, 140),
-	(NULL, 27, 'Fall', 2022, 'BEME - Open', 143, 141),
-	(12, 48, 'Spring', 2023, 'BEME 2 - Section A', 149, 142),
-	(13, 50, 'Spring', 2023, 'BEME 2 - Section A', 150, 143),
-	(14, 5, 'Spring', 2023, 'BEME 2 - Section A', 151, 144),
-	(16, 5, 'Spring', 2023, 'BEME 2 - Section A', 152, 145),
-	(17, 3, 'Spring', 2023, 'BEME 2 - Section A', 153, 146),
-	(10, 13, 'Spring', 2023, 'BEME 2 - Section A', 154, 147),
-	(19, 52, 'Spring', 2023, 'BEME 2 - Section A', 155, 148),
-	(NULL, 1, 'Spring', 2023, 'BEME 2 - Section A', 156, 149),
-	(31, 39, 'Spring', 2023, 'BEME 4 - Section A', 157, 150),
-	(32, 8, 'Spring', 2023, 'BEME 4 - Section A', 158, 151),
-	(33, 19, 'Spring', 2023, 'BEME 4 - Section A', 159, 152),
-	(36, 7, 'Spring', 2023, 'BEME 4 - Section A', 160, 153),
-	(37, 27, 'Spring', 2023, 'BEME 4 - Section A', 161, 154),
-	(39, 27, 'Spring', 2023, 'BEME 4 - Section A', 162, 155),
-	(NULL, 55, 'Spring', 2023, 'BEME 4 - Section A', 163, 156),
-	(NULL, 2, 'Spring', 2023, 'BEME 4 - Section A', 164, 157),
-	(NULL, 2, 'Spring', 2023, 'BEME 4 - Section A', 165, 158),
-	(49, 48, 'Spring', 2023, 'BEME 6 - Section A', 166, 159),
-	(50, 19, 'Spring', 2023, 'BEME 6 - Section A', 167, 160),
-	(51, 5, 'Spring', 2023, 'BEME 6 - Section A', 168, 161),
-	(52, 4, 'Spring', 2023, 'BEME 6 - Section A', 169, 162),
-	(53, 39, 'Spring', 2023, 'BEME 6 - Section A', 170, 163),
-	(54, 8, 'Spring', 2023, 'BEME 6 - Section A', 171, 164),
-	(67, 21, 'Spring', 2023, 'BEME 6 - Section A', 172, 165),
-	(55, 7, 'Spring', 2023, 'BEME 6 - Section A', 173, 166),
-	(56, 50, 'Spring', 2023, 'BEME 6 - Section A', 174, 167),
-	(49, 48, 'Spring', 2023, 'BEME 6 - Section B', 175, 168),
-	(50, 19, 'Spring', 2023, 'BEME 6 - Section B', 176, 169),
-	(51, 5, 'Spring', 2023, 'BEME 6 - Section B', 177, 170),
-	(52, 4, 'Spring', 2023, 'BEME 6 - Section B', 178, 171),
-	(53, 39, 'Spring', 2023, 'BEME 6 - Section B', 179, 172),
-	(54, 8, 'Spring', 2023, 'BEME 6 - Section B', 180, 173),
-	(67, 21, 'Spring', 2023, 'BEME 6 - Section B', 181, 174),
-	(55, 7, 'Spring', 2023, 'BEME 6 - Section B', 182, 175),
-	(56, 3, 'Spring', 2023, 'BEME 6 - Section B', 183, 176),
-	(NULL, 30, 'Spring', 2023, 'BEME 8 - Section A', 184, 177),
-	(NULL, 35, 'Spring', 2023, 'BEME 8 - Section A', 185, 178),
-	(71, 13, 'Spring', 2023, 'BEME 8 - Section A', 186, 179),
-	(72, 10, 'Spring', 2023, 'BEME 8 - Section A', 187, 180),
-	(73, 3, 'Spring', 2023, 'BEME 8 - Section A', 188, 181),
-	(NULL, 30, 'Spring', 2023, 'BEME 8 - Section B', 189, 182),
-	(NULL, 35, 'Spring', 2023, 'BEME 8 - Section B', 190, 183),
-	(71, 13, 'Spring', 2023, 'BEME 8 - Section B', 191, 184),
-	(72, 10, 'Spring', 2023, 'BEME 8 - Section B', 192, 185),
-	(73, 3, 'Spring', 2023, 'BEME 8 - Section B', 193, 186),
-	(68, 35, 'Spring', 2023, 'BEME - Elective', 194, 187),
-	(NULL, 26, 'Spring', 2023, 'BEME - Elective', 195, 188),
-	(NULL, 21, 'Spring', 2023, 'BEME - Elective', 196, 189),
-	(30, 1, 'Spring', 2023, 'BEME - Open', 197, 190),
-	(NULL, 27, 'Spring', 2023, 'BEME - Open', 198, 191),
-	(64, 10, 'Spring', 2023, 'BEME - Open', 199, 192),
-	(60, 3, 'Spring', 2023, 'BEME - Open', 200, 193),
-	(2, 5, 'Summer', 2023, 'BEME - Open', 208, 194),
-	(24, 2, 'Summer', 2023, 'BEME - Open', 209, 195),
-	(33, 55, 'Summer', 2023, 'BEME - Open', 210, 196),
-	(40, 50, 'Summer', 2023, 'BEME - Open', 211, 197),
-	(42, 7, 'Summer', 2023, 'BEME - Open', 212, 198),
-	(44, 27, 'Summer', 2023, 'BEME - Open', 213, 199),
-	(43, 27, 'Summer', 2023, 'BEME - Open', 213, 200),
-	(46, 27, 'Summer', 2023, 'BEME - Open', 214, 201),
-	(45, 27, 'Summer', 2023, 'BEME - Open', 214, 202),
-	(53, 39, 'Summer', 2023, 'BEME - Open', 215, 203),
-	(54, 8, 'Summer', 2023, 'BEME - Open', 216, 204),
-	(NULL, 30, 'Summer', 2023, 'BEME - Open', 217, 205),
-	(NULL, 13, 'Summer', 2023, 'BEME - Open', 218, 206),
-	(64, 48, 'Summer', 2023, 'BEME - Open', 219, 207),
-	(72, 13, 'Summer', 2023, 'BEME - Open', 220, 208),
-	(1, 47, 'Fall', 2023, 'BEME 1 - Section A', 221, 209),
-	(2, 27, 'Fall', 2023, 'BEME 1 - Section A', 222, 210),
-	(3, 36, 'Fall', 2023, 'BEME 1 - Section A', 223, 211),
-	(4, 2, 'Fall', 2023, 'BEME 1 - Section A', 224, 212),
-	(5, 48, 'Fall', 2023, 'BEME 1 - Section A', 225, 213),
-	(6, 27, 'Fall', 2023, 'BEME 1 - Section A', 226, 214),
-	(8, 30, 'Fall', 2023, 'BEME 1 - Section A', 227, 215),
-	(9, 5, 'Fall', 2023, 'BEME 1 - Section A', 228, 216),
-	(17, 7, 'Fall', 2023, 'BEME 1 - Section A', 229, 217),
-	(22, 7, 'Fall', 2023, 'BEME 3 - Section A', 230, 218),
-	(23, 50, 'Fall', 2023, 'BEME 3 - Section A', 231, 219),
-	(24, 5, 'Fall', 2023, 'BEME 3 - Section A', 232, 220),
-	(25, 55, 'Fall', 2023, 'BEME 3 - Section A', 233, 221),
-	(28, 7, 'Fall', 2023, 'BEME 3 - Section A', 234, 222),
-	(29, 19, 'Fall', 2023, 'BEME 3 - Section A', 235, 223),
-	(20, 13, 'Fall', 2023, 'BEME 3 - Section A', 236, 224),
-	(NULL, 30, 'Fall', 2023, 'BEME 3 - Section A', 237, 225),
-	(NULL, 35, 'Fall', 2023, 'BEME 3 - Section A', 238, 226),
-	(40, 50, 'Fall', 2023, 'BEME 5 - Section A', 239, 227),
-	(79, 30, 'Fall', 2023, 'BEME 5 - Section A', 240, 228),
-	(78, 35, 'Fall', 2023, 'BEME 5 - Section A', 241, 229),
-	(NULL, 10, 'Fall', 2023, 'BEME 5 - Section A', 242, 230),
-	(41, 55, 'Fall', 2023, 'BEME 5 - Section A', 243, 231),
-	(42, 55, 'Fall', 2023, 'BEME 5 - Section A', 244, 232),
-	(44, 48, 'Fall', 2023, 'BEME 5 - Section A', 245, 233),
-	(43, 48, 'Fall', 2023, 'BEME 5 - Section A', 245, 234),
-	(46, 19, 'Fall', 2023, 'BEME 5 - Section A', 246, 235),
-	(45, 19, 'Fall', 2023, 'BEME 5 - Section A', 246, 236),
-	(47, 13, 'Fall', 2023, 'BEME 5 - Section A', 247, 237),
-	(48, 50, 'Fall', 2023, 'BEME 5 - Section A', 248, 238),
-	(57, 5, 'Fall', 2023, 'BEME 7 - Section A', 249, 239),
-	(58, 26, 'Fall', 2023, 'BEME 7 - Section A', 250, 240),
-	(59, 21, 'Fall', 2023, 'BEME 7 - Section A', 251, 241),
-	(60, 35, 'Fall', 2023, 'BEME 7 - Section A', 252, 242),
-	(61, 2, 'Fall', 2023, 'BEME 7 - Section A', 253, 243),
-	(63, 48, 'Fall', 2023, 'BEME 7 - Section A', 254, 244),
-	(64, 10, 'Fall', 2023, 'BEME 7 - Section A', 255, 245),
-	(57, 5, 'Fall', 2023, 'BEME 7 - Section B', 256, 246),
-	(58, 26, 'Fall', 2023, 'BEME 7 - Section B', 257, 247),
-	(59, 21, 'Fall', 2023, 'BEME 7 - Section B', 258, 248),
-	(60, 35, 'Fall', 2023, 'BEME 7 - Section B', 259, 249),
-	(61, 2, 'Fall', 2023, 'BEME 7 - Section B', 260, 250),
-	(63, 48, 'Fall', 2023, 'BEME 7 - Section B', 261, 251),
-	(64, 10, 'Fall', 2023, 'BEME 7 - Section B', 262, 252),
-	(69, 19, 'Fall', 2023, 'BEME - Elective', 263, 253),
-	(74, 4, 'Fall', 2023, 'BEME - Elective', 264, 254),
-	(NULL, 30, 'Fall', 2023, 'BEME - Open', 265, 255),
-	(73, 35, 'Fall', 2023, 'BEME - Open', 266, 256),
-	(12, 55, 'Spring', 2024, 'BEME 2 - Section A', 272, 257),
-	(13, 27, 'Spring', 2024, 'BEME 2 - Section A', 273, 258),
-	(14, 5, 'Spring', 2024, 'BEME 2 - Section A', 274, 259),
-	(16, 2, 'Spring', 2024, 'BEME 2 - Section A', 275, 260),
-	(18, 5, 'Spring', 2024, 'BEME 2 - Section A', 276, 261),
-	(10, 13, 'Spring', 2024, 'BEME 2 - Section A', 277, 262),
-	(19, 9, 'Spring', 2024, 'BEME 2 - Section A', 278, 263),
-	(31, 48, 'Spring', 2024, 'BEME 4 - Section A', 279, 264),
-	(32, 50, 'Spring', 2024, 'BEME 4 - Section A', 280, 265),
-	(33, 19, 'Spring', 2024, 'BEME 4 - Section A', 281, 266),
-	(36, 30, 'Spring', 2024, 'BEME 4 - Section A', 282, 267),
-	(37, 50, 'Spring', 2024, 'BEME 4 - Section A', 283, 268),
-	(39, 19, 'Spring', 2024, 'BEME 4 - Section A', 284, 269),
-	(NULL, 55, 'Spring', 2024, 'BEME 4 - Section A', 285, 270),
-	(NULL, 4, 'Spring', 2024, 'BEME 4 - Section A', 286, 271),
-	(NULL, 2, 'Spring', 2024, 'BEME 4 - Section A', 287, 272),
-	(49, 48, 'Spring', 2024, 'BEME 6 - Section A', 288, 273),
-	(50, 19, 'Spring', 2024, 'BEME 6 - Section A', 289, 274),
-	(51, 5, 'Spring', 2024, 'BEME 6 - Section A', 290, 275),
-	(52, 4, 'Spring', 2024, 'BEME 6 - Section A', 291, 276),
-	(53, 48, 'Spring', 2024, 'BEME 6 - Section A', 292, 277),
-	(54, 27, 'Spring', 2024, 'BEME 6 - Section A', 293, 278),
-	(67, 24, 'Spring', 2024, 'BEME 6 - Section A', 294, 279),
-	(55, 55, 'Spring', 2024, 'BEME 6 - Section A', 295, 280),
-	(56, 50, 'Spring', 2024, 'BEME 6 - Section A', 296, 281),
-	(NULL, 30, 'Spring', 2024, 'BEME 8 - Section A', 297, 282),
-	(NULL, 10, 'Spring', 2024, 'BEME 8 - Section A', 298, 283),
-	(71, 13, 'Spring', 2024, 'BEME 8 - Section A', 299, 284),
-	(72, 10, 'Spring', 2024, 'BEME 8 - Section A', 300, 285),
-	(73, 35, 'Spring', 2024, 'BEME 8 - Section A', 301, 286),
-	(NULL, 30, 'Spring', 2024, 'BEME 8 - Section B', 302, 287),
-	(NULL, 10, 'Spring', 2024, 'BEME 8 - Section B', 303, 288),
-	(71, 13, 'Spring', 2024, 'BEME 8 - Section B', 304, 289),
-	(72, 10, 'Spring', 2024, 'BEME 8 - Section B', 305, 290),
-	(73, 35, 'Spring', 2024, 'BEME 8 - Section B', 306, 291),
-	(NULL, 38, 'Spring', 2024, 'BEME - Elective', 307, 292),
-	(NULL, 18, 'Spring', 2024, 'BEME - Elective', 308, 293),
-	(68, 35, 'Spring', 2024, 'BEME - Elective', 309, 294),
-	(NULL, 27, 'Spring', 2024, 'BEME - Elective', 310, 295),
-	(76, 21, 'Spring', 2024, 'BEME - Elective', 311, 296),
-	(75, 21, 'Spring', 2024, 'BEME - Elective', 311, 297),
-	(30, 45, 'Spring', 2024, 'BEME - Open', 312, 298),
-	(NULL, 5, 'Spring', 2024, 'BEME - Open', 313, 299),
-	(60, 35, 'Spring', 2024, 'BEME - Open', 314, 300),
-	(39, 19, 'Summer', 2024, 'BEME - Open', 316, 301),
-	(79, 30, 'Summer', 2024, 'BEME - Open', 317, 302),
-	(49, 7, 'Summer', 2024, 'BEME - Open', 318, 303),
-	(50, 27, 'Summer', 2024, 'BEME - Open', 319, 304),
-	(NULL, 30, 'Summer', 2024, 'BEME - Open', 320, 305),
-	(61, 2, 'Summer', 2024, 'BEME - Open', 321, 306),
-	(64, 10, 'Summer', 2024, 'BEME - Open', 322, 307),
-	(1, 5, 'Fall', 2024, 'BEME 1 - Section A', 323, 308),
-	(2, 50, 'Fall', 2024, 'BEME 1 - Section A', 324, 309),
-	(3, 15, 'Fall', 2024, 'BEME 1 - Section A', 325, 310),
-	(4, 2, 'Fall', 2024, 'BEME 1 - Section A', 326, 311),
-	(5, 7, 'Fall', 2024, 'BEME 1 - Section A', 327, 312),
-	(6, 48, 'Fall', 2024, 'BEME 1 - Section A', 328, 313),
-	(8, 30, 'Fall', 2024, 'BEME 1 - Section A', 329, 314),
-	(9, 34, 'Fall', 2024, 'BEME 1 - Section A', 330, 315),
-	(10, 5, 'Fall', 2024, 'BEME 1 - Section A', 331, 316),
-	(1, 5, 'Fall', 2024, 'BEME 1 - Section B', 332, 317),
-	(2, 50, 'Fall', 2024, 'BEME 1 - Section B', 333, 318),
-	(3, 11, 'Fall', 2024, 'BEME 1 - Section B', 334, 319),
-	(4, 2, 'Fall', 2024, 'BEME 1 - Section B', 335, 320),
-	(5, 7, 'Fall', 2024, 'BEME 1 - Section B', 336, 321),
-	(6, 48, 'Fall', 2024, 'BEME 1 - Section B', 337, 322),
-	(8, 30, 'Fall', 2024, 'BEME 1 - Section B', 338, 323),
-	(9, 34, 'Fall', 2024, 'BEME 1 - Section B', 339, 324),
-	(10, 5, 'Fall', 2024, 'BEME 1 - Section B', 340, 325),
-	(22, 7, 'Fall', 2024, 'BEME 3 - Section A', 341, 326),
-	(23, 27, 'Fall', 2024, 'BEME 3 - Section A', 342, 327),
-	(24, 10, 'Fall', 2024, 'BEME 3 - Section A', 343, 328),
-	(25, 27, 'Fall', 2024, 'BEME 3 - Section A', 344, 329),
-	(28, 2, 'Fall', 2024, 'BEME 3 - Section A', 345, 330),
-	(29, 19, 'Fall', 2024, 'BEME 3 - Section A', 346, 331),
-	(20, 7, 'Fall', 2024, 'BEME 3 - Section A', 347, 332),
-	(NULL, 30, 'Fall', 2024, 'BEME 3 - Section A', 348, 333),
-	(NULL, 35, 'Fall', 2024, 'BEME 3 - Section A', 349, 334),
-	(40, 50, 'Fall', 2024, 'BEME 5 - Section A', 350, 335),
-	(79, 30, 'Fall', 2024, 'BEME 5 - Section A', 351, 336),
-	(78, 35, 'Fall', 2024, 'BEME 5 - Section A', 352, 337),
-	(NULL, 10, 'Fall', 2024, 'BEME 5 - Section A', 353, 338),
-	(41, 55, 'Fall', 2024, 'BEME 5 - Section A', 354, 339),
-	(42, 55, 'Fall', 2024, 'BEME 5 - Section A', 355, 340),
-	(44, 39, 'Fall', 2024, 'BEME 5 - Section A', 356, 341),
-	(43, 39, 'Fall', 2024, 'BEME 5 - Section A', 356, 342),
-	(46, 19, 'Fall', 2024, 'BEME 5 - Section A', 357, 343),
-	(45, 19, 'Fall', 2024, 'BEME 5 - Section A', 357, 344),
-	(47, 39, 'Fall', 2024, 'BEME 5 - Section A', 358, 345),
-	(48, 50, 'Fall', 2024, 'BEME 5 - Section A', 359, 346),
-	(57, 34, 'Fall', 2024, 'BEME 7 - Section A', 360, 347),
-	(58, 55, 'Fall', 2024, 'BEME 7 - Section A', 361, 348),
-	(59, 34, 'Fall', 2024, 'BEME 7 - Section A', 362, 349),
-	(60, 35, 'Fall', 2024, 'BEME 7 - Section A', 363, 350),
-	(61, 2, 'Fall', 2024, 'BEME 7 - Section A', 364, 351),
-	(63, 39, 'Fall', 2024, 'BEME 7 - Section A', 365, 352),
-	(64, 10, 'Fall', 2024, 'BEME 7 - Section A', 366, 353),
-	(NULL, 37, 'Fall', 2024, 'BEME - Elective', 367, 354),
-	(NULL, 27, 'Fall', 2024, 'BEME - Elective', 368, 355),
-	(74, 4, 'Fall', 2024, 'BEME - Elective', 369, 356),
-	(11, 36, 'Fall', 2024, 'BEME - Open', 370, 357),
-	(NULL, 48, 'Fall', 2024, 'BEME - Open', 371, 358),
-	(NULL, 48, 'Fall', 2024, 'BEME - Open', 372, 359),
-	(30, 35, 'Fall', 2024, 'BEME - Open', 373, 360),
-	(NULL, 19, 'Fall', 2024, 'BEME - Open', 374, 361),
-	(73, 35, 'Fall', 2024, 'BEME - Open', 375, 362),
-	(12, 39, 'Spring', 2025, 'BEME 2 - Section A', 378, 363),
-	(13, 34, 'Spring', 2025, 'BEME 2 - Section A', 379, 364),
-	(14, 48, 'Spring', 2025, 'BEME 2 - Section A', 380, 365),
-	(16, 4, 'Spring', 2025, 'BEME 2 - Section A', 381, 366),
-	(17, 55, 'Spring', 2025, 'BEME 2 - Section A', 382, 367),
-	(18, 55, 'Spring', 2025, 'BEME 2 - Section A', 383, 368),
-	(19, 14, 'Spring', 2025, 'BEME 2 - Section A', 384, 369),
-	(20, 7, 'Spring', 2025, 'BEME 2 - Section A', 385, 370),
-	(12, 7, 'Spring', 2025, 'BEME 2 - Section B', 386, 371),
-	(13, 34, 'Spring', 2025, 'BEME 2 - Section B', 387, 372),
-	(14, 48, 'Spring', 2025, 'BEME 2 - Section B', 388, 373),
-	(16, 4, 'Spring', 2025, 'BEME 2 - Section B', 389, 374),
-	(17, 55, 'Spring', 2025, 'BEME 2 - Section B', 390, 375),
-	(18, 55, 'Spring', 2025, 'BEME 2 - Section B', 391, 376),
-	(19, 14, 'Spring', 2025, 'BEME 2 - Section B', 392, 377),
-	(20, 7, 'Spring', 2025, 'BEME 2 - Section B', 393, 378),
-	(31, 55, 'Spring', 2025, 'BEME 4 - Section A', 394, 379),
-	(32, 50, 'Spring', 2025, 'BEME 4 - Section A', 395, 380),
-	(33, 19, 'Spring', 2025, 'BEME 4 - Section A', 396, 381),
-	(36, 30, 'Spring', 2025, 'BEME 4 - Section A', 397, 382),
-	(37, 50, 'Spring', 2025, 'BEME 4 - Section A', 398, 383),
-	(39, 19, 'Spring', 2025, 'BEME 4 - Section A', 399, 384),
-	(NULL, 30, 'Spring', 2025, 'BEME 4 - Section A', 400, 385),
-	(NULL, 4, 'Spring', 2025, 'BEME 4 - Section A', 401, 386),
-	(NULL, 2, 'Spring', 2025, 'BEME 4 - Section A', 402, 387),
-	(49, 39, 'Spring', 2025, 'BEME 6 - Section A', 403, 388),
-	(50, 19, 'Spring', 2025, 'BEME 6 - Section A', 404, 389),
-	(51, 48, 'Spring', 2025, 'BEME 6 - Section A', 405, 390),
-	(52, 2, 'Spring', 2025, 'BEME 6 - Section A', 406, 391),
-	(53, 39, 'Spring', 2025, 'BEME 6 - Section A', 407, 392),
-	(54, 48, 'Spring', 2025, 'BEME 6 - Section A', 408, 393),
-	(67, 10, 'Spring', 2025, 'BEME 6 - Section A', 409, 394),
-	(55, 7, 'Spring', 2025, 'BEME 6 - Section A', 410, 395),
-	(56, 50, 'Spring', 2025, 'BEME 6 - Section A', 411, 396),
-	(NULL, 30, 'Spring', 2025, 'BEME 8 - Section A', 412, 397),
-	(NULL, 35, 'Spring', 2025, 'BEME 8 - Section A', 413, 398),
-	(71, 39, 'Spring', 2025, 'BEME 8 - Section A', 414, 399),
-	(72, 10, 'Spring', 2025, 'BEME 8 - Section A', 415, 400),
-	(73, 35, 'Spring', 2025, 'BEME 8 - Section A', 416, 401),
-	(68, 35, 'Spring', 2025, 'BEME - Elective', 417, 402),
-	(NULL, 2, 'Spring', 2025, 'BEME - Elective', 418, 403),
-	(NULL, 34, 'Spring', 2025, 'BEME - Elective', 419, 404),
-	(11, 11, 'Spring', 2025, 'BEME - Open', 420, 405),
-	(30, 55, 'Spring', 2025, 'BEME - Open', 421, 406),
-	(NULL, 55, 'Spring', 2025, 'BEME - Open', 422, 407),
-	(2, 33, 'Summer', 2025, 'BEME - Open', 427, 408),
-	(9, 28, 'Summer', 2025, 'BEME - Open', 428, 409),
-	(33, 50, 'Summer', 2025, 'BEME - Open', 429, 410),
-	(NULL, 55, 'Summer', 2025, 'BEME - Open', 430, 411),
-	(40, 6, 'Summer', 2025, 'BEME - Open', 431, 412),
-	(46, 8, 'Summer', 2025, 'BEME - Open', 432, 413),
-	(45, 8, 'Summer', 2025, 'BEME - Open', 432, 414),
-	(50, 48, 'Summer', 2025, 'BEME - Open', 433, 415),
-	(NULL, 10, 'Summer', 2025, 'BEME - Open', 434, 416),
-	(64, 34, 'Summer', 2025, 'BEME - Open', 435, 417),
-	(2, 48, 'Fall', 2025, 'BEME 1 - Section A', 436, 418),
-	(3, 44, 'Fall', 2025, 'BEME 1 - Section A', 437, 419),
-	(4, 7, 'Fall', 2025, 'BEME 1 - Section A', 438, 420),
-	(5, 55, 'Fall', 2025, 'BEME 1 - Section A', 439, 421),
-	(6, 8, 'Fall', 2025, 'BEME 1 - Section A', 440, 422),
-	(NULL, 31, 'Fall', 2025, 'BEME 1 - Section A', 441, 423),
-	(7, 25, 'Fall', 2025, 'BEME 1 - Section A', 442, 424),
-	(8, 30, 'Fall', 2025, 'BEME 1 - Section A', 443, 425),
-	(9, 50, 'Fall', 2025, 'BEME 1 - Section A', 444, 426),
-	(10, 7, 'Fall', 2025, 'BEME 1 - Section A', 445, 427),
-	(21, 14, 'Fall', 2025, 'BEME 3 - Section A', 446, 428),
-	(22, 7, 'Fall', 2025, 'BEME 3 - Section A', 447, 429),
-	(23, 19, 'Fall', 2025, 'BEME 3 - Section A', 448, 430),
-	(24, 2, 'Fall', 2025, 'BEME 3 - Section A', 449, 431),
-	(25, 39, 'Fall', 2025, 'BEME 3 - Section A', 450, 432),
-	(26, 30, 'Fall', 2025, 'BEME 3 - Section A', 451, 433),
-	(27, 35, 'Fall', 2025, 'BEME 3 - Section A', 452, 434),
-	(28, 10, 'Fall', 2025, 'BEME 3 - Section A', 453, 435),
-	(29, 19, 'Fall', 2025, 'BEME 3 - Section A', 454, 436),
-	(21, 14, 'Fall', 2025, 'BEME 3 - Section B', 455, 437),
-	(22, 7, 'Fall', 2025, 'BEME 3 - Section B', 456, 438),
-	(23, 19, 'Fall', 2025, 'BEME 3 - Section B', 457, 439),
-	(24, 2, 'Fall', 2025, 'BEME 3 - Section B', 458, 440),
-	(25, 39, 'Fall', 2025, 'BEME 3 - Section B', 459, 441),
-	(26, 30, 'Fall', 2025, 'BEME 3 - Section B', 460, 442),
-	(27, 35, 'Fall', 2025, 'BEME 3 - Section B', 461, 443),
-	(28, 10, 'Fall', 2025, 'BEME 3 - Section B', 462, 444),
-	(29, 19, 'Fall', 2025, 'BEME 3 - Section B', 463, 445),
-	(40, 50, 'Fall', 2025, 'BEME 5 - Section A', 464, 446),
-	(79, 30, 'Fall', 2025, 'BEME 5 - Section A', 465, 447),
-	(78, 35, 'Fall', 2025, 'BEME 5 - Section A', 466, 448),
-	(41, 30, 'Fall', 2025, 'BEME 5 - Section A', 467, 449),
-	(42, 55, 'Fall', 2025, 'BEME 5 - Section A', 468, 450),
-	(44, 7, 'Fall', 2025, 'BEME 5 - Section A', 469, 451),
-	(43, 7, 'Fall', 2025, 'BEME 5 - Section A', 469, 452),
-	(46, 19, 'Fall', 2025, 'BEME 5 - Section A', 470, 453),
-	(45, 19, 'Fall', 2025, 'BEME 5 - Section A', 470, 454),
-	(47, 7, 'Fall', 2025, 'BEME 5 - Section A', 471, 455),
-	(48, 50, 'Fall', 2025, 'BEME 5 - Section A', 472, 456),
-	(57, 34, 'Fall', 2025, 'BEME 7 - Section A', 473, 457),
-	(58, 55, 'Fall', 2025, 'BEME 7 - Section A', 474, 458),
-	(59, 50, 'Fall', 2025, 'BEME 7 - Section A', 475, 459),
-	(60, 35, 'Fall', 2025, 'BEME 7 - Section A', 476, 460),
-	(61, 2, 'Fall', 2025, 'BEME 7 - Section A', 477, 461),
-	(63, 39, 'Fall', 2025, 'BEME 7 - Section A', 478, 462),
-	(64, 10, 'Fall', 2025, 'BEME 7 - Section A', 479, 463),
-	(74, 4, 'Fall', 2025, 'BEME - Elective', 480, 464),
-	(NULL, 48, 'Fall', 2025, 'BEME - Open', 481, 465),
-	(NULL, 51, 'Fall', 2025, 'BEME - Open', 482, 466),
-	(NULL, 32, 'Fall', 2025, 'BEME - Open', 483, 467),
-	(NULL, 30, 'Fall', 2025, 'BEME - Open', 484, 468),
-	(NULL, 35, 'Fall', 2025, 'BEME - Open', 485, 469),
-	(71, 39, 'Fall', 2025, 'BEME - Open', 486, 470);
 
 
 --
@@ -2099,20 +1481,6 @@ SELECT pg_catalog.setval('public.curriculum_courses_ccid_seq', 80, true);
 
 
 --
--- Name: faculty_fid_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('public.faculty_fid_seq', 55, true);
-
-
---
--- Name: offered_courses_offid_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('public.offered_courses_offid_seq', 470, true);
-
-
---
 -- Name: plo_ploid_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
@@ -2171,22 +1539,6 @@ ALTER TABLE ONLY public.curriculum
 
 ALTER TABLE ONLY public.curriculum_courses
     ADD CONSTRAINT curriculum_courses_pkey PRIMARY KEY (ccid);
-
-
---
--- Name: faculty faculty_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.faculty
-    ADD CONSTRAINT faculty_pkey PRIMARY KEY (fid);
-
-
---
--- Name: offered_courses offered_courses_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.offered_courses
-    ADD CONSTRAINT offered_courses_pkey PRIMARY KEY (offid);
 
 
 --
@@ -2254,14 +1606,6 @@ ALTER TABLE ONLY public.curriculum_courses
 
 
 --
--- Name: closheet fk_offid; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.closheet
-    ADD CONSTRAINT fk_offid FOREIGN KEY (offid) REFERENCES public.offered_courses(offid);
-
-
---
 -- Name: plo plo_curid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2273,5 +1617,5 @@ ALTER TABLE ONLY public.plo
 -- PostgreSQL database dump complete
 --
 
-\unrestrict apUXgJcVDPTE7i1CbSGkOl9bb0wPaDKgQRqEicoorPbfGKPFjS2sIvOvbDBkHdG
+\unrestrict fwhTexkITmJNTza7DYh8LHRgiuTDhL3c5CPOT3gKmDBN0J2e83BOpDcVskjA780
 
