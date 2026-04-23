@@ -6,28 +6,39 @@ router.get("/recaps", async (req, res) => {
   try {
     const search = (req.query.q || "").toString().trim();
     const effectiveSearch = search.length >= 3 ? search : "";
-    const query = `
-            SELECT r.rid, r.batch, r.course, r.faculty, r.semester, r.year, c.code, cs.closid
-            FROM recaps r JOIN rcourse vr ON r.rid = vr.rid
-            LEFT OUTER JOIN course c ON vr.code = trim(c.code)
-            LEFT OUTER JOIN closheet cs ON cs.rid = r.rid
-            WHERE r.batch NOT LIKE 'MSME%'
-              AND r.batch NOT LIKE 'BSASAI%'
-              AND (
-                  $1 = '' OR
-                  to_tsvector(
-                      'simple',
-                      concat_ws(' ',
-                          coalesce(r.course, ''),
-                          coalesce(r.faculty, ''),
-                          coalesce(r.semester::text, ''),
-                          coalesce(r.year::text, '')
-                      )
-                  ) @@ plainto_tsquery('simple', $1)
-              )
-            ORDER BY r.rid;
+      
+        const query = `
+          SELECT voc.offid, voc.ccid, voc.batch, voc.title, voc."name", voc.semester, voc."year", cs.closid, voc.rid 
+          FROM 
+            (SELECT oc.offid, oc.ccid, oc.batch, c.title, f."name", oc.semester, oc."year", oc.rid
+            FROM offered_courses oc
+            LEFT OUTER JOIN curriculum_courses cc on oc.ccid = cc.ccid
+            JOIN course c ON c.cid = cc.cid
+            JOIN faculty f ON oc.fid = f.fid
+            AND oc.ccid IS NOT NULL
+            UNION
+            SELECT oc.offid, oc.ccid, oc.batch, vr.title, f."name", oc.semester, oc."year", oc.rid
+            FROM offered_courses oc
+            JOIN faculty f ON f.fid = oc.fid
+            JOIN rcourse vr ON oc.rid = vr.rid
+            AND oc.ccid IS NULL) voc
+          LEFT OUTER JOIN closheet cs ON voc.rid = cs.rid
+          WHERE (
+              $1 = '' OR
+              to_tsvector(
+                'simple',
+                concat_ws(' ',
+                  coalesce(voc.title, ''),
+                  coalesce(voc."name", ''),
+                  coalesce(voc.semester::text, ''),
+                  coalesce(voc."year"::text, '')
+                )
+              ) @@ plainto_tsquery('simple', $1)
+            )
+          ORDER BY voc.offid;
         `;
     const result = await db.query(query, [effectiveSearch]);
+	
     res.json(result.rows);
   } catch (err) {
     console.error("Error fetching marks:", err);
@@ -67,10 +78,12 @@ router.get("/recaps/:rid", async (req, res) => {
         `;
     const cloQuery = `
             SELECT cl.*
-            FROM rcourse r
-            JOIN course c ON r.code = c.code
-            JOIN clo cl ON cl.cid = c.cid
-            WHERE r.rid = $1;
+            FROM closheet cs
+            INNER JOIN offered_courses oc ON oc.offid = cs.offid
+            INNER JOIN curriculum_courses cc ON cc.ccid = oc.ccid
+            INNER JOIN clo cl ON cl.cid = cc.cid
+            WHERE cs.rid = $1
+            ORDER BY cl.clo;
         `;
 
     const [recapResult, cloResult] = await Promise.all([
@@ -107,15 +120,28 @@ router.get("/closheet/:closid", async (req, res) => {
             FROM closheet
             WHERE closid = $1;
         `;
+    const cloQuery = `
+            SELECT cl.*
+            FROM closheet cs
+            INNER JOIN offered_courses oc ON oc.offid = cs.offid
+            INNER JOIN curriculum_courses cc ON cc.ccid = oc.ccid
+            INNER JOIN clo cl ON cl.cid = cc.cid
+            WHERE cs.closid = $1
+            ORDER BY cl.clo;
+        `;
 
     const closheetResult = await db.query(closheetQuery, [closid]);
+    const cloResult = await db.query(cloQuery, [closid]);
 
     if (closheetResult.rows.length === 0) {
       res.status(404).json({ error: "CLO Sheet not found" });
       return;
     }
 
-    res.json(closheetResult.rows[0]);
+    res.json({
+      ...closheetResult.rows[0],
+      clo: cloResult.rows,
+    });
   } catch (err) {
     console.error("Error fetching CLO Sheet by id:", err);
     res.status(500).json({ error: "Internal Server Error" });

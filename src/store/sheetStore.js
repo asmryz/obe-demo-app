@@ -183,9 +183,16 @@ export const useSheetStore = create((set) => {
       if (!cloSheetResourceCache.has(closid)) {
         const cloSheetPromise = api
           .get(`/closheet/${closid}`)
-          .then(({ data }) => ({ data, error: null }))
+          .then(({ data }) => ({
+            data: data?.data ?? null,
+            clo: Array.isArray(data?.clo) ? data.clo : [],
+            closheet: data ?? null,
+            error: null,
+          }))
           .catch((err) => ({
             data: null,
+            clo: [],
+            closheet: null,
             error: err?.response?.data?.error || err.message,
           }));
         cloSheetResourceCache.set(closid, cloSheetPromise);

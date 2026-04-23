@@ -51,10 +51,11 @@ function CLOSheet({ closid, rid }) {
     const { getRecapResource } = useRecapStore()
     const { recap } = use(getRecapResource(rid))
 
-    const { data: incomingData } = use(getCLOSheet(closid))
+    const incomingData = use(getCLOSheet(closid))
     const [kpi, setKpi] = useState(50)
-    const { data } = incomingData
+    const { data, clo: cloRows = [] } = incomingData
 
+    console.log(cloRows )
 
     const arr = data[ENUMS.CLO].slice(3)
     // const clo = [...new Set(arr.filter((x) => typeof x === 'number'))]
@@ -123,11 +124,9 @@ function CLOSheet({ closid, rid }) {
 
     // Now safe to calculate groupedPlanTotals
     const groupedPlanTotals = groupPlanByFirstWord(PLAN);
-    // Update groupedPlanTotals in store if changed
-    if (JSON.stringify(groupedPlanTotals) !== JSON.stringify(globalGroupedPlanTotals)) {
-        setGroupedPlanTotals(groupedPlanTotals);
-    }
-    console.log(groupedPlanTotals)
+    const groupedPlanTotalsKey = JSON.stringify(groupedPlanTotals)
+    const globalGroupedPlanTotalsKey = JSON.stringify(globalGroupedPlanTotals)
+
     // Update gradeChart in zustand store after rendering recap sheet
     useEffect(() => {
         // Calculate localGradeChart only when data changes
@@ -155,7 +154,11 @@ function CLOSheet({ closid, rid }) {
         if (recap && JSON.stringify(recap) !== JSON.stringify(globalRecap)) {
             setRecap(recap)
         }
-    }, [data, gradeChart, setGradeChart, recap, globalRecap, setRecap])
+
+        if (groupedPlanTotalsKey !== globalGroupedPlanTotalsKey) {
+            setGroupedPlanTotals(groupedPlanTotals)
+        }
+    }, [data, gradeChart, setGradeChart, recap, globalRecap, setRecap, groupedPlanTotals, groupedPlanTotalsKey, globalGroupedPlanTotalsKey, setGroupedPlanTotals])
 
     const planByHeadAndClo = PLAN.reduce((acc, item) => {
         if (!acc[item.head]) {
@@ -218,7 +221,7 @@ function CLOSheet({ closid, rid }) {
     // console.log(recap)
     return (
         <div className="marks-list">
-
+            rid = {rid} closid = {closid} 
             <h3>Grouped PLAN Totals by First Word</h3>
             <table id="grouped-plan-totals">
                 <thead>
@@ -342,7 +345,6 @@ function CLOSheet({ closid, rid }) {
                     ))}
                 </tbody>
             </table>
-            {console.log(gradeChart)}
             <h2>CLOs wise Head</h2>
             <form action="">
                 <label htmlFor="kpi">Set KPI Threshold (%): </label>

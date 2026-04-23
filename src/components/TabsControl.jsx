@@ -12,7 +12,7 @@ import CLOList from './CLOList';
 
 function TabsControl() {
     const ref = useRef();
-    const { cloSid } = useSheetStore()
+    const { cloSid, rid } = useSheetStore()
     const sheetData = useSheetStore((state) => state.sheetData);
     const handlePrint = useReactToPrint({
         contentRef: ref,
@@ -35,9 +35,13 @@ function TabsControl() {
                     <FileUpload />
                     {sheetData ? (
                         <Suspense fallback={<p>Loading student marks...</p>}>
-                            <div style={{ textAlign: 'center', padding: '20px' }}>
-                                <CLOSheet closid={cloSid} />
-                            </div>
+                            {cloSid && rid ? (
+                                <div style={{ textAlign: 'center', padding: '20px' }}>
+                                    <CLOSheet closid={cloSid} rid={rid} />
+                                </div>
+                            ) : (
+                                <p>Select a recap sheet first to view the CLO sheet.</p>
+                            )}
                         </Suspense>
                     ) : (
                         <p>Please upload an Excel file to view marks.</p>

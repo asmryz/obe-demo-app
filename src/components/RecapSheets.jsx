@@ -42,19 +42,21 @@ export const RecapSheets = () => {
         setCLOSid(closid);
     };
 
+    // console.log(recapList)
+
     if (rid !== null) {
         return (
             <>
                 <a href="#" onClick={() => { setRID(null); setCLOSid(null); }}>
                     Back to <b>Recap Sheets</b>
                 </a>
-                
-                    {cloSid ? (
-                        <CLOSheet closid={cloSid} rid={rid} />
-                    ) : (
-                        <CLOApply rid={rid} />
-                    )}
-                
+
+                {cloSid ? (
+                    <CLOSheet closid={cloSid} rid={rid} />
+                ) : (
+                    <CLOApply rid={rid} />
+                )}
+
             </>
         );
     }
@@ -71,35 +73,41 @@ export const RecapSheets = () => {
             {isLoading && <p>Loading recap sheets...</p>}
             {error && <p>{error}</p>}
             {recapList.length > 0
-                ? <table>
-                    <thead>
-                        <tr>
-                            <th>Batch</th>
-                            <th>Course</th>
-                            <th>Faculty</th>
-                            <th>Semester</th>
-                            <th>Year</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {recapList.map((recap, index) => (
-                            <tr key={`${recap.rid}-${recap.code ?? 'nocode'}-${index}`} style={{ backgroundColor: recap.closid !== null ? 'lightgreen' : recap.code !== null ? 'lightyellow' : 'transparent' }}>
-                                <td>{recap.batch}</td>
-                                <td style={{ width: '650px' }}>
-                                    <a href="#!" onClick={(event) => handleRecapClick(event, recap.rid, recap.closid)}>
-                                        {recap.course}
-                                    </a>
-                                </td>
-                                <td style={{ width: '200px' }}>{recap.faculty}</td>
-                                <td>{recap.semester}</td>
-                                <td>{recap.year}</td>
-                                <td>{recap.closid}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
 
+                ? <>
+                    {recapList.length}
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Batch</th>
+                                <th>Course</th>
+                                <th>Faculty</th>
+                                <th>Semester</th>
+                                <th>Year</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {recapList.map((recap, index) => (
+                                <tr key={`${recap.rid}-${recap.code ?? 'nocode'}-${index}`} style={{ backgroundColor: recap.ccid !== null ? (recap.closid !== null ? 'lightgreen' : 'lightyellow') : 'transparent' }}>
+                                    <td>{recap.batch}</td>
+                                    <td style={{ width: '650px' }}>
+                                        {recap.ccid !== null ? (
+                                            <a href="#!" onClick={(event) => handleRecapClick(event, recap.rid, recap.closid)}>
+                                                {recap.title}
+                                            </a>
+
+                                        ) : recap.title}
+                                    </td>
+                                    <td style={{ width: '200px' }}>{recap.name}</td>
+                                    <td>{recap.semester}</td>
+                                    <td>{recap.year}</td>
+                                    <td>{recap.closid} | {recap.rid }</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </>
                 : <p>No recap sheets available.</p>}
         </>
 
