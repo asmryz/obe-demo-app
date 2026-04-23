@@ -78,18 +78,32 @@ export const CLOApply = ({ rid, closid }) => {
     }
 
     // Re-evaluate save status whenever status or recapRows changes
-     
+
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         checkSaveStatus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [status, recapRows, firstEmptyCellIndex]);
 
     // Returns the sum of all nth elements in heads[key]
     function verify(key, rowIndex) {
         if (!heads[key] || heads[key].length === 0) return false;
         // Get the nth element from each array in heads[key] and sum them
-        return heads[key].reduce((sum, arr) => sum + Number(arr[rowIndex]), 0) === editColumn[rowIndex];
+        const sum = heads[key].reduce((sum, arr) => sum + Number(arr[rowIndex]), 0);
+        return equalsRounded(sum, editColumn[rowIndex]);
     }
 
+    function roundTo(value, decimals = 2) {
+        const factor = 10 ** decimals;
+        return Math.round(value * factor) / factor;
+    }
+
+    function equalsRounded(value, expected) {
+        const numericExpected = Number(expected);
+        if (Number.isNaN(numericExpected)) return false;
+
+        return roundTo(value, 1) === numericExpected || roundTo(value, 2) === numericExpected;
+    }
     //     useEffect(() => {
     //         setMultiCLO([["S.No","Name","Reg.No","Final Paper 1",null,null,null],[null,null,null,1,2,3,4],[null,null,null,"10","10","10","10"],[1,"Muhammad Huzaifa Ghafoor","1945116",0,0,0,0],[2,"Muhammad Azaan Mirza","2045115",25,8,4,9],[3,"Sher  Bahadur","2045154",6,1,1,3],[4,"Abdul Mueed Shaikh","2145120",10,5,3,1],[5,"Hassin  Sikander","2245102",27.5,6,7,8],[6,"Hussain  Hasnain","2245103",36,10,9,10],[7,"Mohammad Shabbir Tarwari","2245104",31,10,7,8],[8,"Ahmad  Foad","2245110",27,7,7,9],[9,"Ali Khan Mashori","2245111",19,3,5,8],[10,"Jawwad Raza","2245115",17.5,2,6,8],[11,"Rayyan Ahmed Thakur","2245118",33,5,9,9],[12,"Syed Faaiz Raza Zaidi","2245120",18,7,4,7],[13,"Zain Ul Abedien Raza","2245123",0,0,0,0],[14,"Um E Abiha","2245124",15,2,5,8],[15,"Hunain  Muhammad Iqbal","2245126",38,10,8,10]]
     // )
@@ -148,7 +162,7 @@ export const CLOApply = ({ rid, closid }) => {
                                 .map(s => s.trim())
                                 .filter(Boolean);
                         }
-                        arr = arr.map(v => (isNaN(Number(v)) ? v : Number(v)));
+                        arr = arr.map(v => (isNaN(Number(v)) ? v : Number(v).toFixed(2)));
                         setClipboardArray(arr);
                         setClipboardCache(arr);
                         setClipboardActive(true);
@@ -218,7 +232,7 @@ export const CLOApply = ({ rid, closid }) => {
                 let check = true;
                 editColumn.slice(3).forEach((val, idx) => {
                     const sum = newHeads[key].reduce((sum, arr) => sum + Number(arr[idx + 3]), 0);
-                    if (sum !== val) {
+                    if (!equalsRounded(sum, val)) {
                         check = false;
                     }
                 });
@@ -249,7 +263,7 @@ export const CLOApply = ({ rid, closid }) => {
                 if (newHeads[key].length > 0) {
                     editColumn.slice(3).forEach((val, idx) => {
                         const sum = newHeads[key].reduce((sum, arr) => sum + Number(arr[idx + 3]), 0);
-                        if (sum !== val) {
+                        if (!equalsRounded(sum, val)) {
                             check = false;
                         }
                     });
@@ -386,7 +400,7 @@ export const CLOApply = ({ rid, closid }) => {
                         style={{
                             opacity: clipboardAvailable ? 1 : 0.5,
                             cursor: clipboardAvailable ? 'pointer' : 'not-allowed',
-                            textDecoration: 'none', 
+                            textDecoration: 'none',
                             margin: '16px 12px',
                         }}
                         title={clipboardAvailable ? 'Paste from clipboard' : 'Clipboard API not available'}
@@ -516,7 +530,7 @@ export const CLOApply = ({ rid, closid }) => {
                                     <div style={{ height: '50px', border: '1px solid #d3d3d3', display: 'flex', alignItems: 'center', gap: '12px' }}>
                                         {save ? <span style={{ color: 'green', fontWeight: 'bold' }}>All CLOs saved!</span> : <span style={{ color: 'red', fontWeight: 'bold' }}>CLOs not saved</span>}
                                         <button onClick={saveCLOSheet} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }} title="Save CLO Sheet">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 48 48" fill="#000000"><g fill="none" stroke="#979797" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"><path d="M42.5 11c0 4.418-8.283 8-18.5 8S5.5 15.418 5.5 11M43 24.205C43 28.51 34.493 32 24 32S5 28.51 5 24.205M11.5 24a.5.5 0 0 0 0-1m0 1a.5.5 0 0 1 0-1"/><path d="M5.5 11c0-4.418 8.283-8 18.5-8s18.5 3.582 18.5 8c0 0 .5 5 .5 13s-.5 13-.5 13c0 4.418-8.283 8-18.5 8S5.5 41.418 5.5 37c0 0-.5-5-.5-13s.5-13 .5-13"/><path d="M11.5 37a.5.5 0 0 0 0-1m0 1a.5.5 0 0 1 0-1M18 25.75a.5.5 0 0 0 0-1m0 1a.5.5 0 0 1 0-1m0 14a.5.5 0 0 0 0-1m0 1a.5.5 0 0 1 0-1"/></g></svg>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 48 48" fill="#000000"><g fill="none" stroke="#979797" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3"><path d="M42.5 11c0 4.418-8.283 8-18.5 8S5.5 15.418 5.5 11M43 24.205C43 28.51 34.493 32 24 32S5 28.51 5 24.205M11.5 24a.5.5 0 0 0 0-1m0 1a.5.5 0 0 1 0-1" /><path d="M5.5 11c0-4.418 8.283-8 18.5-8s18.5 3.582 18.5 8c0 0 .5 5 .5 13s-.5 13-.5 13c0 4.418-8.283 8-18.5 8S5.5 41.418 5.5 37c0 0-.5-5-.5-13s.5-13 .5-13" /><path d="M11.5 37a.5.5 0 0 0 0-1m0 1a.5.5 0 0 1 0-1M18 25.75a.5.5 0 0 0 0-1m0 1a.5.5 0 0 1 0-1m0 14a.5.5 0 0 0 0-1m0 1a.5.5 0 0 1 0-1" /></g></svg>
                                             <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
                                                 <defs>
                                                     <path id="SVGJ5kDdewH" fill="#fff" d="M24 19c10.217 0 18.5-3.582 18.5-8S34.217 3 24 3S5.5 6.582 5.5 11s8.283 8 18.5 8" />

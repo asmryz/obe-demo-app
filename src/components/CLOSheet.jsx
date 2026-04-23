@@ -75,7 +75,7 @@ function CLOSheet({ closid, rid }) {
         planRows.forEach(row => {
             if (typeof row.head !== 'string' || !row.head) return;
             const key = row.head.split(' ')[0]; // Split by non-breaking space and take the first part
-            // console.log(row.head.split(' ')[0])
+            
             const mark = Number(row.total) || 0;
             result[key] = (result[key] || 0) + mark;
         });
@@ -83,16 +83,16 @@ function CLOSheet({ closid, rid }) {
         return result;
     }
     // Utility to group and sum marks by first word of the first column
-    function groupAndSumByFirstWord(rows) {
-        const result = {};
-        rows.forEach(row => {
-            if (!row[0] || typeof row[0] !== 'string') return;
-            const key = row[0].split(' ')[0];
-            const mark = Number(row[1]) || 0; // Adjust index if needed
-            result[key] = (result[key] || 0) + mark;
-        });
-        return result;
-    }
+    // function groupAndSumByFirstWord(rows) {
+    //     const result = {};
+    //     rows.forEach(row => {
+    //         if (!row[0] || typeof row[0] !== 'string') return;
+    //         const key = row[0].split(' ')[0];
+    //         const mark = Number(row[1]) || 0; // Adjust index if needed
+    //         result[key] = (result[key] || 0) + mark;
+    //     });
+    //     return result;
+    // }
 
     //const groupedTotals = groupAndSumByFirstWord(data[0]);
     // console.log(groupedTotals)
@@ -119,7 +119,7 @@ function CLOSheet({ closid, rid }) {
         }
     })
 
-    console.log(PLAN)
+    // console.log(PLAN)
 
     // Now safe to calculate groupedPlanTotals
     const groupedPlanTotals = groupPlanByFirstWord(PLAN);
@@ -280,23 +280,7 @@ function CLOSheet({ closid, rid }) {
                     </tr>
                 </tbody>
             </table>
-            {/* <h2>Grouped Totals by First Word</h2>
-            <table id="grouped-totals">
-                <thead>
-                    <tr>
-                        <th>Group</th>
-                        <th>Total Marks</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {Object.entries(groupedTotals).map(([group, total]) => (
-                        <tr key={group}>
-                            <td>{group}</td>
-                            <td>{total}</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table> */}
+
 
             <h2>Head wise CLOs</h2>
             <table id="head-clo">
@@ -311,7 +295,7 @@ function CLOSheet({ closid, rid }) {
                         ) : (
                             <tr key={`row-${rowIndex}`}>
                                 {row.map((cell, cellIndex) => (
-                                    <td key={`cell-${rowIndex}-${cellIndex}`} style={{ textAlign: cellIndex === 1 && 'left' }}>{cell ?? ''}</td>
+                                    <td key={`cell-${rowIndex}-${cellIndex}`} style={{ textAlign: cellIndex === 1 && 'left' }}>{cellIndex > 2 ? Number(cell).toString() : cell ?? ''}</td>
                                 ))}
                             </tr>
                         )
@@ -420,7 +404,7 @@ function CLOSheet({ closid, rid }) {
                             return [
                                 ...items.map((item, index) => (
                                     <td key={`cell-${rowIndex}-${cloKey}-${index}`}>
-                                        {row[item.sno + 2] ?? ''}
+                                        {Number(row[item.sno + 2]).toString() ?? ''}
                                     </td>
                                 )),
                                 <td
