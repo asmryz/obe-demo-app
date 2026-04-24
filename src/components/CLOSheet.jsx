@@ -218,7 +218,7 @@ function CLOSheet({ closid, rid }) {
             }, {})
         )
     }
-    // console.log(recap)
+    
     return (
         <div className="marks-list">
             rid = {rid} closid = {closid} 
@@ -435,6 +435,7 @@ function CLOSheet({ closid, rid }) {
                     })}
                 </tbody>
             </table>
+            {console.log(cloSummary(calCLOs))}
             <h2>CLO Achievement Summary</h2>
             <table id="clo-summary">
                 <thead>
