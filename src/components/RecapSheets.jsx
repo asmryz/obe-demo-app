@@ -5,10 +5,11 @@ import { useEffect } from 'react';
 import './RecapSheets.css';
 import { useRecapStore } from '../store/recapStore';
 import { useSheetStore } from '../store/sheetStore';
+import { CLOApply } from './CLOApply';
 
 
 export const RecapSheets = () => {
-    const { setRID, setCLOSid, setRecap, setActiveTabIndex } = useSheetStore()
+    const { rid, setRID, setCLOSid, setRecap, setActiveTabIndex } = useSheetStore()
     // const [selectedRid, setSelectedRid] = useState(null);
     // const [cloSid, setCloSid] = useState(null);
     const recapsByQuery = useRecapStore((state) => state.recapsByQuery);
@@ -58,6 +59,10 @@ export const RecapSheets = () => {
         });
         setActiveTabIndex(1);
     };
+
+    if (rid !== null) {
+        return <CLOApply rid={rid} />;
+    }
 
     return (
         <>
