@@ -140,8 +140,27 @@ export const useSheetStore = create((set) => {
   return {
     gradeChart: {},
     setGradeChart: (chart) => set({ gradeChart: chart }),
-    recap: {},
+    recap: null,
     setRecap: (recap) => set({ recap }),
+    calCLOs: [],
+    setCalCLOs: (calCLOs) => set({ calCLOs }),
+    cloSummary: (localCalCLOs = [], cloNumbers = []) =>
+      Object.entries(
+        localCalCLOs.reduce((acc, cloObj) => {
+          cloNumbers.forEach((cloNo) => {
+            const cloKey = `CLO${cloNo}`;
+            if (!acc[cloKey]) {
+              acc[cloKey] = [0, 0];
+            }
+            if (cloObj[cloKey] === 1) {
+              acc[cloKey][0] += 1;
+            } else if (cloObj[cloKey] === 0) {
+              acc[cloKey][1] += 1;
+            }
+          });
+          return acc;
+        }, {})
+      ),
     groupedPlanTotals: {},
     setGroupedPlanTotals: (totals) => set({ groupedPlanTotals: totals }),
     // ...other state/actions...
@@ -149,10 +168,6 @@ export const useSheetStore = create((set) => {
     multiCLOData,
     cloSid: null,
     rid: null,
-    recap: null,
-    // gradeChart: {},
-    // setGradeChart: (gradeChart) => set({ gradeChart }),
-    setRecap: (recap) => set({ recap }),
     setCLOSid: (cloSid) => set({ cloSid }),
     setRID: (rid) => set({ rid }),
     statusData: () => {
@@ -179,7 +194,6 @@ export const useSheetStore = create((set) => {
 
     // Resource-style fetcher for CLO Sheet (for use() hook)
     getCLOSheet(closid) {
-      console.log(`closid >> ${closid}`);
       if (!cloSheetResourceCache.has(closid)) {
         const cloSheetPromise = api
           .get(`/closheet/${closid}`)

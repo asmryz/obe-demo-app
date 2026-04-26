@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict ykAAcIMQ7DmEObIdgNUHqzExBcMWITYKeTkSSbHkncNA1dqRsHxnm2Rrj2XNhgq
+\restrict y6HLgTu2PkXPMZu2Wj8IFZWkIIGHa8EzUdgdv19ZeqB24N54ByitmGWZrJtqLGM
 
 -- Dumped from database version 18.1 (Debian 18.1-1.pgdg13+2)
 -- Dumped by pg_dump version 18.3 (Ubuntu 18.3-1.pgdg24.04+1)
@@ -27,9 +27,9 @@ DROP DATABASE IF EXISTS obe;
 CREATE DATABASE obe WITH TEMPLATE = template0 ENCODING = 'UTF8' LOCALE_PROVIDER = libc LOCALE = 'en_US.utf8';
 
 
-\unrestrict ykAAcIMQ7DmEObIdgNUHqzExBcMWITYKeTkSSbHkncNA1dqRsHxnm2Rrj2XNhgq
+\unrestrict y6HLgTu2PkXPMZu2Wj8IFZWkIIGHa8EzUdgdv19ZeqB24N54ByitmGWZrJtqLGM
 \connect obe
-\restrict ykAAcIMQ7DmEObIdgNUHqzExBcMWITYKeTkSSbHkncNA1dqRsHxnm2Rrj2XNhgq
+\restrict y6HLgTu2PkXPMZu2Wj8IFZWkIIGHa8EzUdgdv19ZeqB24N54ByitmGWZrJtqLGM
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -152,9 +152,7 @@ ALTER SEQUENCE public.crs_cloid_seq OWNED BY public.clo.cloid;
 CREATE TABLE public.curriculum (
     curid integer CONSTRAINT curiculum_curid_not_null NOT NULL,
     year smallint CONSTRAINT curiculum_year_not_null NOT NULL,
-    prgid integer CONSTRAINT curiculum_prgid_not_null NOT NULL,
-    kpi integer,
-    cohort integer
+    prgid integer CONSTRAINT curiculum_prgid_not_null NOT NULL
 );
 
 
@@ -272,39 +270,6 @@ CREATE SEQUENCE public.offered_courses_offid_seq
 --
 
 ALTER SEQUENCE public.offered_courses_offid_seq OWNED BY public.offered_courses.offid;
-
-
---
--- Name: plo; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.plo (
-    ploid integer CONSTRAINT plo_poid_not_null NOT NULL,
-    plo integer,
-    title character varying(50),
-    statement text,
-    curid integer
-);
-
-
---
--- Name: plo_poid_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE public.plo_poid_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: plo_poid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE public.plo_poid_seq OWNED BY public.plo.ploid;
 
 
 --
@@ -436,13 +401,6 @@ ALTER TABLE ONLY public.offered_courses ALTER COLUMN offid SET DEFAULT nextval('
 
 
 --
--- Name: plo ploid; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.plo ALTER COLUMN ploid SET DEFAULT nextval('public.plo_poid_seq'::regclass);
-
-
---
 -- Name: programs prgid; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -508,6 +466,7 @@ INSERT INTO public.clo VALUES
 	(45, 5, 'Reproduce the Setup for weekly experiments and lab exams', 'Psychomotor', 2, 9, 12),
 	(46, 6, 'Participate responsibly to complete a task', 'Affective', 2, 9, 12),
 	(47, 1, 'Explain the basic concepts of linear algebra, matrix algebra and vector algebra, linear/nonlinear, homogeneous/ non-homogeneous ODE. ', 'Cognitive', 2, 1, 14),
+	(48, 2, 'Solve problems of ODEs, Linear Algebra and related topics. ', 'Cognitive', 3, 2, 15),
 	(49, 1, 'Define the ideology of Pakistan with reference to the basic values of Islam and the socio-cultural milieu of Muslims in the sub-continent ', 'Cognitive', 1, 6, 19),
 	(50, 2, 'Describe the early problems with particular emphasis on economic, geopolitical, refugee, state, and administrative problems, constitutional reforms of 1956, 1962, and 1973’s', 'Cognitive', 2, 6, 19),
 	(51, 3, 'Communicate the knowledge of topics relevant to geography, resources, and foreign policy of Pakistan which emphasizes progression and peaceful co-existence, and document their findings ', 'Affective', 2, 6, 19),
@@ -773,8 +732,7 @@ ii. The operation of logic gates, flip flops, memory, sequential circuits and pr
 	(308, 4, 'Present working of proposed solution and its associated shortcomings.', 'Affective', 2, 10, 76),
 	(309, 1, 'Use concepts of simple modeling elements of various engineering disciplines to construct models of systems of interest.', 'Cognitive', 3, 1, 70),
 	(310, 2, 'Apply the models derived (in the form of differential equations) and formulate and run simulations of the model for conditions of interest.', 'Cognitive', 3, 5, 70),
-	(311, 3, 'Analyze the results of a simulation and compare them with analytical results obtained from the derived model.', 'Cognitive', 4, 2, 70),
-	(48, 2, 'Solve problems of ODEs, Linear Algebra and related topics. ', 'Cognitive', 3, 2, 14);
+	(311, 3, 'Analyze the results of a simulation and compare them with analytical results obtained from the derived model.', 'Cognitive', 4, 2, 70);
 
 
 --
@@ -785,7 +743,7 @@ INSERT INTO public.closheet VALUES
 	(1, 352, '[["S.No", "Name", "Reg.No", "Quiz 1", "Quiz 2", "Quiz 3", "Mid Term Paper 1", null, null, null, "Final Paper 1", null, null, null, "Project 1"], [null, null, null, 1, 2, 3, 1, 1, 2, 2, 1, 2, 3, 4, 4], [null, null, null, 10, 10, 10, 5, 5, 5, 5, 10, 10, 10, 10, 10], [1, "Muhammad Huzaifa Ghafoor", "1945116", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [2, "Muhammad Azaan Mirza", "2045115", 10, 9, 8, 1, 2, 4, 1.5, 4, 8, 4, 9, 7], [3, "Sher  Bahadur", "2045154", 6.5, 6, 6.5, 1, 2, 3, 0, 1, 1, 1, 3, 5], [4, "Abdul Mueed Shaikh", "2145120", 10, 9, 10, 3, 2, 3, 1, 1, 5, 3, 1, 7], [5, "Hassin  Sikander", "2245102", 10, 7.5, 10, 5, 4, 4, 3, 6.5, 6, 7, 8, 9], [6, "Hussain  Hasnain", "2245103", 10, 7.5, 9, 5, 4, 5, 4.5, 7, 10, 9, 10, 9], [7, "Mohammad Shabbir Tarwari", "2245104", 10, 8.5, 9, 4, 4, 5, 4.5, 6, 10, 7, 8, 9], [8, "Ahmad  Foad", "2245110", 10, 6, 7, 3, 3, 4, 1, 4, 7, 7, 9, 7], [9, "Ali Khan Mashori", "2245111", 10, 8, 9, 0, 2.5, 2, 4, 3, 3, 5, 8, 6], [10, "Jawwad Raza", "2245115", 10, 8.5, 9, 2, 2.5, 0, 1, 1.5, 2, 6, 8, 6], [11, "Rayyan Ahmed Thakur", "2245118", 10, 10, 8, 1, 4, 4, 3, 10, 5, 9, 9, 7], [12, "Syed Faaiz Raza Zaidi", "2245120", 10, 8.5, 7, 0, 2, 3, 3, 0, 7, 4, 7, 6], [13, "Zain Ul Abedien Raza", "2245123", 8.5, 6, 6, 5, 2, 3, 2, 0, 0, 0, 0, 6], [14, "Um E Abiha", "2245124", 4.5, 7.5, 10, 4, 4, 4, 0, 0, 2, 5, 8, 7], [15, "Hunain  Muhammad Iqbal", "2245126", 7.5, 6, 4.5, 5, 4, 4, 4, 10, 10, 8, 10, 7]]', 337),
 	(3, 403, '[["S.No", "Name", "Reg.No", "Assignment 1", null, "Lab Work 1", "Final Paper 1", "manual 1", null, "General Viva 1", "Project 1", null, null], [null, null, null, 1, 4, 1, 1, 1, 5, 5, 2, 3, 4], [null, null, null, 10, 4, 5, 30, 7, 7, 5, 9, 13, 10], [1, "Shahmeer", "1845143", 1, 4, 2, 22.5, 4.75, 5.25, 3, 9, 9, 5], [2, "Hassin  Sikander", "2245102", 10, 4, 5, 20.5, 5.25, 4.75, 4, 9, 9, 5], [3, "Hussain  Hasnain", "2245103", 8, 3, 3, 20, 6.75, 7, 3, 9, 10, 5], [4, "Mohammad Shabbir Tarwari", "2245104", 10, 4, 5, 25, 6.25, 6.75, 4, 9, 10, 5], [5, "Ahmad  Foad", "2245110", 8, 4, 4, 21, 6.25, 6.25, 3, 9, 10, 5], [6, "Rayyan Ahmed Thakur", "2245118", 10, 4, 5, 17, 4, 4, 3, 9, 10, 5], [7, "Syed Faaiz Raza Zaidi", "2245120", 10, 4, 5, 19, 3.25, 4, 3, 9, 9, 5], [8, "Um E Abiha", "2245124", 8, 4, 4, 20.5, 4.75, 5.75, 3, 9, 9, 5], [9, "Hunain  Muhammad Iqbal", "2245126", 10, 4, 5, 25, 6, 6.25, 3, 9, 9, 5]]', 388),
 	(2, 449, '[["S.No", "Name", "Reg.No", "Assignment 1", "Assignment 2", "Test 1", null, "Test 2", "Mid Term Paper 1", null, "Final Paper 1", null], [null, null, null, 2, 2, 1, 2, 2, 1, 2, 1, 2], [null, null, null, 5, 5, 6, 9, 15, 10, 15, 10, 25], [1, "Sohaib Ali Surhio", "1945122", 3, 3, 6, 9, 10.5, 5, 3, 2.5, 12.8], [2, "Jawwad Raza", "2245115", 5, 5, 5.5, 4, 9.1, 5.5, 6, 5, 10.6], [3, "Ameen  Naushad", "2345105", 2.5, 2.5, 3.5, 6.5, 11, 7, 10.5, 6.5, 20.6], [4, "Muhammad  Muhib", "2345118", 2.5, 2.5, 5, 9, 6.5, 7.5, 13.5, 8.5, 20.6], [5, "Mohammad Aqeel Anjarwala", "2345132", 2.5, 2.5, 5.5, 9, 9.2, 8.5, 15, 7.5, 15.6], [6, "Abdul Basit Hussain", "2345135", 4.45, 4.45, 4, 5, 8.7, 6.5, 11, 5.5, 10.6], [7, "Aleeza  Shahbaz", "2445101", 4, 4, 4.5, 5.5, 6.8, 5.5, 7.5, 5, 12.2], [8, "Geeta  Khurana", "2445108", 5, 5, 6, 6.5, 7.2, 6.5, 7, 5.5, 11.6], [9, "Hussain  Hasnain", "2445110", 5, 5, 5.5, 9, 11, 7.5, 15, 4, 18.4], [10, "Kaydin Asher Alfred Lobo", "2445111", 4, 4, 5, 9, 9, 6, 11.5, 6, 20.6], [11, "Muhammad Hamza Yaqoob", "2445112", 0, 0, 0, 0, 0, 0, 0, 0, 0], [12, "Muhammad Huzaifa", "2445113", 3, 3, 5, 9, 8.6, 7, 15, 4, 21.1], [13, "Murtaza Ali Yousuf Ali Bohra", "2445116", 5, 5, 5, 9, 12, 7, 13.5, 7, 17.3], [14, "Roshni", "2445118", 4.7, 4.7, 5, 6, 11.7, 5.5, 10, 6.5, 16.2], [15, "Salahuddin Dossal", "2445119", 4.45, 4.45, 6, 9, 7.4, 5, 9.5, 4.5, 13.4], [16, "Hasan  Gohar Ahmed", "2445132", 5, 5, 4.5, 9, 4.8, 7, 13, 5.5, 16.2], [17, "Wasib Aizaz Khan", "2445147", 3, 3, 5.5, 7.5, 4, 6.5, 6.5, 3.5, 15.6], [18, "Sabih  Ahmed", "2445150", 5, 5, 4.5, 6.5, 9.6, 7, 8.5, 4.5, 12.8]]', 431),
-	(4, 7, '[["S.No", "Name", "Reg.No", "Final Paper 1", null, null, "Mid Term Paper 1", null, "Presentation 1", "Report 1", "Test 1", "Test 2"], [null, null, null, 1, 2, 3, 1, 2, 3, 2, 1, 2], [null, null, null, 13, 13, 14, 10, 10, 15, 5, 10, 10], [1, "Muhammad Yoksal Khan", "2045143", "0.00", "0.00", "0.00", "5.75", "5.75", 0, 0, 5, 0], [2, "Ahtisham  Qayyum", "2145101", "6.67", "6.67", "6.67", "4.00", "4.00", 13, 5, 6, 10], [3, "Ayesha Khan  Nangraj", "2145102", "11.33", "11.33", "11.33", "9.00", "9.00", 15, 5, 9, 10], [4, "Syed Nayyer Abbas", "2145103", "8.17", "8.17", "8.17", "8.50", "8.50", 15, 5, 8, 10], [5, "Eeqan  Arif", "2145104", "11.50", "11.50", "11.50", "10.00", "10.00", 15, 5, 10, 10], [6, "Hatim  Mustafa", "2145105", "10.50", "10.50", "10.50", "10.00", "10.00", 15, 5, 10, 10], [7, "Khowaja Aboul Kalam", "2145106", "7.83", "7.83", "7.83", "6.00", "6.00", 15, 5, 10, 10], [8, "Muhammad Azan Khan", "2145107", "10.00", "10.00", "10.00", "9.50", "9.50", 15, 5, 8, 10], [9, "Moiz Ullah Khan", "2145108", "10.25", "10.25", "10.25", "6.00", "6.00", 15, 5, 10, 10], [10, "Mubeen Raza Qazi", "2145109", "10.50", "10.50", "10.50", "9.25", "9.25", 15, 5, 8, 10], [11, "Muhammad  Hussain", "2145110", "11.33", "11.33", "11.33", "9.00", "9.00", 15, 5, 8, 10], [12, "Muhammad  Qamber", "2145111", "11.17", "11.17", "11.17", "8.75", "8.75", 15, 5, 8, 10], [13, "Shaikh Shahbaz Ali", "2145115", "0.00", "0.00", "0.00", "7.25", "7.25", 13, 5, 8, 10], [14, "Waniza  Khan", "2145117", "11.67", "11.67", "11.67", "10.00", "10.00", 15, 5, 10, 10], [15, "Abdul Momin  Sahito", "2145119", "11.67", "11.67", "11.67", "10.00", "10.00", 15, 5, 9, 10], [16, "Abdul Mueed Shaikh", "2145120", "11.33", "11.33", "11.33", "9.50", "9.50", 15, 5, 7, 10], [17, "Ali  Naqi", "2145122", "5.50", "5.50", "5.50", "6.25", "6.25", 10, 5, 6, 10], [18, "Muhammad Minam Ur Rehman Khan", "2145124", "10.33", "10.33", "10.33", "10.00", "10.00", 15, 5, 10, 10], [19, "Syed Muhammad Umer Ali Qadri", "2145125", "11.00", "11.00", "11.00", "9.00", "9.00", 15, 5, 10, 10], [20, "Burhanuddin  Ali", "2145128", "10.83", "10.83", "10.83", "9.50", "9.50", 15, 5, 8, 10]]', 7);
+	(4, 7, '[["S.No", "Name", "Reg.No", "Final Paper 1", null, null, "Mid Term Paper 1", null, "Presentation 1", "Report 1", "Test 1", "Test 2"], [null, null, null, 1, 2, 3, 1, 2, 3, 2, 1, 2], [null, null, null, 13, 13, 14, 10, 10, 15, 5, 10, 10], [1, "Muhammad Yoksal Khan", "2045143", "0.00", "0.00", "0.00", "5.75", "5.75", 0, 0, 5, 0], [2, "Ahtisham  Qayyum", "2145101", "6.67", "6.67", "6.67", "4.00", "4.00", 13, 5, 6, 10], [3, "Ayesha Khan  Nangraj", "2145102", "11.33", "11.33", "11.33", "9.00", "9.00", 15, 5, 9, 10], [4, "Syed Nayyer Abbas", "2145103", "8.17", "8.17", "8.17", "8.50", "8.50", 15, 5, 8, 10], [5, "Eeqan  Arif", "2145104", "11.50", "11.50", "11.50", "10.00", "10.00", 15, 5, 10, 10], [6, "Hatim  Mustafa", "2145105", "10.50", "10.50", "10.50", "10.00", "10.00", 15, 5, 10, 10], [7, "Khowaja Aboul Kalam", "2145106", "7.83", "7.83", "7.83", "6.00", "6.00", 15, 5, 10, 10], [8, "Muhammad Azan Khan", "2145107", "10.00", "10.00", "10.00", "9.50", "9.50", 15, 5, 8, 10], [9, "Moiz Ullah Khan", "2145108", "10.25", "10.25", "10.25", "6.00", "6.00", 15, 5, 10, 10], [10, "Mubeen Raza Qazi", "2145109", "10.50", "10.50", "10.50", "9.25", "9.25", 15, 5, 8, 10], [11, "Muhammad  Hussain", "2145110", "11.33", "11.33", "11.33", "9.00", "9.00", 15, 5, 8, 10], [12, "Muhammad  Qamber", "2145111", "11.17", "11.17", "11.17", "8.75", "8.75", 15, 5, 8, 10], [13, "Shaikh Shahbaz Ali", "2145115", "0.00", "0.00", "0.00", "7.25", "7.25", 13, 5, 8, 10], [14, "Waniza  Khan", "2145117", "11.67", "11.67", "11.67", "10.00", "10.00", 15, 5, 10, 10], [15, "Abdul Momin  Sahito", "2145119", "11.67", "11.67", "11.67", "10.00", "10.00", 15, 5, 9, 10], [16, "Abdul Mueed Shaikh", "2145120", "11.33", "11.33", "11.33", "9.50", "9.50", 15, 5, 7, 10], [17, "Ali  Naqi", "2145122", "5.50", "5.50", "5.50", "6.25", "6.25", 10, 5, 6, 10], [18, "Muhammad Minam Ur Rehman Khan", "2145124", "10.33", "10.33", "10.33", "10.00", "10.00", 15, 5, 10, 10], [19, "Syed Muhammad Umer Ali Qadri", "2145125", "11.00", "11.00", "11.00", "9.00", "9.00", 15, 5, 10, 10], [20, "Burhanuddin  Ali", "2145128", "10.83", "10.83", "10.83", "9.50", "9.50", 15, 5, 8, 10]]', NULL);
 
 
 --
@@ -879,8 +837,8 @@ INSERT INTO public.course VALUES
 --
 
 INSERT INTO public.curriculum VALUES
-	(1, 2024, 2, 50, 60),
-	(2, 2025, 2, 50, 60);
+	(1, 2024, 2),
+	(2, 2025, 2);
 
 
 --
@@ -1509,25 +1467,6 @@ INSERT INTO public.offered_courses VALUES
 
 
 --
--- Data for Name: plo; Type: TABLE DATA; Schema: public; Owner: -
---
-
-INSERT INTO public.plo VALUES
-	(1, 1, 'Engineering Knowledge', 'An ability to apply knowledge of mathematics, science, engineering fundamentals, and an engineering specialization to the solution of complex engineering problems.', 1),
-	(2, 2, 'Problem Analysis', 'An ability to identify, formulate, research literature, and analyze complex engineering problems, reaching substantiated conclusions using first principles of mathematics, natural sciences, and engineering sciences.', 1),
-	(3, 3, 'Design/Development of Solutions', 'An ability to design solutions for complex engineering problems and design systems, components, or processes that meet specified needs with appropriate consideration for public health and safety and cultural, societal, and environmental considerations.', 1),
-	(4, 4, 'Investigation', 'An ability to investigate complex engineering problems in a methodical way, including literature survey, design and conduct of experiments, analysis and interpretation of experimental data, and synthesis of information to derive valid conclusions.', 1),
-	(5, 5, 'Modern Tool Usage', 'An ability to create, select and apply appropriate techniques, resources, and modern engineering and IT tools, including prediction and modeling, to complex engineering activities, with an understanding of the limitations.', 1),
-	(6, 6, 'The Engineer and Society', 'An ability to apply reasoning informed by contextual knowledge to assess societal, health, safety, legal and cultural issues and the consequent responsibilities relevant to professional engineering practice and solution to complex engineering problems.', 1),
-	(7, 7, 'Environment and Sustainability', 'An ability to understand the impact of professional engineering solutions in societal and environmental contexts and demonstrate knowledge of and need for sustainable development.', 1),
-	(8, 8, 'Ethics', 'Apply ethical principles and commit to professional ethics and responsibilities and norms of engineering practice.', 1),
-	(9, 9, 'Individual and Teamwork', 'An ability to work effectively, as an individual or in a team, on multifaceted and/or multidisciplinary settings.', 1),
-	(10, 10, 'Communication', 'An ability to communicate effectively, orally as well as in writing, on complex engineering activities with the engineering community and with society at large.', 1),
-	(11, 11, 'Project Management', 'An ability to demonstrate management skills and apply engineering principles to one’s own work as a member and/or leader in a team to manage projects in a multidisciplinary environment.', 1),
-	(12, 12, 'Lifelong Learning', 'An ability to recognize the need for, and have the preparation and ability to engage in, independent and lifelong learning in the broadest context of technological change.', 1);
-
-
---
 -- Data for Name: programs; Type: TABLE DATA; Schema: public; Owner: -
 --
 
@@ -2115,13 +2054,6 @@ SELECT pg_catalog.setval('public.offered_courses_offid_seq', 470, true);
 
 
 --
--- Name: plo_poid_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('public.plo_poid_seq', 12, true);
-
-
---
 -- Name: programs_prgid_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
@@ -2192,14 +2124,6 @@ ALTER TABLE ONLY public.offered_courses
 
 
 --
--- Name: plo plo_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.plo
-    ADD CONSTRAINT plo_pkey PRIMARY KEY (ploid);
-
-
---
 -- Name: programs programs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2213,13 +2137,6 @@ ALTER TABLE ONLY public.programs
 
 ALTER TABLE ONLY public.recaps
     ADD CONSTRAINT recaps_pkey PRIMARY KEY (rid);
-
-
---
--- Name: plo_plo_key; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX plo_plo_key ON public.plo USING btree (plo);
 
 
 --
@@ -2271,16 +2188,8 @@ ALTER TABLE ONLY public.offered_courses
 
 
 --
--- Name: plo plo_curid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.plo
-    ADD CONSTRAINT plo_curid_fkey FOREIGN KEY (curid) REFERENCES public.curriculum(curid);
-
-
---
 -- PostgreSQL database dump complete
 --
 
-\unrestrict ykAAcIMQ7DmEObIdgNUHqzExBcMWITYKeTkSSbHkncNA1dqRsHxnm2Rrj2XNhgq
+\unrestrict y6HLgTu2PkXPMZu2Wj8IFZWkIIGHa8EzUdgdv19ZeqB24N54ByitmGWZrJtqLGM
 

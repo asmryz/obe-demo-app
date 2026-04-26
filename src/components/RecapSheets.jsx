@@ -10,7 +10,7 @@ import { useSheetStore } from '../store/sheetStore';
 
 
 export const RecapSheets = () => {
-    const { rid, setRID, cloSid, setCLOSid } = useSheetStore()
+    const { rid, setRID, cloSid, setCLOSid, setRecap } = useSheetStore()
     // const [selectedRid, setSelectedRid] = useState(null);
     // const [cloSid, setCloSid] = useState(null);
     const recapsByQuery = useRecapStore((state) => state.recapsByQuery);
@@ -18,6 +18,7 @@ export const RecapSheets = () => {
     const isLoading = useRecapStore((state) => state.isLoading);
     const error = useRecapStore((state) => state.error);
     const fetchRecaps = useRecapStore((state) => state.fetchRecaps);
+    const getRecapResource = useRecapStore((state) => state.getRecapResource);
     const [search, setSearch] = useState(lastQuery);
     const normalizedSearch = search.trim().length >= 3 ? search.trim() : '';
     const hasCachedRecaps = Object.prototype.hasOwnProperty.call(recapsByQuery, normalizedSearch);
@@ -36,10 +37,25 @@ export const RecapSheets = () => {
         return () => clearTimeout(timeoutId);
     }, [normalizedSearch, hasCachedRecaps, fetchRecaps]);
 
-    const handleRecapClick = (event, rid, closid) => {
+    const handleRecapClick = (event, selectedRecap) => {
         event.preventDefault();
+        const rid = selectedRecap.rid;
+        const closid = selectedRecap.closid;
+        setRecap({
+            ...selectedRecap,
+            course: selectedRecap.course ?? selectedRecap.title ?? '',
+            faculty: selectedRecap.faculty ?? selectedRecap.name ?? '',
+            data: Array.isArray(selectedRecap.data) ? selectedRecap.data : [],
+            clo: Array.isArray(selectedRecap.clo) ? selectedRecap.clo : []
+        });
         setRID(rid);
         setCLOSid(closid);
+
+        getRecapResource(rid).then(({ recap }) => {
+            if (recap) {
+                setRecap(recap);
+            }
+        });
     };
 
     // console.log(recapList)
@@ -47,15 +63,14 @@ export const RecapSheets = () => {
     if (rid !== null) {
         return (
             <>
-                <a href="#" onClick={() => { setRID(null); setCLOSid(null); }}>
+                <a href="#" onClick={() => { setRID(null); setCLOSid(null); setRecap(null); }}>
                     Back to <b>Recap Sheets</b>
                 </a>
 
-                {cloSid ? (
-                    <CLOSheet closid={cloSid} rid={rid} />
-                ) : (
-                    <CLOApply rid={rid} />
-                )}
+                {!cloSid && <CLOApply rid={rid} />
+                                  
+                    // <CLOSheet closid={cloSid} rid={rid} />
+                }
 
             </>
         );
@@ -93,7 +108,7 @@ export const RecapSheets = () => {
                                     <td>{recap.batch}</td>
                                     <td style={{ width: '650px' }}>
                                         {recap.ccid !== null ? (
-                                            <a href="#!" onClick={(event) => handleRecapClick(event, recap.rid, recap.closid)}>
+                                            <a href="#!" onClick={(event) => handleRecapClick(event, recap)}>
                                                 {recap.title}
                                             </a>
 
@@ -113,4 +128,3 @@ export const RecapSheets = () => {
 
     )
 }
-

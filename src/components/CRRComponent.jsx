@@ -1,18 +1,48 @@
+/* eslint-disable no-unused-vars */
 import './CRRComponent.css'
 import logo from '../assets/logo.jpg'
 import { useSheetStore } from '../store/sheetStore'
 import { useState } from 'react'
 
 
+
 function CRRComponent() {
-    const { gradeChart, recap, groupedPlanTotals } = useSheetStore()
+    const { gradeChart, recap, groupedPlanTotals, cloSummary, calCLOs } = useSheetStore()
     const [reason, setReason] = useState('')
-    console.log(gradeChart)
-    console.log(recap)
-    console.log(groupedPlanTotals)
-    // gradeChart['D+'] = 0;
-    // gradeChart['D'] = 0;
-    // gradeChart['D-'] = 0;
+    const [KPI, setKPI] = useState(50)
+    const cloRows = Array.isArray(recap?.clo) ? recap.clo : []
+    const cloSummaryRows = cloSummary(calCLOs, cloRows.map(c => c.clo))
+    const course = recap?.course ?? ''
+    const courseParts = course.split(' ')
+    const courseCode = courseParts[0] ?? ''
+    const courseTitle = courseParts.slice(1, 3).join(' ')
+    const creditValue = getCreditValue(course)
+    const contactHours = creditValue ? Number(creditValue) * 16 : ''
+    const studentCount = Array.isArray(recap?.data) ? Math.max(recap.data.length - 2, 0) : ''
+
+    function getCreditValue(course = '') {
+        const plusCredit = course.match(/\((\d+)\s*\+\s*(\d+)\)/)
+
+        if (plusCredit) {
+            return String(Number(plusCredit[1]) + Number(plusCredit[2]))
+        }
+
+        const commaCredit = course.match(/\((\d+)\s*,\s*(\d+)\)/)
+
+        if (commaCredit) {
+            return String(Number(commaCredit[1]) + Number(commaCredit[2]))
+        }
+
+        return ''
+    }
+    if (!recap) {
+        return (
+            <section className="crr-page inl-1">
+                <p>Select a recap sheet first to view the Course Review Report.</p>
+            </section>
+        )
+    }
+
 
     // Pluralize a word, excluding certain exceptions
     function toPlural(word) {
@@ -36,8 +66,7 @@ function CRRComponent() {
                     border="0"
                     cellSpacing="0"
                     cellPadding="0"
-                    width="100%"
-                >
+                    width="100%">
                     <tbody>
                         <tr className="inl-3">
                             <td width="100%" colSpan="6" valign="top" className="inl-4"
@@ -50,19 +79,11 @@ function CRRComponent() {
                                     alt="Description: SZABIST Logo"
                                     className="inl-5" /><br />
                                 <p className="MsoNormal inl-6" align="center">
-                                    <b className="inl-7"
-                                    ><span lang="EN-US" className="inl-8"
-                                    >Faculty Course Review Report</span
-                                        ></b
-                                    >
+                                    <b className="inl-7"><span lang="EN-US" className="inl-8">Faculty Course Review Report</span></b>
                                 </p>
                                 <p className="MsoNormal inl-6" align="center">
-                                    <b className="inl-7"
-                                    ><span lang="EN-US" className="inl-9"
-                                    >(To be filled by each faculty at the time of Course
-                                            Completion)</span
-                                        ></b
-                                    >
+                                    <b className="inl-7"><span lang="EN-US" className="inl-9">(To be filled by each faculty at the time of Course
+                                        Completion)</span></b>
                                 </p>
                                 <p className="MsoNormal inl-6" align="center">
                                     <span lang="EN-US" className="inl-10">&nbsp;</span>
@@ -87,9 +108,7 @@ function CRRComponent() {
                             </td>
                             <td width="31%" colSpan="2" valign="top" className="inl-15">
                                 <p className="MsoNormal">
-                                    <span lang="EN-US" className="inl-10"
-                                    >Computing &amp; Engineering Sciences</span
-                                    >
+                                    <span lang="EN-US" className="inl-10">Computing &amp; Engineering Sciences</span>
                                 </p>
                             </td>
                         </tr>
@@ -101,7 +120,7 @@ function CRRComponent() {
                             </td>
                             <td width="14%" valign="top" className="inl-18">
                                 <p className="MsoNormal">
-                                    <span lang="EN-US" className="inl-10">{recap.course.split(' ')[0]}</span>
+                                    <span lang="EN-US" className="inl-10">{courseCode}</span>
                                 </p>
                             </td>
                             <td width="18%" valign="top" className="inl-19">
@@ -111,7 +130,7 @@ function CRRComponent() {
                             </td>
                             <td width="43%" colSpan="3" valign="top" className="inl-20">
                                 <p className="MsoNormal">
-                                    <span lang="EN-US" className="inl-10">{recap.course.split(' ').splice(1, 2).join(' ')}</span>
+                                    <span lang="EN-US" className="inl-10">{courseTitle}</span>
                                 </p>
                             </td>
                         </tr>
@@ -159,7 +178,7 @@ function CRRComponent() {
                                 </p>
                             </td>
                             <td width="14%" valign="top" className="inl-32">
-                                <p className="MsoNormal"><span lang="EN-US" className="inl-10">{recap.course.split(' ').splice(recap.course.split(' ').length - 2, 2)[0][1]}</span></p>
+                                <p className="MsoNormal"><span lang="EN-US" className="inl-10">{creditValue}</span></p>
                             </td>
                             <td width="18%" valign="top" className="inl-33">
                                 <p className="MsoNormal">
@@ -168,8 +187,7 @@ function CRRComponent() {
                             </td>
                             <td width="11%" valign="top" className="inl-34">
                                 <p className="MsoNormal">
-                                    <span lang="EN-US" className="inl-10"
-                                    ><br className="inl-35" />
+                                    <span lang="EN-US" className="inl-10"><br className="inl-35" />
                                         <br className="inl-27" />
                                     </span>
                                 </p>
@@ -181,9 +199,7 @@ function CRRComponent() {
                             </td>
                             <td width="16%" valign="top" className="inl-37">
                                 <p className="MsoNormal">
-                                    <span lang="EN-US" className="inl-10" style={{ color: 'red' }}
-                                    >ME1203-T Engineering Physics</span
-                                    >
+                                    <span lang="EN-US" className="inl-10" style={{ color: 'red' }}>ME1203-T Engineering Physics</span>
                                 </p>
                             </td>
                         </tr>
@@ -204,29 +220,24 @@ function CRRComponent() {
                                 </p>
                             </td>
                             <td width="43%" colSpan="3" valign="top" className="inl-42">
-                                <p className="MsoNormal"><span lang="EN-US" className="inl-10">{recap.data.length - 2}</span></p>
+                                <p className="MsoNormal"><span lang="EN-US" className="inl-10">{studentCount}</span></p>
                             </td>
                         </tr>
                         <tr className="inl-43">
                             <td width="18%" valign="top" className="inl-44">
                                 <p className="MsoNormal">
-                                    <span lang="EN-US" className="inl-10"
-                                    >Total Number of Contact Hours</span
-                                    >
+                                    <span lang="EN-US" className="inl-10">Total Number of Contact Hours</span>
                                 </p>
                             </td>
                             <td width="43%" colSpan="3" valign="top" className="inl-45">
-                                <p className="MsoNormal"><span lang="EN-US" className="inl-10">{Number(recap.course.split(' ').splice(recap.course.split(' ').length - 2, 2)[0][1]) * 16}</span></p>
+                                <p className="MsoNormal"><span lang="EN-US" className="inl-10">{contactHours}</span></p>
                             </td>
                         </tr>
                         <tr className="inl-46">
                             <td width="38%" colSpan="2" valign="top" className="inl-47">
                                 <p className="MsoNormal">
-                                    <span lang="EN-US" className="inl-10">Assessment Methods:<br /> </span
-                                    ><span lang="EN-US" className="inl-48"
-                                    >give precise details (no &amp; length of assignments, exams,
-                                        weightings etc.)</span
-                                    ><span lang="EN-US" className="inl-10"></span>
+                                    <span lang="EN-US" className="inl-10">Assessment Methods:<br /> </span><span lang="EN-US" className="inl-48">give precise details (no &amp; length of assignments, exams,
+                                        weightings etc.)</span><span lang="EN-US" className="inl-10"></span>
                                 </p>
                                 <p className="MsoNormal">
                                     <span lang="EN-US" className="inl-10">&nbsp;</span>
@@ -258,17 +269,14 @@ function CRRComponent() {
                 </table>
                 <p className="MsoNormal inl-50">
                     <br clear="ALL" className="inl-52" />
-                    <b className="inl-7"
-                    ><span lang="EN-US" style={{ color: 'black' }}>Course Result</span></b
-                    ><span lang="EN-US" className="inl-54"></span>
+                    <b className="inl-7"><span lang="EN-US" style={{ color: 'black' }}>Course Result</span></b><span lang="EN-US" className="inl-54"></span>
                 </p>
                 <table
                     className="MsoNormalTable inl-55"
                     border="1"
                     cellSpacing="0"
                     cellPadding="0"
-                    width="100%"
-                >
+                    width="100%">
                     <tbody>
                         <tr className="inl-56">
                             <td width="20%" className="inl-57">
@@ -350,9 +358,7 @@ function CRRComponent() {
                             </td> */}
                             <td width="7%" className="inl-71">
                                 <p className="MsoNormal inl-72" align="center">
-                                    <span lang="EN-US" className="inl-58">W</span
-                                    ><span lang="EN-US" className="inl-10">*</span
-                                    ><span lang="EN-US" className="inl-73"></span>
+                                    <span lang="EN-US" className="inl-58">W</span><span lang="EN-US" className="inl-10">*</span><span lang="EN-US" className="inl-73"></span>
                                 </p>
                             </td>
                             <td width="7%" className="inl-74">
@@ -446,16 +452,14 @@ function CRRComponent() {
                             </td>
                             <td width="7%" className="inl-90">
                                 <p className="MsoNormal inl-6" align="center">
-                                    <span lang="EN-US" className="inl-58">{recap.data.length - 2}</span>
+                                    <span lang="EN-US" className="inl-58">{studentCount}</span>
                                 </p>
                             </td>
                         </tr>
                         <tr className="inl-91">
                             <td width="20%" className="inl-92">
                                 <p className="MsoNormal" valign="top">
-                                    <span lang="EN-US" className="inl-77"
-                                    >Reason(s) if F's percentage is more than 25</span
-                                    >
+                                    <span lang="EN-US" className="inl-77">Reason(s) if F's percentage is more than 25</span>
                                 </p>
                             </td>
                             <td width="79%" colSpan="15" valign="top" className="inl-93">
@@ -464,7 +468,7 @@ function CRRComponent() {
                                         {/* editable on screen */}
                                         <textarea name="reason" value={reason} onChange={e => setReason(e.target.value)} />
                                         {/* visible only when printing */}
-                                        <div className="print-text">{reason}</div>
+                                        <span className="print-text">{reason}</span>
                                     </span>
                                 </p>
                             </td>
@@ -478,31 +482,21 @@ function CRRComponent() {
                 </p>
                 <p className="MsoNormal inl-96">
                     <b className="inl-97">
-                        <span lang="EN-US" className="inl-54">
-                            &nbsp;</span>
-
+                        <span lang="EN-US" className="inl-54">&nbsp;</span>
                     </b>
                 </p>
                 <p className="MsoNormal inl-96">
-                    <b className="inl-97"
-                    ><u
-                    ><span lang="EN-US" className="inl-54"
-                    >Instructor Comments on CLO attainment</span
-                            ></u
-                        ></b
-                    >
+                    <b className="inl-97">
+                        <u><span lang="EN-US" className="inl-54">Instructor Comments on CLO attainment</span></u>
+                    </b>
                 </p>
                 <p className="MsoNormal inl-99">
-                    <span lang="EN-US" className="inl-10"
-                    >The course has three CLOs, the threshold (KPI) set by the department
+                    <span lang="EN-US" className="inl-10">The course has three CLOs, the threshold (KPI) set by the department
                         for CLO attainment at individual level is 50 %, whereas KPI for cohort
                         level is 60% i.e. 60% of the students should be able to attain defined
-                        CLOs. It was observed that all three CLOs have been attained<b
-                            className="inl-7"
-                        >. </b
-                        >Following table summarizes CLO attainment at cohort level.</span
-                    >
-
+                        CLOs. It was observed that all three CLOs have been attained.
+                        Following table summarizes CLO attainment at cohort level.
+                    </span>
                 </p>
                 <p className="MsoNormal inl-99">
                     <span lang="EN-US" className="inl-10">&nbsp;</span>
@@ -515,66 +509,73 @@ function CRRComponent() {
                     border="1"
                     cellSpacing="0"
                     cellPadding="0"
-                    width="100%"
-                >
+                    width="100%">
                     <tbody>
                         <tr className="inl-101">
                             <td width="32%" valign="top" className="inl-102">
                                 <p className="MsoNormal inl-103">
-                                    <b className="inl-7"
-                                    ><span lang="EN-US" className="inl-10"
-                                    >Course Learning Outcome: Learning Domain - Level</span
-                                        ></b
-                                    >
+                                    <b className="inl-7">
+                                        <span lang="EN-US" className="inl-10">
+                                            Course Learning Outcome: Learning Domain - Level
+                                        </span>
+                                    </b>
                                 </p>
                             </td>
                             <td width="29%" valign="top" className="inl-104">
                                 <p className="MsoNormal inl-105" align="center">
-                                    <b className="inl-106"
-                                    ><span lang="EN-US" className="inl-10"
-                                    >Percentage of students attained CLO</span
-                                        ></b
-                                    >
+                                    <b className="inl-106"><span lang="EN-US" className="inl-10">Percentage of students attained CLO</span></b>
                                 </p>
                             </td>
                             <td width="13%" valign="top" className="inl-107">
                                 <p className="MsoNormal inl-108" align="center">
-                                    <b className="inl-106"
-                                    ><span lang="EN-US" className="inl-10">KPI</span></b
-                                    >
+                                    <b className="inl-106"><span lang="EN-US" className="inl-10">KPI</span></b>
                                 </p>
                             </td>
                             <td width="24%" valign="top" className="inl-109">
                                 <p className="MsoNormal inl-108" align="center">
-                                    <b className="inl-106"
-                                    ><span lang="EN-US" className="inl-10">Remarks</span></b
-                                    >
+                                    <b className="inl-106"><span lang="EN-US" className="inl-10">Remarks</span></b>
                                 </p>
                             </td>
                         </tr>
-                        <tr className="inl-110">
-                            <td width="32%" valign="top" className="inl-111">
-                                <p className="MsoNormal inl-105" align="center">
-                                    <span lang="EN-US" className="inl-10">CLO 1 : C - 2</span>
-                                </p>
-                            </td>
-                            <td width="29%" valign="top" className="inl-112">
-                                <p className="MsoNormal inl-105" align="center">
-                                    <span lang="EN-US" className="inl-10">100%</span>
-                                </p>
-                            </td>
-                            <td width="13%" valign="top" className="inl-113">
-                                <p className="MsoNormal inl-105" align="center">
-                                    <span lang="EN-US" className="inl-10">60</span>
-                                </p>
-                            </td>
-                            <td width="24%" valign="top" className="inl-114">
-                                <p className="MsoNormal inl-103">
-                                    <span lang="EN-US" className="inl-10">CLO 1 attained.</span>
-                                </p>
-                            </td>
-                        </tr>
-                        <tr className="inl-115">
+                        {cloSummaryRows.map((clo) => {
+                            const cloLabel = clo[0].replace(/^CLO/, 'CLO ')
+                            const cloNumber = Number(clo[0].replace(/^CLO/, ''))
+                            const matchedCLO = cloRows.find((c) => c.clo === cloNumber)
+                            const cloDetails = matchedCLO ? `${matchedCLO.domain.slice(0, 1)} - ${matchedCLO.taxonomy}` : ''
+                            const achievedCount = clo[1][0]
+                            const notAchievedCount = clo[1][1]
+                            const totalCount = achievedCount + notAchievedCount
+                            let achievedPct = totalCount ? (achievedCount / totalCount) * 100 : 0
+                            const remark = `${cloLabel} `
+
+                            // achievedPct = achievedPct - 50
+
+                            return (
+                                <tr key={clo[0]} className="inl-110">
+                                    <td width="32%" valign="top" className="inl-111">
+                                        <p className="MsoNormal inl-105" align="center">
+                                            <span lang="EN-US" className="inl-10">{cloLabel} : {cloDetails}</span>
+                                        </p>
+                                    </td>
+                                    <td width="29%" valign="top" className="inl-112">
+                                        <p className="MsoNormal inl-105" align="center">
+                                            <span lang="EN-US" className="inl-10">{Number(achievedPct.toFixed(2))}%</span>
+                                        </p>
+                                    </td>
+                                    <td width="13%" valign="top" className="inl-113">
+                                        <p className="MsoNormal inl-105" align="center">
+                                            <span lang="EN-US" className="inl-10">60</span>
+                                        </p>
+                                    </td>
+                                    <td width="24%" valign="top" className="inl-114">
+                                        <p className="MsoNormal inl-103">
+                                            <span lang="EN-US" className="inl-10">{remark} {achievedPct > KPI ? `aattained` : `not attained`}</span>
+                                        </p>
+                                    </td>
+                                </tr>
+                            )
+                        })}
+                        {/* <tr className="inl-115">
                             <td width="32%" valign="top" className="inl-111">
                                 <p className="MsoNormal inl-105" align="center">
                                     <span lang="EN-US" className="inl-10">CLO 2 : C - 3</span>
@@ -617,99 +618,102 @@ function CRRComponent() {
                                     <span lang="EN-US" className="inl-10">CLO 3 attained.</span>
                                 </p>
                             </td>
-                        </tr>
+                        </tr> */}
                     </tbody>
                 </table>
                 <div className="MsoNormal">&nbsp;</div>
                 <p className="MsoNormal inl-50">
-                    <b className="inl-7"
-                    ><u
-                    ><span lang="EN-US" className="inl-54"
-                    >Instructor Comments on PLO attainment</span
-                            ></u
-                        ></b
-                    >
+                    <b className="inl-7"><u><span lang="EN-US" className="inl-54">Instructor Comments on PLO attainment</span></u></b>
                 </p>
                 <table
                     className="MsoNormalTable inl-55"
                     border="1"
                     cellSpacing="0"
                     cellPadding="0"
-                    width="100%"
-                >
+                    width="100%">
                     <tbody>
                         <tr className="inl-117">
                             <td width="26%" className="inl-118">
                                 <p className="MsoNormal inl-6" align="center">
-                                    <b className="inl-7"
-                                    ><span lang="EN-US" className="inl-119"
-                                    >Number of PLOs offered</span
-                                        ></b
-                                    >
+                                    <b className="inl-7"><span lang="EN-US" className="inl-119">Number of PLOs offered</span></b>
                                 </p>
                             </td>
                             <td width="10%" className="inl-120">
                                 <p className="MsoNormal inl-6" align="center">
-                                    <span lang="EN-US" className="inl-58">2</span>
+                                    <span lang="EN-US" className="inl-58">{new Set(recap.clo.map(row => row.plo)).size}</span>
                                 </p>
                             </td>
                             <td width="27%" className="inl-121">
                                 <p className="MsoNormal inl-6" align="center">
-                                    <b className="inl-7"
-                                    ><span lang="EN-US" className="inl-119"
-                                    >PLOs which are being offered</span
-                                        ></b
-                                    >
+                                    <b className="inl-7"><span lang="EN-US" className="inl-119">PLOs which are being offered</span></b>
                                 </p>
                             </td>
                             <td width="34%" className="inl-122">
                                 <p className="MsoNormal">
-                                    <span lang="EN-US" className="inl-77"
-                                    >PLO 1 (Engineering Knowledge), PLO 2 (Problem Analysis)</span
-                                    >
-                                </p>
-                            </td>
-                        </tr>
-                        <tr className="inl-123">
-                            <td width="26%" className="inl-124">
-                                <p className="MsoNormal inl-6" align="center">
-                                    <span lang="EN-US" className="inl-58"
-                                    >Percentage of students who have not achieved PLO 1 (CLO
-                                        1)</span
-                                    >
-                                </p>
-                            </td>
-                            <td width="10%" className="inl-125">
-                                <p className="MsoNormal inl-6" align="center">
-                                    <span lang="EN-US" className="inl-58">0.00%</span>
-                                </p>
-                            </td>
-                            <td width="27%" className="inl-126">
-                                <p className="MsoNormal inl-6" align="center">
-                                    <span lang="EN-US" className="inl-58">&nbsp;</span>
-                                </p>
-                                <p className="MsoNormal inl-6" align="center">
-                                    <span lang="EN-US" className="inl-58"
-                                    >Reason(s) if this percentage is more than 50
+                                    <span lang="EN-US" className="inl-77">
+                                        {[...new Set(recap.clo.map(c => c.plo).sort((a, b) => a - b))].map((plo, index, plos) => (
+                                            <span key={index} className="inl-10" style={{ display: 'inline-block' }}>
+                                                PLO {plo} ({recap.clo.find(c => c.plo === plo)?.title ?? ''})
+                                                {index < plos.length - 1 && <>,&nbsp;<wbr /> </>}
+                                            </span>
+                                        ))}
                                     </span>
                                 </p>
-                                <p className="MsoNormal inl-6" align="center">
-                                    <span lang="EN-US" className="inl-58">&nbsp;</span>
-                                </p>
-                            </td>
-                            <td width="34%" className="inl-127">
-                                <p className="MsoNormal inl-6" align="center">
-                                    <span lang="EN-US" className="inl-58">-</span>
-                                </p>
                             </td>
                         </tr>
-                        <tr className="inl-128">
+                        {[...new Set(recap.clo.map(c => c.plo).sort((a, b) => a - b))].map((plo) => {
+                            const ploClos = recap.clo.filter((c) => c.plo === plo)
+                            const cloLabels = recap.clo
+                                .filter((c) => c.plo === plo)
+                                .map((c) => `CLO ${c.clo}`)
+                                .join(' & ')
+                            const notAchievedCount = calCLOs.filter((studentCLOs) =>
+                                ploClos.some((clo) => studentCLOs[`CLO${clo.clo}`] === 0)
+                            ).length
+                            const ploStudentCount = calCLOs.length || studentCount
+                            const notAchievedPercentage = ploStudentCount
+                                ? ((notAchievedCount / ploStudentCount) * 100).toFixed(2)
+                                : '0.00'
+
+                            return (
+
+                                <tr key={`plo-not-achieved-${plo}`} className="inl-123">
+                                    <td width="26%" className="inl-124">
+                                        <p className="MsoNormal inl-6" align="center">
+                                            <span lang="EN-US" className="inl-58">Percentage of students who have not achieved<br/>PLO {plo} ({cloLabels})
+                                            </span>
+                                        </p>
+                                    </td>
+                                    <td width="10%" className="inl-125">
+                                        <p className="MsoNormal inl-6" align="center">
+                                            <span lang="EN-US" className="inl-58">{notAchievedPercentage}</span>
+                                        </p>
+                                    </td>
+                                    <td width="27%" className="inl-126">
+                                        <p className="MsoNormal inl-6" align="center">
+                                            <span lang="EN-US" className="inl-58">&nbsp;</span>
+                                        </p>
+                                        <p className="MsoNormal inl-6" align="center">
+                                            <span lang="EN-US" className="inl-58">Reason(s) if this percentage is more than 50
+                                            </span>
+                                        </p>
+                                        <p className="MsoNormal inl-6" align="center">
+                                            <span lang="EN-US" className="inl-58">&nbsp;</span>
+                                        </p>
+                                    </td>
+                                    <td width="34%" className="inl-127">
+                                        <p className="MsoNormal inl-6" align="center">
+                                            <span lang="EN-US" className="inl-58">-</span>
+                                        </p>
+                                    </td>
+                                </tr>
+                            )
+                        })}
+                        {/* <tr className="inl-128">
                             <td width="26%" className="inl-129">
                                 <p className="MsoNormal inl-6" align="center">
-                                    <span lang="EN-US" className="inl-58"
-                                    >Percentage of students who have not achieved PLO 2 (CLO2 &amp;
-                                        CLO3)</span
-                                    >
+                                    <span lang="EN-US" className="inl-58">Percentage of students who have not achieved PLO 2 (CLO2 &amp;
+                                        CLO3)</span>
                                 </p>
                             </td>
                             <td width="10%" className="inl-130">
@@ -722,10 +726,8 @@ function CRRComponent() {
                                     <span lang="EN-US" className="inl-58">&nbsp;</span>
                                 </p>
                                 <p className="MsoNormal inl-6" align="center">
-                                    <span lang="EN-US" className="inl-58"
-                                    >Reason(s) if this percentage is more than 50 (if
-                                        applicable)</span
-                                    >
+                                    <span lang="EN-US" className="inl-58">Reason(s) if this percentage is more than 50 (if
+                                        applicable)</span>
                                 </p>
                                 <p className="MsoNormal inl-6" align="center">
                                     <span lang="EN-US" className="inl-58">&nbsp;</span>
@@ -736,32 +738,27 @@ function CRRComponent() {
                                     <span lang="EN-US" className="inl-58">-</span>
                                 </p>
                             </td>
-                        </tr>
+                        </tr> */}
                     </tbody>
                 </table>
                 <p className="MsoNormal inl-133" style={{ marginTop: '10px', marginBottom: '10px' }}>
-                    <span lang="EN-US" className="inl-10"
-                    >It was observed that one student (listed below) was not able to
+                    <span lang="EN-US" className="inl-10">It was observed that one student (listed below) was not able to
                         achieve PLO 2 whereas PLO 1 was achieved by all students. Program
                         Manager will forward this information to Departmental Quality
                         Assurance Committee (DQAC), so that his/her progress could be
-                        monitored.<b className="inl-7"></b
-                        ></span>
+                        monitored.<b className="inl-7"></b></span>
                 </p>
                 <table
                     className="MsoNormalTable inl-100"
                     border="1"
                     cellSpacing="0"
                     cellPadding="0"
-                    width="100%"
-                >
+                    width="100%">
                     <tbody>
                         <tr className="inl-101">
                             <td width="10%" valign="top" className="inl-134">
                                 <p className="MsoNormal inl-6" align="center">
-                                    <b className="inl-7"
-                                    ><span lang="EN-US" className="inl-10">S. No.</span></b
-                                    >
+                                    <b className="inl-7"><span lang="EN-US" className="inl-10">S. No.</span></b>
                                 </p>
                             </td>
                             <td width="34%" valign="top" className="inl-135">
@@ -771,16 +768,12 @@ function CRRComponent() {
                             </td>
                             <td width="29%" valign="top" className="inl-136">
                                 <p className="MsoNormal inl-6" align="center">
-                                    <b className="inl-7"
-                                    ><span lang="EN-US" className="inl-10">Registration Number</span></b
-                                    >
+                                    <b className="inl-7"><span lang="EN-US" className="inl-10">Registration Number</span></b>
                                 </p>
                             </td>
                             <td width="25%" valign="top" className="inl-137">
                                 <p className="MsoNormal inl-6" align="center">
-                                    <b className="inl-7"
-                                    ><span lang="EN-US" className="inl-10">PLO not attained</span></b
-                                    >
+                                    <b className="inl-7"><span lang="EN-US" className="inl-10">PLO not attained</span></b>
                                 </p>
                             </td>
                         </tr>
@@ -834,17 +827,11 @@ function CRRComponent() {
                     <b className="inl-7"><span lang="EN-US">&nbsp;</span></b>
                 </p>
                 <p className="MsoNormal">
-                    <b className="inl-7"
-                    ><span lang="EN-US" className="inl-10"
-                    >Overview/Evaluation (Course Co-Coordinator's Comments)</span
-                        ></b
-                    >
+                    <b className="inl-7"><span lang="EN-US" className="inl-10">Overview/Evaluation (Course Co-Coordinator's Comments)</span></b>
                 </p>
                 <p className="MsoNormal">
-                    <span lang="EN-US" className="inl-10"
-                    >Feedback: first summarize, then comment on feedback received
-                        from:</span
-                    >
+                    <span lang="EN-US" className="inl-10">Feedback: first summarize, then comment on feedback received
+                        from:</span>
                 </p>
                 <p className="MsoNormal"><span lang="EN-US" className="inl-10">&nbsp;</span></p>
                 <table
@@ -852,20 +839,15 @@ function CRRComponent() {
                     border="1"
                     cellSpacing="0"
                     cellPadding="0"
-                    width="100%"
-                >
+                    width="100%">
                     <tbody>
                         <tr className="inl-101">
                             <td width="100%" valign="top" className="inl-147">
                                 <p className="MsoNormal">
-                                    <span lang="EN-US" className="inl-10"
-                                    >1. Student (Course Evaluation) Questionnaires</span
-                                    >
+                                    <span lang="EN-US" className="inl-10">1. Student (Course Evaluation) Questionnaires</span>
                                 </p>
                                 <p className="MsoNormal inl-148">
-                                    <span lang="EN-US" className="inl-10"
-                                    >Course evaluation's score by the students: 92.03%</span
-                                    >
+                                    <span lang="EN-US" className="inl-10">Course evaluation's score by the students: 92.03%</span>
                                 </p>
                                 <p className="MsoNormal">
                                     <span lang="EN-US" className="inl-10">Suggestions: - N/A </span>
@@ -880,15 +862,12 @@ function CRRComponent() {
                     border="1"
                     cellSpacing="0"
                     cellPadding="0"
-                    width="100%"
-                >
+                    width="100%">
                     <tbody>
                         <tr className="inl-149">
                             <td width="100%" valign="top" className="inl-150">
                                 <p className="MsoNormal">
-                                    <span lang="EN-US" className="inl-10"
-                                    >2.Moderators (if any)</span
-                                    >
+                                    <span lang="EN-US" className="inl-10">2.Moderators (if any)</span>
                                 </p>
                                 <p className="MsoNormal">
                                     <span lang="EN-US" className="inl-10">&nbsp;</span>
@@ -906,29 +885,24 @@ function CRRComponent() {
                     border="1"
                     cellSpacing="0"
                     cellPadding="0"
-                    width="100%"
-                >
+                    width="100%">
                     <tbody>
                         <tr className="inl-152">
                             <td width="100%" valign="top" className="inl-153">
                                 <p className="MsoNormal">
-                                    <span lang="EN-US" className="inl-10"
-                                    >3. Curriculum: comment on the
+                                    <span lang="EN-US" className="inl-10">3. Curriculum: comment on the
                                         continuing appropriateness of the Course curriculum in relation
                                         to the intended learning outcomes (Course objectives) and its
                                         compliance with the HEC Approved / Revised National Curriculum
-                                        Guidelines</span
-                                    >
+                                        Guidelines</span>
                                 </p>
                                 <p className="MsoNormal inl-148">
                                     <span lang="EN-US" className="inl-10">&nbsp;</span>
                                 </p>
                                 <p className="MsoNormal inl-148">
-                                    <span lang="EN-US" className="inl-10"
-                                    >Course content in relation to the intended learning outcomes is
+                                    <span lang="EN-US" className="inl-10">Course content in relation to the intended learning outcomes is
                                         well defined. Furthermore, curriculum is in line with HEC
-                                        guidelines and international standards.</span
-                                    >
+                                        guidelines and international standards.</span>
                                 </p>
                             </td>
                         </tr>
@@ -941,26 +915,21 @@ function CRRComponent() {
                     border="1"
                     cellSpacing="0"
                     cellPadding="0"
-                    width="100%"
-                >
+                    width="100%">
                     <tbody>
                         <tr className="inl-154">
                             <td width="100%" valign="top" className="inl-155">
                                 <p className="MsoNormal">
-                                    <span lang="EN-US" className="inl-10"
-                                    >4. Assessment: comment on the continuing effectiveness of
+                                    <span lang="EN-US" className="inl-10">4. Assessment: comment on the continuing effectiveness of
                                         method(s) of assessment in relation to the intended learning
-                                        outcomes (Course objectives)</span
-                                    >
+                                        outcomes (Course objectives)</span>
                                 </p>
                                 <p className="MsoNormal">
                                     <span lang="EN-US" className="inl-10">&nbsp;</span>
                                 </p>
                                 <p className="MsoNormal">
-                                    <span lang="EN-US" className="inl-10"
-                                    >Current assessments methods seem enough to gauge defined
-                                        PLOs.</span
-                                    >
+                                    <span lang="EN-US" className="inl-10">Current assessments methods seem enough to gauge defined
+                                        PLOs.</span>
                                 </p>
                             </td>
                         </tr>
@@ -972,30 +941,24 @@ function CRRComponent() {
                     border="1"
                     cellSpacing="0"
                     cellPadding="0"
-                    width="100%"
-                >
+                    width="100%">
                     <tbody>
                         <tr className="inl-156">
                             <td width="100%" valign="top" className="inl-147">
                                 <p className="MsoNormal">
-                                    <span lang="EN-US" className="inl-10"
-                                    >5. Enhancement: comment on the
+                                    <span lang="EN-US" className="inl-10">5. Enhancement: comment on the
                                         implementation of changes proposed in earlier
                                     </span>
                                 </p>
                                 <p className="MsoNormal">
-                                    <span lang="EN-US" className="inl-10"
-                                    >Faculty Course Review Reports (if any)</span
-                                    >
+                                    <span lang="EN-US" className="inl-10">Faculty Course Review Reports (if any)</span>
                                 </p>
                                 <p className="MsoNormal">
                                     <span lang="EN-US" className="inl-10">&nbsp;</span>
                                 </p>
                                 <p className="MsoNormal">
-                                    <span lang="EN-US" className="inl-10"
-                                    >The number of tutorial problems associated with CLO 2 (C-3) has
-                                        been increased as proposed in earlier CRR.</span
-                                    >
+                                    <span lang="EN-US" className="inl-10">The number of tutorial problems associated with CLO 2 (C-3) has
+                                        been increased as proposed in earlier CRR.</span>
                                 </p>
                             </td>
                         </tr>
@@ -1007,19 +970,14 @@ function CRRComponent() {
                     border="1"
                     cellSpacing="0"
                     cellPadding="0"
-                    width="100%"
-                >
+                    width="100%">
                     <tbody>
                         <tr className="inl-156">
                             <td width="100%" valign="top" className="inl-147">
                                 <p className="MsoNormal">
-                                    <span lang="EN-US" className="inl-10"
-                                    >6. Outline any changes in the
+                                    <span lang="EN-US" className="inl-10">6. Outline any changes in the
                                         future delivery or structure of the Course that this
-                                        semester/term's experience may prompt </span
-                                    ><span lang="EN-US" className="inl-58"
-                                    >to improve student's performance</span
-                                    ><span lang="EN-US" className="inl-10"></span>
+                                        semester/term's experience may prompt </span><span lang="EN-US" className="inl-58">to improve student's performance</span><span lang="EN-US" className="inl-10"></span>
                                 </p>
                                 <p className="MsoNormal">
                                     <span lang="EN-US" className="inl-10">&nbsp;</span>
@@ -1037,8 +995,7 @@ function CRRComponent() {
                     border="1"
                     cellSpacing="0"
                     cellPadding="0"
-                    width="100%"
-                >
+                    width="100%">
                     <tbody>
                         <tr className="inl-156">
                             <td width="100%" valign="top" className="inl-147">
@@ -1049,8 +1006,7 @@ function CRRComponent() {
                                     className="MsoTableGrid inl-157"
                                     width="100%"
                                     cellSpacing="0"
-                                    cellPadding="0"
-                                >
+                                    cellPadding="0">
                                     <tbody>
                                         <tr className="inl-101">
                                             <td width="57" valign="top" className="inl-158">
@@ -1082,11 +1038,7 @@ function CRRComponent() {
                                             </td>
                                             <td width="350" valign="top" className="inl-162">
                                                 <p className="MsoNormal inl-6" align="center">
-                                                    <i className="inl-163"
-                                                    ><span lang="EN-US" className="inl-10"
-                                                    >(Course Instructor)</span
-                                                        ></i
-                                                    ><span lang="EN-US" className="inl-10"></span>
+                                                    <i className="inl-163"><span lang="EN-US" className="inl-10">(Course Instructor)</span></i><span lang="EN-US" className="inl-10"></span>
                                                 </p>
                                             </td>
                                             <td width="51" valign="top" className="inl-160">
@@ -1109,8 +1061,7 @@ function CRRComponent() {
                                     className="MsoTableGrid inl-157"
                                     width="100%"
                                     cellSpacing="0"
-                                    cellPadding="0"
-                                >
+                                    cellPadding="0">
                                     <tbody>
                                         <tr className="inl-101">
                                             <td width="57" valign="top" className="inl-158">
@@ -1142,11 +1093,7 @@ function CRRComponent() {
                                             </td>
                                             <td width="350" valign="top" className="inl-162">
                                                 <p className="MsoNormal inl-6" align="center">
-                                                    <i className="inl-163"
-                                                    ><span lang="EN-US" className="inl-10"
-                                                    >(Head of Department)</span
-                                                        ></i
-                                                    ><span lang="EN-US" className="inl-10"></span>
+                                                    <i className="inl-163"><span lang="EN-US" className="inl-10">(Head of Department)</span></i><span lang="EN-US" className="inl-10"></span>
                                                 </p>
                                             </td>
                                             <td width="51" valign="top" className="inl-160">

@@ -1,7 +1,6 @@
-import React from 'react'
 import Tabs from './Tabs';
 import { useReactToPrint } from 'react-to-print';
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import CRRComponent from './CRRComponent'
 import { RecapSheets } from './RecapSheets';
 import { Suspense } from 'react';
@@ -14,10 +13,26 @@ function TabsControl() {
     const ref = useRef();
     const { cloSid, rid } = useSheetStore()
     const sheetData = useSheetStore((state) => state.sheetData);
+    const hasSelectedCloSheet = Boolean(cloSid && rid);
     const handlePrint = useReactToPrint({
         contentRef: ref,
         documentTitle: "My Document",
     });
+
+    useEffect(() => {
+        const handlePrintShortcut = (event) => {
+            if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'p') {
+                event.preventDefault()
+                handlePrint()
+            }
+        }
+
+        window.addEventListener('keydown', handlePrintShortcut)
+
+        return () => {
+            window.removeEventListener('keydown', handlePrintShortcut)
+        }
+    }, [handlePrint])
 
     const tabData = [
         {
@@ -28,6 +43,7 @@ function TabsControl() {
                 </div>
             ),
         },
+        ...(hasSelectedCloSheet ? [
         {
             label: "OBE",
             content: (
@@ -49,15 +65,15 @@ function TabsControl() {
                 </div>
             ),
         },
-        {
-            label: "Settings",
-            content: (
-                <div>
-                    <h2>⚙️ Settings</h2>
-                    <p>Manage your preferences here.</p>
-                </div>
-            ),
-        },
+        // {
+        //     label: "Settings",
+        //     content: (
+        //         <div>
+        //             <h2>⚙️ Settings</h2>
+        //             <p>Manage your preferences here.</p>
+        //         </div>
+        //     ),
+        // },
         {
             label: "CRR",
             content: (
@@ -68,7 +84,8 @@ function TabsControl() {
                     </div>
                 </>
             ),
-        }, 
+        },
+        ] : []),
         {
             label: "CLO List",
             content: (

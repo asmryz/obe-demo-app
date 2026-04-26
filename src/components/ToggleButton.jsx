@@ -17,8 +17,7 @@ export const ToggleButton = ({ checked, onToggle, onLabel = 'On', offLabel = 'Of
                 cursor: 'pointer',
                 transform: `scale(${scale})`,
                 transformOrigin: 'left center'
-            }}
-        >
+            }}>
             <span
                 style={{
                     position: 'relative',
@@ -27,8 +26,7 @@ export const ToggleButton = ({ checked, onToggle, onLabel = 'On', offLabel = 'Of
                     borderRadius: '9999px',
                     backgroundColor: checked ? '#2563eb' : '#9ca3af',
                     transition: 'background-color 0.2s ease'
-                }}
-            >
+                }}>
                 <span
                     style={{
                         position: 'absolute',

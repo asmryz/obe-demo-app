@@ -51,7 +51,6 @@ export const CLOApply = ({ rid, closid }) => {
 
     // Save CLO Sheet to backend
     const saveCLOSheet = async () => {
-        console.log(rid, multiCLO)
         try {
             await api.post('/closheet', {
                 rid,
@@ -403,8 +402,7 @@ export const CLOApply = ({ rid, closid }) => {
                             textDecoration: 'none',
                             margin: '16px 12px',
                         }}
-                        title={clipboardAvailable ? 'Paste from clipboard' : 'Clipboard API not available'}
-                    >
+                        title={clipboardAvailable ? 'Paste from clipboard' : 'Clipboard API not available'}>
                         Clipboard
                     </a>
                     {clipboardArray.length > 0 && (
@@ -500,8 +498,7 @@ export const CLOApply = ({ rid, closid }) => {
                                                                                 cursor: clipboardAvailable ? 'pointer' : 'not-allowed',
                                                                                 textDecoration: 'none'
                                                                             }}
-                                                                            title={clipboardAvailable ? 'Paste from clipboard' : 'Clipboard API not available'}
-                                                                        >
+                                                                            title={clipboardAvailable ? 'Paste from clipboard' : 'Clipboard API not available'}>
 
                                                                             <PasterIcon width={20} height={20} />
                                                                         </a>

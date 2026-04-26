@@ -13,6 +13,10 @@ PGPASSWORD='Po@995886' pg_dump -U postgres -h localhost -p 5432 -d obe -F p \
   -f backups/obe.sql
 ```
 
+```sh
+GPASSWORD='Aa20195@1' psql -U postgres -h 192.168.1.162 -p 5432 -d obe
+```
+
 https://asmryz.github.io/obe-demo-app/
 # React + Vite
 

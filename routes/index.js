@@ -71,18 +71,22 @@ router.get("/recaps/:rid", async (req, res) => {
       return;
     }
 
+    // console.log(rid)
+
     const recapQuery = `
             SELECT rid, batch, course, faculty, semester, year, data
             FROM recaps
             WHERE rid = $1;
         `;
     const cloQuery = `
-            SELECT cl.*
-            FROM closheet cs
-            INNER JOIN offered_courses oc ON oc.offid = cs.offid
+            SELECT cl.*, p.title, cu.kpi, cu.cohort 
+            FROM offered_courses oc
             INNER JOIN curriculum_courses cc ON cc.ccid = oc.ccid
             INNER JOIN clo cl ON cl.cid = cc.cid
-            WHERE cs.rid = $1
+            INNER JOIN course c ON c.cid = cl.cid
+            INNER JOIN plo p ON p.plo = cl.plo
+            INNER JOIN curriculum cu ON cu.curid = p.curid
+            WHERE oc.rid = $1
             ORDER BY cl.clo;
         `;
 
@@ -95,6 +99,11 @@ router.get("/recaps/:rid", async (req, res) => {
       res.status(404).json({ error: "Recap not found" });
       return;
     }
+
+    // console.log({
+    //     ...recapResult.rows[0],
+    //   clo: cloResult.rows,
+    // })
 
     res.json({
       ...recapResult.rows[0],
@@ -116,27 +125,31 @@ router.get("/closheet/:closid", async (req, res) => {
     }
 
     const closheetQuery = `
-            SELECT closid, rid, data
+            SELECT closid, rid, offid, data
             FROM closheet
             WHERE closid = $1;
         `;
-    const cloQuery = `
-            SELECT cl.*
-            FROM closheet cs
-            INNER JOIN offered_courses oc ON oc.offid = cs.offid
-            INNER JOIN curriculum_courses cc ON cc.ccid = oc.ccid
-            INNER JOIN clo cl ON cl.cid = cc.cid
-            WHERE cs.closid = $1
-            ORDER BY cl.clo;
-        `;
-
     const closheetResult = await db.query(closheetQuery, [closid]);
-    const cloResult = await db.query(cloQuery, [closid]);
 
     if (closheetResult.rows.length === 0) {
       res.status(404).json({ error: "CLO Sheet not found" });
       return;
     }
+
+    const { rid, offid } = closheetResult.rows[0];
+    const cloQuery = `
+            SELECT DISTINCT cl.*
+            FROM offered_courses oc
+            INNER JOIN curriculum_courses cc ON cc.ccid = oc.ccid
+            INNER JOIN clo cl ON cl.cid = cc.cid
+            WHERE (
+              $1::int IS NOT NULL AND oc.offid = $1
+            ) OR (
+              $1::int IS NULL AND oc.rid = $2
+            )
+            ORDER BY cl.clo;
+        `;
+    const cloResult = await db.query(cloQuery, [offid, rid]);
 
     res.json({
       ...closheetResult.rows[0],
@@ -156,8 +169,18 @@ router.post("/closheet", async (req, res) => {
       return res.status(400).json({ error: "Missing rid or multiCLO" });
     }
     const insertQuery = `
-            INSERT INTO closheet (rid, data)
-            VALUES ($1, $2::jsonb) RETURNING *;
+            INSERT INTO closheet (rid, offid, data)
+            VALUES (
+              $1,
+              (
+                SELECT oc.offid
+                FROM offered_courses oc
+                WHERE oc.rid = $1
+                ORDER BY oc.offid
+                LIMIT 1
+              ),
+              $2::jsonb
+            ) RETURNING *;
         `;
     const result = await db.query(insertQuery, [rid, JSON.stringify(multiCLO)]);
     res.json({ success: true, closheet: result.rows[0] });

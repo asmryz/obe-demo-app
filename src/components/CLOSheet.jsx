@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 
 import { Fragment, useState, use, useEffect } from 'react'
 import PLOChart from './PLOChart'
@@ -27,24 +28,6 @@ const grades = [
 
 
 function CLOSheet({ closid, rid }) {
-    // Group PLAN rows by first word and sum their totals
-    // ...existing code...
-    // PLAN is defined here
-    // ...existing code...
-    // const PLAN = headsCleaned.slice(3).map((head, index) => {
-    //     const currentHead = headsCleaned[index + 3]
-    //     if (currentHead !== null) {
-    //         previousHead = currentHead
-    //     }
-    //     const chead = previousHead
-
-    //     return {
-    //         sno: sno++,
-    //         head: chead,
-    //         clo: data[ENUMS.CLO][index + 3] ?? '',
-    //         total: data[ENUMS.MAX][index + 3] ?? ''
-    //     }
-    // })
 
     // Group and sum marks by first word for display
     const { getCLOSheet } = useSheetStore()
@@ -53,15 +36,26 @@ function CLOSheet({ closid, rid }) {
 
     const incomingData = use(getCLOSheet(closid))
     const [kpi, setKpi] = useState(50)
+    // eslint-disable-next-line no-unused-vars
     const { data, clo: cloRows = [] } = incomingData
 
-    console.log(cloRows )
+    console.log(recap)
 
     const arr = data[ENUMS.CLO].slice(3)
     // const clo = [...new Set(arr.filter((x) => typeof x === 'number'))]
 
     // Access gradeChart and setter from zustand store
-    const { gradeChart, setGradeChart, recap: globalRecap, setRecap, groupedPlanTotals: globalGroupedPlanTotals, setGroupedPlanTotals } = useSheetStore(state => state)
+    const {
+        gradeChart,
+        setGradeChart,
+        recap: globalRecap,
+        setRecap,
+        groupedPlanTotals: globalGroupedPlanTotals,
+        setGroupedPlanTotals,
+        calCLOs: globalCalCLOs,
+        setCalCLOs,
+        cloSummary
+    } = useSheetStore(state => state)
     // setGradeChart(localGradeChart)
 
     // unique numeric CLOs sorted ascending
@@ -76,28 +70,14 @@ function CLOSheet({ closid, rid }) {
         planRows.forEach(row => {
             if (typeof row.head !== 'string' || !row.head) return;
             const key = row.head.split(' ')[0]; // Split by non-breaking space and take the first part
-            
+
             const mark = Number(row.total) || 0;
             result[key] = (result[key] || 0) + mark;
         });
 
         return result;
     }
-    // Utility to group and sum marks by first word of the first column
-    // function groupAndSumByFirstWord(rows) {
-    //     const result = {};
-    //     rows.forEach(row => {
-    //         if (!row[0] || typeof row[0] !== 'string') return;
-    //         const key = row[0].split(' ')[0];
-    //         const mark = Number(row[1]) || 0; // Adjust index if needed
-    //         result[key] = (result[key] || 0) + mark;
-    //     });
-    //     return result;
-    // }
 
-    //const groupedTotals = groupAndSumByFirstWord(data[0]);
-    // console.log(groupedTotals)
-    // Replace ' Paper 1' with '' in all properties of data[ENUMS.HEADS]
     const headsCleaned = data[ENUMS.HEADS].map(h =>
         typeof h === 'string' ? h.replace(/\s*Paper\s*1/g, '') : h
     )
@@ -126,6 +106,65 @@ function CLOSheet({ closid, rid }) {
     const groupedPlanTotals = groupPlanByFirstWord(PLAN);
     const groupedPlanTotalsKey = JSON.stringify(groupedPlanTotals)
     const globalGroupedPlanTotalsKey = JSON.stringify(globalGroupedPlanTotals)
+    sno = 1
+    const cloHdr = Object.entries(Object.groupBy(PLAN, ({ clo }) => clo))
+    const calCLOs = data.slice(3).map((row) => {
+        const studentCLOs = {
+            regno: row[2]?.toString() ?? '',
+            name: row[1]
+        }
+
+        cloHdr.forEach(([cloKey, items]) => {
+            const stdTotal = items.reduce((sum, item) => sum + (Number(row[item.sno + 2]) || 0), 0);
+            const cloTotal = items.reduce((sum, item) => sum + (Number(item.total) || 0), 0);
+            const achieved = cloTotal ? (stdTotal / cloTotal * 100) : 0
+            studentCLOs[`CLO${cloKey}`] = achieved <= kpi ? 0 : 1
+        })
+
+        return studentCLOs
+    })
+
+    const ploMap = (recap?.clo ?? []).reduce((acc, cloRow) => {
+        const cloNo = Number(cloRow.clo)
+        const ploNo = Number(cloRow.plo)
+        if (!Number.isNaN(cloNo) && !Number.isNaN(ploNo)) {
+            acc[cloNo] = ploNo
+        }
+        return acc
+    }, {})
+    // console.log(ploMap)
+    const totals = {};
+    const cohort = data.slice(3).map((row) => {
+        const stdPLOs = {
+            regno: row[2]?.toString() ?? '',
+            name: row[1]
+        }
+        const cohort = { ...stdPLOs }
+        //const plos = [...new Set(recap.clo.map(c => c.plo).sort((a, b) => a - b))]
+
+        cloHdr.forEach(([cloKey, items]) => {
+            const stdTotal = items.reduce((sum, item) => sum + (Number(row[item.sno + 2]) || 0), 0);
+            const cloTotal = items.reduce((sum, item) => sum + (Number(item.total) || 0), 0);
+            //stdPLOs[`PLO${cloKey}`] = [stdTotal, cloTotal]
+            // Map CLO to PLO using ploMap
+            const ploKey = ploMap[cloKey]
+            if (ploKey) {
+                stdPLOs[`PLO${ploKey}`] = stdPLOs[`PLO${ploKey}`] || [0, 0]
+                stdPLOs[`PLO${ploKey}`][0] += stdTotal
+                stdPLOs[`PLO${ploKey}`][1] += cloTotal
+            }
+            const achieved = cloTotal ? (stdPLOs[`PLO${ploKey}`][0] / stdPLOs[`PLO${ploKey}`][1] * 100) : 0
+            cohort[`PLO${ploKey}`] = stdPLOs[`PLO${ploKey}`][0]
+            totals[`PLO${ploKey}`] = stdPLOs[`PLO${ploKey}`][1]
+
+        })
+        // console.log(stdPLOs)
+        return cohort
+    })
+    //console.log([...new Set(recap.clo.map(c => c.plo).sort((a, b) => a - b))])
+    console.log(cohort);
+    const globalCalCLOsKey = JSON.stringify(globalCalCLOs ?? [])
+    const calCLOsKey = JSON.stringify(calCLOs)
 
     // Update gradeChart in zustand store after rendering recap sheet
     useEffect(() => {
@@ -158,7 +197,11 @@ function CLOSheet({ closid, rid }) {
         if (groupedPlanTotalsKey !== globalGroupedPlanTotalsKey) {
             setGroupedPlanTotals(groupedPlanTotals)
         }
-    }, [data, gradeChart, setGradeChart, recap, globalRecap, setRecap, groupedPlanTotals, groupedPlanTotalsKey, globalGroupedPlanTotalsKey, setGroupedPlanTotals])
+
+        if (calCLOsKey !== globalCalCLOsKey) {
+            setCalCLOs(calCLOs)
+        }
+    }, [data, gradeChart, setGradeChart, recap, globalRecap, setRecap, groupedPlanTotals, groupedPlanTotalsKey, globalGroupedPlanTotalsKey, setGroupedPlanTotals, calCLOs, calCLOsKey, globalCalCLOsKey, setCalCLOs])
 
     const planByHeadAndClo = PLAN.reduce((acc, item) => {
         if (!acc[item.head]) {
@@ -195,33 +238,14 @@ function CLOSheet({ closid, rid }) {
         return acc
     }, [])
 
-    sno = 1
-    const cloHdr = Object.entries(Object.groupBy(PLAN, ({ clo }) => clo))
-    let calCLOs = []
-    let stdCLOs = {}
-
-    function cloSummary(localCalCLOs) {
-        return Object.entries(
-            localCalCLOs.reduce((acc, cloObj) => {
-                clo.forEach((cloNo) => {
-                    const cloKey = `CLO${cloNo}`
-                    if (!acc[cloKey]) {
-                        acc[cloKey] = [0, 0]
-                    }
-                    if (cloObj[cloKey] === 1) {
-                        acc[cloKey][0] += 1
-                    } else if (cloObj[cloKey] === 0) {
-                        acc[cloKey][1] += 1
-                    }
-                })
-                return acc
-            }, {})
-        )
-    }
-    
+    const cloSummaryRows = cloSummary(calCLOs, clo)
+    const cohortPloColumns = Array.from(
+        new Set(cohort.flatMap((student) => Object.keys(student).filter((key) => key.startsWith('PLO'))))
+    ).sort((a, b) => Number(a.replace('PLO', '')) - Number(b.replace('PLO', '')))
+    const aggPLOs = {};
     return (
         <div className="marks-list">
-            rid = {rid} closid = {closid} 
+            rid = {rid} closid = {closid}
             <h3>Grouped PLAN Totals by First Word</h3>
             <table id="grouped-plan-totals">
                 <thead>
@@ -396,13 +420,10 @@ function CLOSheet({ closid, rid }) {
                 </thead>
                 <tbody>
                     {data.slice(3).map((row, rowIndex) => {
-                        stdCLOs.regno = row[2].toString()
-                        stdCLOs.name = row[1]
                         const cloCells = cloHdr.flatMap(([cloKey, items]) => {
                             const stdTotal = items.reduce((sum, item) => sum + (Number(row[item.sno + 2]) || 0), 0).toFixed(2)
                             const cloTotal = items.reduce((sum, item) => sum + (Number(item.total) || 0), 0)
                             const achieved = cloTotal ? (stdTotal / cloTotal * 100).toFixed(2) + '%' : '0%'
-                            stdCLOs[`CLO${cloKey}`] = parseFloat(achieved) <= kpi ? 0 : 1
                             return [
                                 ...items.map((item, index) => (
                                     <td key={`cell-${rowIndex}-${cloKey}-${index}`}>
@@ -411,19 +432,16 @@ function CLOSheet({ closid, rid }) {
                                 )),
                                 <td
                                     key={`cell-${rowIndex}-${cloKey}-total`}
-                                    style={{ color: parseFloat(achieved) <= kpi ? 'red' : 'black', fontWeight: parseFloat(achieved) <= kpi ? 'bold' : 'normal' }}
-                                >
+                                    style={{ color: parseFloat(achieved) <= kpi ? 'red' : 'black', fontWeight: parseFloat(achieved) <= kpi ? 'bold' : 'normal' }}>
                                     {stdTotal}
                                 </td>,
                                 <td
                                     key={`cell-${rowIndex}-${cloKey}-achieved`}
-                                    style={{ color: parseFloat(achieved) <= kpi ? 'red' : 'black', fontWeight: parseFloat(achieved) <= kpi ? 'bold' : 'normal' }}
-                                >
+                                    style={{ color: parseFloat(achieved) <= kpi ? 'red' : 'black', fontWeight: parseFloat(achieved) <= kpi ? 'bold' : 'normal' }}>
                                     {achieved}
                                 </td>
                             ]
                         })
-                        calCLOs.push({ ...stdCLOs })
                         return (
                             <tr key={`row-${rowIndex}`}>
                                 <td>{row[0]}</td>
@@ -435,7 +453,72 @@ function CLOSheet({ closid, rid }) {
                     })}
                 </tbody>
             </table>
-            {console.log(cloSummary(calCLOs))}
+            <h2>Cohort PLO Achievement</h2>
+            <table id="cohort-plo-achievement">
+                <thead>
+                    <tr>
+                        <th>SNo</th>
+                        <th>Name</th>
+                        <th>Reg.No</th>
+                        {cohortPloColumns.map((ploKey) => (
+                            <th key={`cohort-head-${ploKey}`}>{ploKey}</th>
+                        ))}
+                        <th>Total</th>
+                        <th>Grade</th>
+                    </tr>
+                    <tr>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        {Object.entries(totals).map((total, index) => (
+                            <th key={`cohort-total-${index}`}>{total[1]}</th>
+                        ))}
+                        <th></th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {cohort.map((student, index) => {
+                        // console.log(student)
+                        const { regno, name, ...stdPLOTotal } = student;
+                        const stdTotal = Math.round(Object.values(stdPLOTotal).reduce((sum, val) => sum + (Number(val) || 0), 0))
+                        const grade = grades.find(({ start, end }) => stdTotal >= start && stdTotal <= end)?.grade ?? ''
+                        const sumPLOs = Object.fromEntries(cohortPloColumns.map((ploKey) => [ploKey, 0]))
+                        
+                        // console.log(sumPLOs)
+                        return (
+                            <tr key={`cohort-row-${student.regno || index}`}>
+                                <td>{index + 1}</td>
+                                <td style={{ textAlign: 'left' }}>{student.name}</td>
+                                <td>{student.regno}</td>
+                                {cohortPloColumns.map((ploKey) => {
+                                    const studentPlo = Number(student[ploKey]) || 0
+                                    const ploTotal = Number(totals[ploKey]) || 0
+                                    const achieved = ploTotal ? (studentPlo / ploTotal * 100) : 0
+                                    sumPLOs[ploKey] = grade === 'F' ? 0 : achieved <= kpi ? 0 : 1
+                                    aggPLOs[ploKey] = aggPLOs[ploKey] || { achieved: 0, notAchieved: 0 }
+                                    aggPLOs[ploKey].achieved += sumPLOs[ploKey]
+                                    aggPLOs[ploKey].notAchieved += grade !== 'F' && sumPLOs[ploKey] === 0 && 1
+                                    return (
+                                        <td key={`cohort-cell-${student.regno || index}-${ploKey}`}
+                                            style={{
+                                                color: sumPLOs[ploKey] === 0 ? 'red' : 'black',
+                                                fontWeight: sumPLOs[ploKey] === 0 ? 700 : 400,
+                                                backgroundColor: grade !== 'F' && sumPLOs[ploKey] === 0 ? '#CCC1DA' : 'transparent'
+                                            }}
+                                        >
+                                            {Number(student[ploKey].toFixed(2)).toString() ?? ''}
+                                        </td>
+                                    )
+                                })}
+                                <td>{stdTotal}</td>
+                                <td>{grade}</td>
+                            </tr>
+                        )
+                    })}
+                </tbody>
+            </table>
+            {console.log(aggPLOs)}
             <h2>CLO Achievement Summary</h2>
             <table id="clo-summary">
                 <thead>
@@ -447,7 +530,7 @@ function CLOSheet({ closid, rid }) {
                     </tr>
                 </thead>
                 <tbody>
-                    {cloSummary(calCLOs).map(([cloKey, [achievedCount, notAchievedCount]]) => {
+                    {cloSummaryRows.map(([cloKey, [achievedCount, notAchievedCount]]) => {
                         const totalCount = achievedCount + notAchievedCount
                         const achievedPct = totalCount ? ((achievedCount / totalCount) * 100).toFixed(2) : '0.00'
                         return (
@@ -463,15 +546,14 @@ function CLOSheet({ closid, rid }) {
             </table>
             <h2>CLO Achievement Charts</h2>
             <div style={{ display: 'flex', flexWrap: 'nowrap', gap: '16px', overflowX: 'auto', alignItems: 'flex-start' }}>
-                {cloSummary(calCLOs).map(([cloKey, [achievedCount, notAchievedCount]]) => {
+                {cloSummaryRows.map(([cloKey, [achievedCount, notAchievedCount]]) => {
                     const totalCount = achievedCount + notAchievedCount
                     const achievedPct = totalCount ? ((achievedCount / totalCount) * 100).toFixed(2) : '0.00'
                     const notAchievedPct = totalCount ? ((notAchievedCount / totalCount) * 100).toFixed(2) : '0.00'
                     return (
                         <div
                             key={`cal-${cloKey}`}
-                            style={{ flex: '0 0 320px', padding: '12px', border: '1px solid #ddd', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '6px' }}
-                        >
+                            style={{ flex: '0 0 320px', padding: '12px', border: '1px solid #ddd', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
                             <span style={{ fontSize: '13px' }}>Achieved: {achievedCount} | {achievedPct}%</span>
                             <span style={{ fontSize: '13px' }}>Not Achieved: {notAchievedCount} | {notAchievedPct}%</span>
                             <PLOChart label={`${cloKey} Achievement`} achieved={Number(achievedPct)} notAchieved={100 - Number(achievedPct)} />
@@ -479,7 +561,6 @@ function CLOSheet({ closid, rid }) {
                     )
                 })}
             </div>
-
             <h2>Summary</h2>
             <table id="summary">
                 <tbody>

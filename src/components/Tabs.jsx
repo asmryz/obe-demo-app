@@ -3,6 +3,12 @@ import { useState } from "react";
 const Tabs = ({ tabs }) => {
   const [activeIndex, setActiveIndex] = useState(0);
 
+  if (tabs.length === 0) {
+    return null;
+  }
+
+  const safeActiveIndex = Math.min(activeIndex, tabs.length - 1);
+
   return (
     <div className="tabs">
       {/* Headers */}
@@ -11,8 +17,7 @@ const Tabs = ({ tabs }) => {
           <button
             key={index}
             onClick={() => setActiveIndex(index)}
-            className={activeIndex === index ? "active" : ""}
-          >
+            className={safeActiveIndex === index ? "active" : ""}>
             {tab.label}
           </button>
         ))}
@@ -20,7 +25,7 @@ const Tabs = ({ tabs }) => {
 
       {/* Content */}
       <div className="tab-content">
-        {tabs[activeIndex].content}
+        {tabs[safeActiveIndex].content}
       </div>
     </div>
   );

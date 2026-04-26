@@ -13,7 +13,13 @@ export const useRecapStore = create((set, get) => ({
     getRecapResource(rid) {
         if (!recapResourceCache.has(rid)) {
             const recapPromise = api.get(`/recaps/${rid}`)
-                .then(({ data }) => ({ recap: data, error: null }))
+                .then(({ data }) => ({
+                    recap: {
+                        ...(data ?? {}),
+                        clo: Array.isArray(data?.clo) ? data.clo : []
+                    },
+                    error: null
+                }))
                 .catch((err) => ({
                     recap: null,
                     error: err?.response?.data?.error || 'Failed to load recap data.'
@@ -62,4 +68,3 @@ export const useRecapStore = create((set, get) => ({
         }
     }
 }))
-
