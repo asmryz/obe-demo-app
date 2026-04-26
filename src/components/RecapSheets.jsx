@@ -4,13 +4,11 @@ import { useState } from 'react';
 import { useEffect } from 'react';
 import './RecapSheets.css';
 import { useRecapStore } from '../store/recapStore';
-import { CLOApply } from './CLOApply';
-import CLOSheet from './CLOSheet';
 import { useSheetStore } from '../store/sheetStore';
 
 
 export const RecapSheets = () => {
-    const { rid, setRID, cloSid, setCLOSid, setRecap } = useSheetStore()
+    const { setRID, setCLOSid, setRecap, setActiveTabIndex } = useSheetStore()
     // const [selectedRid, setSelectedRid] = useState(null);
     // const [cloSid, setCloSid] = useState(null);
     const recapsByQuery = useRecapStore((state) => state.recapsByQuery);
@@ -24,7 +22,6 @@ export const RecapSheets = () => {
     const hasCachedRecaps = Object.prototype.hasOwnProperty.call(recapsByQuery, normalizedSearch);
     const recaps = recapsByQuery[normalizedSearch] ?? [];
     const recapList = Array.isArray(recaps) ? recaps : [];
-
     useEffect(() => {
         if (hasCachedRecaps) {
             return;
@@ -36,6 +33,9 @@ export const RecapSheets = () => {
 
         return () => clearTimeout(timeoutId);
     }, [normalizedSearch, hasCachedRecaps, fetchRecaps]);
+
+
+    
 
     const handleRecapClick = (event, selectedRecap) => {
         event.preventDefault();
@@ -56,25 +56,8 @@ export const RecapSheets = () => {
                 setRecap(recap);
             }
         });
+        setActiveTabIndex(1);
     };
-
-    // console.log(recapList)
-
-    if (rid !== null) {
-        return (
-            <>
-                <a href="#" onClick={() => { setRID(null); setCLOSid(null); setRecap(null); }}>
-                    Back to <b>Recap Sheets</b>
-                </a>
-
-                {!cloSid && <CLOApply rid={rid} />
-                                  
-                    // <CLOSheet closid={cloSid} rid={rid} />
-                }
-
-            </>
-        );
-    }
 
     return (
         <>
@@ -117,7 +100,7 @@ export const RecapSheets = () => {
                                     <td style={{ width: '200px' }}>{recap.name}</td>
                                     <td>{recap.semester}</td>
                                     <td>{recap.year}</td>
-                                    <td>{recap.closid} | {recap.rid }</td>
+                                    <td>{recap.closid} | {recap.rid}</td>
                                 </tr>
                             ))}
                         </tbody>

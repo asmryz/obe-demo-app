@@ -1,34 +1,43 @@
-import { useState } from "react";
+import { useEffect } from "react";
+import { useSheetStore } from "../store/sheetStore";
 
-const Tabs = ({ tabs }) => {
-  const [activeIndex, setActiveIndex] = useState(0);
+const Tabs = ({ tabs, onTabSelect }) => {
+    const { activeTabIndex, setActiveTabIndex } = useSheetStore()
+    const safeActiveTabIndex = tabs.length > 0 ? Math.min(activeTabIndex, tabs.length - 1) : 0;
 
-  if (tabs.length === 0) {
-    return null;
-  }
+    useEffect(() => {
+        if (tabs.length > 0 && safeActiveTabIndex !== activeTabIndex) {
+            setActiveTabIndex(safeActiveTabIndex);
+        }
+    }, [activeTabIndex, safeActiveTabIndex, setActiveTabIndex, tabs.length]);
 
-  const safeActiveIndex = Math.min(activeIndex, tabs.length - 1);
+    if (tabs.length === 0) {
+        return null;
+    }
 
-  return (
-    <div className="tabs">
-      {/* Headers */}
-      <div className="tab-buttons">
-        {tabs.map((tab, index) => (
-          <button
-            key={index}
-            onClick={() => setActiveIndex(index)}
-            className={safeActiveIndex === index ? "active" : ""}>
-            {tab.label}
-          </button>
-        ))}
-      </div>
+    return (
+        <div className="tabs">
+            {/* Headers */}
+            <div className="tab-buttons">
+                {tabs.map((tab, index) => (
+                    <button
+                        key={index}
+                        onClick={() => {
+                            onTabSelect?.(index);
+                            setActiveTabIndex(index);
+                        }}
+                        className={safeActiveTabIndex === index ? "active" : ""}>
+                        {tab.label}
+                    </button>
+                ))}
+            </div>
 
-      {/* Content */}
-      <div className="tab-content">
-        {tabs[safeActiveIndex].content}
-      </div>
-    </div>
-  );
+            {/* Content */}
+            <div className="tab-content">
+                {tabs[safeActiveTabIndex].content}
+            </div>
+        </div>
+    );
 };
 
 export default Tabs;

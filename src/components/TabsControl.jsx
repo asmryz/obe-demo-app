@@ -8,12 +8,13 @@ import FileUpload from './FileUpload';
 import CLOSheet from './CLOSheet';
 import { useSheetStore } from '../store/sheetStore';
 import CLOList from './CLOList';
+import { CLOApply } from './CLOApply';
 
 function TabsControl() {
     const ref = useRef();
-    const { cloSid, rid } = useSheetStore()
+    const { cloSid, rid, setRID, setCLOSid, setRecap, setActiveTabIndex } = useSheetStore()
     const sheetData = useSheetStore((state) => state.sheetData);
-    const hasSelectedCloSheet = Boolean(cloSid && rid);
+    const hasSelectedRecap = Boolean(rid);
     const handlePrint = useReactToPrint({
         contentRef: ref,
         documentTitle: "My Document",
@@ -43,24 +44,22 @@ function TabsControl() {
                 </div>
             ),
         },
-        ...(hasSelectedCloSheet ? [
+        ...(hasSelectedRecap ? [
         {
             label: "OBE",
             content: (
                 <div>
                     <FileUpload />
-                    {sheetData ? (
+                    {cloSid ? sheetData ? (
                         <Suspense fallback={<p>Loading student marks...</p>}>
-                            {cloSid && rid ? (
-                                <div style={{ textAlign: 'center', padding: '20px' }}>
-                                    <CLOSheet closid={cloSid} rid={rid} />
-                                </div>
-                            ) : (
-                                <p>Select a recap sheet first to view the CLO sheet.</p>
-                            )}
+                            <div style={{ textAlign: 'center', padding: '20px' }}>
+                                <CLOSheet closid={cloSid} rid={rid} />
+                            </div>
                         </Suspense>
                     ) : (
                         <p>Please upload an Excel file to view marks.</p>
+                    ) : (
+                        <CLOApply rid={rid} />
                     )}
                 </div>
             ),
@@ -100,8 +99,17 @@ function TabsControl() {
 
     ];
 
+    const handleTabSelect = (index) => {
+        if (index === 0) {
+            setRID(null);
+            setCLOSid(null);
+            setRecap(null);
+            setActiveTabIndex(0);
+        }
+    };
+
     return (
-        <Tabs tabs={tabData} />
+        <Tabs tabs={tabData} onTabSelect={handleTabSelect} />
     )
 }
 

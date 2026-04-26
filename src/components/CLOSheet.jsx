@@ -54,6 +54,8 @@ function CLOSheet({ closid, rid }) {
         setGroupedPlanTotals,
         calCLOs: globalCalCLOs,
         setCalCLOs,
+        aggPLOs: globalAggPLOs,
+        setAggPLOs,
         cloSummary
     } = useSheetStore(state => state)
     // setGradeChart(localGradeChart)
@@ -148,12 +150,13 @@ function CLOSheet({ closid, rid }) {
             //stdPLOs[`PLO${cloKey}`] = [stdTotal, cloTotal]
             // Map CLO to PLO using ploMap
             const ploKey = ploMap[cloKey]
-            if (ploKey) {
-                stdPLOs[`PLO${ploKey}`] = stdPLOs[`PLO${ploKey}`] || [0, 0]
-                stdPLOs[`PLO${ploKey}`][0] += stdTotal
-                stdPLOs[`PLO${ploKey}`][1] += cloTotal
+            if (!ploKey) {
+                return
             }
-            const achieved = cloTotal ? (stdPLOs[`PLO${ploKey}`][0] / stdPLOs[`PLO${ploKey}`][1] * 100) : 0
+
+            stdPLOs[`PLO${ploKey}`] = stdPLOs[`PLO${ploKey}`] || [0, 0]
+            stdPLOs[`PLO${ploKey}`][0] += stdTotal
+            stdPLOs[`PLO${ploKey}`][1] += cloTotal
             cohort[`PLO${ploKey}`] = stdPLOs[`PLO${ploKey}`][0]
             totals[`PLO${ploKey}`] = stdPLOs[`PLO${ploKey}`][1]
 
@@ -163,6 +166,35 @@ function CLOSheet({ closid, rid }) {
     })
     //console.log([...new Set(recap.clo.map(c => c.plo).sort((a, b) => a - b))])
     console.log(cohort);
+
+    const cohortPloColumns = Array.from(
+        new Set(cohort.flatMap((student) => Object.keys(student).filter((key) => key.startsWith('PLO'))))
+    ).sort((a, b) => Number(a.replace('PLO', '')) - Number(b.replace('PLO', '')))
+    
+    const aggPLOs = cohort.reduce((acc, student) => {
+        const { regno, name, ...stdPLOTotal } = student
+        const stdTotal = Math.round(Object.values(stdPLOTotal).reduce((sum, val) => sum + (Number(val) || 0), 0))
+        const grade = grades.find(({ start, end }) => stdTotal >= start && stdTotal <= end)?.grade ?? ''
+
+        cohortPloColumns.forEach((ploKey) => {
+            const studentPlo = Number(student[ploKey]) || 0
+            const ploTotal = Number(totals[ploKey]) || 0
+            const achieved = ploTotal ? (studentPlo / ploTotal * 100) : 0
+            const achievedFlag = grade === 'F' ? 0 : achieved <= kpi ? 0 : 1
+
+            acc[ploKey] = acc[ploKey] || { achieved: 0, notAchieved: 0, students: [] }
+            acc[ploKey].achieved += achievedFlag
+            acc[ploKey].notAchieved += grade !== 'F' && achievedFlag === 0 ? 1 : 0
+            grade !== 'F' && achievedFlag === 0 && acc[ploKey].students.push({
+                regno: student.regno,
+                name: student.name,
+            })
+        })
+
+        return acc
+    }, {})
+    const aggPLOsKey = JSON.stringify(aggPLOs)
+    const globalAggPLOsKey = JSON.stringify(globalAggPLOs ?? {})
     const globalCalCLOsKey = JSON.stringify(globalCalCLOs ?? [])
     const calCLOsKey = JSON.stringify(calCLOs)
 
@@ -201,7 +233,11 @@ function CLOSheet({ closid, rid }) {
         if (calCLOsKey !== globalCalCLOsKey) {
             setCalCLOs(calCLOs)
         }
-    }, [data, gradeChart, setGradeChart, recap, globalRecap, setRecap, groupedPlanTotals, groupedPlanTotalsKey, globalGroupedPlanTotalsKey, setGroupedPlanTotals, calCLOs, calCLOsKey, globalCalCLOsKey, setCalCLOs])
+
+        if (aggPLOsKey !== globalAggPLOsKey) {
+            setAggPLOs(aggPLOs)
+        }
+    }, [data, gradeChart, setGradeChart, recap, globalRecap, setRecap, groupedPlanTotals, groupedPlanTotalsKey, globalGroupedPlanTotalsKey, setGroupedPlanTotals, calCLOs, calCLOsKey, globalCalCLOsKey, setCalCLOs, aggPLOs, aggPLOsKey, globalAggPLOsKey, setAggPLOs])
 
     const planByHeadAndClo = PLAN.reduce((acc, item) => {
         if (!acc[item.head]) {
@@ -239,10 +275,6 @@ function CLOSheet({ closid, rid }) {
     }, [])
 
     const cloSummaryRows = cloSummary(calCLOs, clo)
-    const cohortPloColumns = Array.from(
-        new Set(cohort.flatMap((student) => Object.keys(student).filter((key) => key.startsWith('PLO'))))
-    ).sort((a, b) => Number(a.replace('PLO', '')) - Number(b.replace('PLO', '')))
-    const aggPLOs = {};
     return (
         <div className="marks-list">
             rid = {rid} closid = {closid}
@@ -420,14 +452,15 @@ function CLOSheet({ closid, rid }) {
                 </thead>
                 <tbody>
                     {data.slice(3).map((row, rowIndex) => {
+                        const safeRow = Array.isArray(row) ? row : []
                         const cloCells = cloHdr.flatMap(([cloKey, items]) => {
-                            const stdTotal = items.reduce((sum, item) => sum + (Number(row[item.sno + 2]) || 0), 0).toFixed(2)
+                            const stdTotal = items.reduce((sum, item) => sum + (Number(safeRow[item.sno + 2]) || 0), 0).toFixed(2)
                             const cloTotal = items.reduce((sum, item) => sum + (Number(item.total) || 0), 0)
                             const achieved = cloTotal ? (stdTotal / cloTotal * 100).toFixed(2) + '%' : '0%'
                             return [
                                 ...items.map((item, index) => (
                                     <td key={`cell-${rowIndex}-${cloKey}-${index}`}>
-                                        {Number(row[item.sno + 2]).toString() ?? ''}
+                                        {safeRow[item.sno + 2] == null ? '' : Number(safeRow[item.sno + 2]).toString()}
                                     </td>
                                 )),
                                 <td
@@ -444,9 +477,9 @@ function CLOSheet({ closid, rid }) {
                         })
                         return (
                             <tr key={`row-${rowIndex}`}>
-                                <td>{row[0]}</td>
-                                <td style={{ textAlign: 'left' }}>{row[1]}</td>
-                                <td>{row[2]}</td>
+                                <td>{safeRow[0] ?? ''}</td>
+                                <td style={{ textAlign: 'left' }}>{safeRow[1] ?? ''}</td>
+                                <td>{safeRow[2] ?? ''}</td>
                                 {cloCells}
                             </tr>
                         )
@@ -496,9 +529,6 @@ function CLOSheet({ closid, rid }) {
                                     const ploTotal = Number(totals[ploKey]) || 0
                                     const achieved = ploTotal ? (studentPlo / ploTotal * 100) : 0
                                     sumPLOs[ploKey] = grade === 'F' ? 0 : achieved <= kpi ? 0 : 1
-                                    aggPLOs[ploKey] = aggPLOs[ploKey] || { achieved: 0, notAchieved: 0 }
-                                    aggPLOs[ploKey].achieved += sumPLOs[ploKey]
-                                    aggPLOs[ploKey].notAchieved += grade !== 'F' && sumPLOs[ploKey] === 0 && 1
                                     return (
                                         <td key={`cohort-cell-${student.regno || index}-${ploKey}`}
                                             style={{
@@ -507,7 +537,7 @@ function CLOSheet({ closid, rid }) {
                                                 backgroundColor: grade !== 'F' && sumPLOs[ploKey] === 0 ? '#CCC1DA' : 'transparent'
                                             }}
                                         >
-                                            {Number(student[ploKey].toFixed(2)).toString() ?? ''}
+                                            {student[ploKey] == null ? '' : Number(student[ploKey]).toFixed(2)}
                                         </td>
                                     )
                                 })}

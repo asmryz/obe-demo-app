@@ -7,8 +7,19 @@ import { useState } from 'react'
 
 
 function CRRComponent() {
-    const { gradeChart, recap, groupedPlanTotals, cloSummary, calCLOs } = useSheetStore()
-    const [reason, setReason] = useState('')
+    const { gradeChart, recap, groupedPlanTotals, cloSummary, calCLOs, aggPLOs } = useSheetStore()
+    const [comments, setComments] = useState({
+        reason: '',
+        PLO: Array.from({ length: aggPLOs.length }, () => ''),
+        evaluation: '',
+        suggestions: '',
+        moderators: '',
+        curriculum: '',
+        assessment: '',
+        enhancements: '',
+        outline: '',
+
+    })
     const [KPI, setKPI] = useState(50)
     const cloRows = Array.isArray(recap?.clo) ? recap.clo : []
     const cloSummaryRows = cloSummary(calCLOs, cloRows.map(c => c.clo))
@@ -463,14 +474,14 @@ function CRRComponent() {
                                 </p>
                             </td>
                             <td width="79%" colSpan="15" valign="top" className="inl-93">
-                                <p className="MsoNormal inl-94" align="center">
-                                    <span lang="EN-US" className="inl-58">
-                                        {/* editable on screen */}
-                                        <textarea name="reason" value={reason} onChange={e => setReason(e.target.value)} />
-                                        {/* visible only when printing */}
-                                        <span className="print-text">{reason}</span>
-                                    </span>
-                                </p>
+                                {/* <p className="MsoNormal inl-94" align="center"> */}
+                                {/* <span lang="EN-US" className="inl-58"> */}
+                                {/* editable on screen */}
+                                <textarea className="comment-textarea" name="reason" value={comments.reason} onChange={e => setComments({ ...comments, reason: e.target.value })} style={{ fontSize: '14.6px' }} />
+                                {/* visible only when printing */}
+                                <span className="print-text" style={{ fontSize: '14.6px' }}>{comments.reason}</span>
+                                {/* </span> */}
+                                {/* </p> */}
                             </td>
                         </tr>
                     </tbody>
@@ -502,7 +513,7 @@ function CRRComponent() {
                     <span lang="EN-US" className="inl-10">&nbsp;</span>
                 </p>
                 {/* Page break for printing */}
-                <div style={{ pageBreakAfter: 'always' }} />
+                {/* <div style={{ pageBreakAfter: 'always' }} /> */}
 
                 <table
                     className="MsoNormalTable inl-100"
@@ -661,7 +672,7 @@ function CRRComponent() {
                                 </p>
                             </td>
                         </tr>
-                        {[...new Set(recap.clo.map(c => c.plo).sort((a, b) => a - b))].map((plo) => {
+                        {[...new Set(recap.clo.map(c => c.plo).sort((a, b) => a - b))].map((plo, index) => {
                             const ploClos = recap.clo.filter((c) => c.plo === plo)
                             const cloLabels = recap.clo
                                 .filter((c) => c.plo === plo)
@@ -671,22 +682,22 @@ function CRRComponent() {
                                 ploClos.some((clo) => studentCLOs[`CLO${clo.clo}`] === 0)
                             ).length
                             const ploStudentCount = calCLOs.length || studentCount
-                            const notAchievedPercentage = ploStudentCount
-                                ? ((notAchievedCount / ploStudentCount) * 100).toFixed(2)
-                                : '0.00'
 
+                            const notAchievedPercentage = aggPLOs[`PLO${plo}`].notAchieved / (aggPLOs[`PLO${plo}`].achieved + aggPLOs[`PLO${plo}`].notAchieved) * 100
+                            //console.log( notAchievedPercentage, plo)
+                            // console.log(comments)
                             return (
-
                                 <tr key={`plo-not-achieved-${plo}`} className="inl-123">
                                     <td width="26%" className="inl-124">
                                         <p className="MsoNormal inl-6" align="center">
-                                            <span lang="EN-US" className="inl-58">Percentage of students who have not achieved<br/>PLO {plo} ({cloLabels})
+                                            <span lang="EN-US" className="inl-58">
+                                                Percentage of students who have not achieved<br />PLO {plo} ({cloLabels})
                                             </span>
                                         </p>
                                     </td>
                                     <td width="10%" className="inl-125">
                                         <p className="MsoNormal inl-6" align="center">
-                                            <span lang="EN-US" className="inl-58">{notAchievedPercentage}</span>
+                                            <span lang="EN-US" className="inl-58">{notAchievedPercentage.toFixed(2)}%</span>
                                         </p>
                                     </td>
                                     <td width="27%" className="inl-126">
@@ -694,17 +705,55 @@ function CRRComponent() {
                                             <span lang="EN-US" className="inl-58">&nbsp;</span>
                                         </p>
                                         <p className="MsoNormal inl-6" align="center">
-                                            <span lang="EN-US" className="inl-58">Reason(s) if this percentage is more than 50
+                                            <span lang="EN-US" className="inl-58">Reason(s) if this percentage is more than 50<br />(if applicable)
                                             </span>
                                         </p>
                                         <p className="MsoNormal inl-6" align="center">
                                             <span lang="EN-US" className="inl-58">&nbsp;</span>
                                         </p>
                                     </td>
-                                    <td width="34%" className="inl-127">
-                                        <p className="MsoNormal inl-6" align="center">
-                                            <span lang="EN-US" className="inl-58">-</span>
-                                        </p>
+                                    <td width="34%" className="inl-127" style={{ position: 'relative', verticalAlign: 'top' }}>
+
+                                        <span lang="EN-US" className="inl-58">
+                                            {/* editable on screen */}
+                                            <textarea
+                                                className="comment-textarea"
+                                                value={comments.PLO[index]}
+                                                style={{
+                                                    position: 'absolute',
+                                                    inset: 0,
+                                                    width: '100%',
+                                                    height: '100%',
+                                                    boxSizing: 'border-box',
+                                                    display: 'block',
+                                                    border: 0,
+                                                    outline: 0,
+                                                    resize: 'none',
+
+                                                }}
+                                                onChange={e => {
+                                                    const newPLO = [...comments.PLO];
+                                                    newPLO[index] = e.target.value;
+                                                    setComments({ ...comments, PLO: newPLO });
+                                                }}
+                                            />
+                                            {/* visible only when printing */}
+                                            <span
+                                                className="print-text"
+                                                style={{
+                                                    display: 'block',
+                                                    width: '100%',
+                                                    boxSizing: 'border-box',
+                                                    fontFamily: 'inherit',
+                                                    marginTop: 0,
+                                                    textAlign: 'left',
+                                                    verticalAlign: 'top',
+                                                    whiteSpace: 'pre-wrap',
+                                                }}>
+                                                {comments.PLO[index]}
+                                            </span>
+                                        </span>
+
                                     </td>
                                 </tr>
                             )
@@ -777,29 +826,36 @@ function CRRComponent() {
                                 </p>
                             </td>
                         </tr>
-                        <tr className="inl-110">
-                            <td width="10%" valign="top" className="inl-138">
-                                <p className="MsoNormal inl-6" align="center">
-                                    <span lang="EN-US" className="inl-10">1</span>
-                                </p>
-                            </td>
-                            <td width="34%" valign="top" className="inl-139">
-                                <p className="MsoNormal">
-                                    <span lang="EN-US">Muhammad Shayaan Khan</span>
-                                </p>
-                            </td>
-                            <td width="29%" valign="top" className="inl-140">
-                                <p className="MsoNormal inl-6" align="center">
-                                    <span lang="EN-US">2345121</span>
-                                </p>
-                            </td>
-                            <td width="25%" valign="top" className="inl-141">
-                                <p className="MsoNormal inl-6" align="center">
-                                    <span lang="EN-US" className="inl-10">PLO 2</span>
-                                </p>
-                            </td>
-                        </tr>
-                        <tr className="inl-142">
+                        {(() => {
+                            let sno = 1;
+                            return [...new Set(recap.clo.map(c => c.plo).sort((a, b) => a - b))].flatMap((plo, index) =>
+                                aggPLOs[`PLO${plo}`].students.map(s => (
+                                    <tr className="inl-110" key={`plo-student-${plo}-${s.regno}`}>
+                                        <td width="10%" valign="top" className="inl-138">
+                                            <p className="MsoNormal inl-6" align="center">
+                                                <span lang="EN-US" className="inl-10">{sno++}</span>
+                                            </p>
+                                        </td>
+                                        <td width="34%" valign="top" className="inl-139">
+                                            <p className="MsoNormal">
+                                                <span lang="EN-US">{s.name}</span>
+                                            </p>
+                                        </td>
+                                        <td width="29%" valign="top" className="inl-140">
+                                            <p className="MsoNormal inl-6" align="center">
+                                                <span lang="EN-US">{s.regno}</span>
+                                            </p>
+                                        </td>
+                                        <td width="25%" valign="top" className="inl-141">
+                                            <p className="MsoNormal inl-6" align="center">
+                                                <span lang="EN-US" className="inl-10">PLO {plo}</span>
+                                            </p>
+                                        </td>
+                                    </tr>
+                                ))
+                            );
+                        })()}
+                        {/* <tr className="inl-142">
                             <td width="10%" valign="top" className="inl-143">
                                 <p className="MsoNormal inl-6" align="center">
                                     <span lang="EN-US" className="inl-10">2</span>
@@ -820,7 +876,7 @@ function CRRComponent() {
                                     <span lang="EN-US" className="inl-10">PLO 2</span>
                                 </p>
                             </td>
-                        </tr>
+                        </tr> */}
                     </tbody>
                 </table>
                 <p className="MsoNormal">
@@ -844,13 +900,30 @@ function CRRComponent() {
                         <tr className="inl-101">
                             <td width="100%" valign="top" className="inl-147">
                                 <p className="MsoNormal">
-                                    <span lang="EN-US" className="inl-10">1. Student (Course Evaluation) Questionnaires</span>
+                                    <span lang="EN-US" className="inl-10" style={{fontWeight: 'bold'}}>1. Student (Course Evaluation) Questionnaires</span>
                                 </p>
                                 <p className="MsoNormal inl-148">
-                                    <span lang="EN-US" className="inl-10">Course evaluation's score by the students: 92.03%</span>
+                                    <span lang="EN-US" className="inl-10">Course evaluation's score by the students:</span>
+                                    <span>
+                                        <input type="text"
+                                            className='comment-textarea'
+                                            value={comments.evaluation}
+                                            onChange={e => setComments({ ...comments, evaluation: e.target.value })}
+                                            style={{ border: 0, outline: 0, width: '50px' }} />
+
+                                    </span>
+                                    <span className="print-text">{comments.evaluation}%</span>
                                 </p>
                                 <p className="MsoNormal">
-                                    <span lang="EN-US" className="inl-10">Suggestions: - N/A </span>
+                                    <span lang="EN-US" className="inl-10"  style={{fontWeight: 'bold'}}>Suggestions:</span>
+                                    <span className="print-text" >{comments.suggestions}</span>
+                                    <div>
+                                        <textarea className="comment-textarea" value={comments.suggestions} 
+                                        onChange={e => setComments({ ...comments, suggestions: e.target.value })} 
+                                        style={{width: '100%', inset: 0, boxSizing: 'border-box',}}
+                                        />
+                                        {/* visible only when printing */}
+                                    </div>
                                 </p>
                             </td>
                         </tr>
@@ -864,17 +937,21 @@ function CRRComponent() {
                     cellPadding="0"
                     width="100%">
                     <tbody>
-                        <tr className="inl-149">
+                        <tr className="inl-101" style={{ border: '1px solid black' }}>
                             <td width="100%" valign="top" className="inl-150">
                                 <p className="MsoNormal">
-                                    <span lang="EN-US" className="inl-10">2.Moderators (if any)</span>
+                                    <span lang="EN-US" className="inl-10"  style={{fontWeight: 'bold'}}>2. Moderators (if any): </span>
+                                    <span className="print-text" >{comments.moderators}</span>
+                                    <div>
+                                        <textarea className="comment-textarea" value={comments.moderators} 
+                                        onChange={e => setComments({ ...comments, moderators: e.target.value })} 
+                                        style={{width: '100%', inset: 0, boxSizing: 'border-box',}}
+                                        />
+                                        {/* visible only when printing */}
+                                    </div>                                    
                                 </p>
-                                <p className="MsoNormal">
-                                    <span lang="EN-US" className="inl-10">&nbsp;</span>
-                                </p>
-                                <p className="MsoNormal">
-                                    <span lang="EN-US" className="inl-10">N/A</span>
-                                </p>
+
+
                             </td>
                         </tr>
                     </tbody>
@@ -890,26 +967,26 @@ function CRRComponent() {
                         <tr className="inl-152">
                             <td width="100%" valign="top" className="inl-153">
                                 <p className="MsoNormal">
-                                    <span lang="EN-US" className="inl-10">3. Curriculum: comment on the
+                                    <span lang="EN-US" className="inl-10" style={{display: 'block', marginBottom: '5px'}}><span style={{ fontWeight: 'bold' }}>3. Curriculum: </span>comment on the
                                         continuing appropriateness of the Course curriculum in relation
                                         to the intended learning outcomes (Course objectives) and its
                                         compliance with the HEC Approved / Revised National Curriculum
                                         Guidelines</span>
-                                </p>
-                                <p className="MsoNormal inl-148">
-                                    <span lang="EN-US" className="inl-10">&nbsp;</span>
-                                </p>
-                                <p className="MsoNormal inl-148">
-                                    <span lang="EN-US" className="inl-10">Course content in relation to the intended learning outcomes is
-                                        well defined. Furthermore, curriculum is in line with HEC
-                                        guidelines and international standards.</span>
+                                    <div className="print-text" >{comments.curriculum}</div>
+                                    <div>
+                                        <textarea className="comment-textarea" rows={4} value={comments.curriculum} 
+                                        onChange={e => setComments({ ...comments, curriculum: e.target.value })} 
+                                        style={{width: '100%', height: '100%', inset: 0, boxSizing: 'border-box',}}
+                                        />
+                                        {/* visible only when printing */}
+                                    </div>                                         
                                 </p>
                             </td>
                         </tr>
                     </tbody>
                 </table>
                 <p className="MsoNormal"><span lang="EN-US" className="inl-10">&nbsp;</span></p>
-                <div style={{ pageBreakAfter: 'always' }} />
+                {/* <div style={{ pageBreakAfter: 'always' }} /> */}
                 <table
                     className="MsoNormalTable inl-55"
                     border="1"
@@ -920,16 +997,17 @@ function CRRComponent() {
                         <tr className="inl-154">
                             <td width="100%" valign="top" className="inl-155">
                                 <p className="MsoNormal">
-                                    <span lang="EN-US" className="inl-10">4. Assessment: comment on the continuing effectiveness of
+                                    <span lang="EN-US" className="inl-10" style={{display: 'block', marginBottom: '5px'}}><span style={{ fontWeight: 'bold' }}>4. Assessment:</span> comment on the continuing effectiveness of
                                         method(s) of assessment in relation to the intended learning
                                         outcomes (Course objectives)</span>
-                                </p>
-                                <p className="MsoNormal">
-                                    <span lang="EN-US" className="inl-10">&nbsp;</span>
-                                </p>
-                                <p className="MsoNormal">
-                                    <span lang="EN-US" className="inl-10">Current assessments methods seem enough to gauge defined
-                                        PLOs.</span>
+                                    <div className="print-text" >{comments.assessment}</div>
+                                    <div>
+                                        <textarea className="comment-textarea" rows={4} value={comments.assessment} 
+                                        onChange={e => setComments({ ...comments, assessment: e.target.value })} 
+                                        style={{width: '100%', height: '100%', inset: 0, boxSizing: 'border-box',}}
+                                        />
+                                        {/* visible only when printing */}
+                                    </div>  
                                 </p>
                             </td>
                         </tr>
@@ -946,20 +1024,23 @@ function CRRComponent() {
                         <tr className="inl-156">
                             <td width="100%" valign="top" className="inl-147">
                                 <p className="MsoNormal">
-                                    <span lang="EN-US" className="inl-10">5. Enhancement: comment on the
+                                    <span lang="EN-US" className="inl-10" ><span style={{ fontWeight: 'bold' }}>5. Enhancement:</span> comment on the
                                         implementation of changes proposed in earlier
                                     </span>
+
                                 </p>
                                 <p className="MsoNormal">
-                                    <span lang="EN-US" className="inl-10">Faculty Course Review Reports (if any)</span>
+                                    <span lang="EN-US" className="inl-10" style={{display: 'block', marginBottom: '5px'}}>Faculty Course Review Reports (if any)</span>
+                                    <div className="print-text" >{comments.enhancements}</div>
+                                    <div>
+                                        <textarea className="comment-textarea" rows={4} value={comments.enhancements} 
+                                        onChange={e => setComments({ ...comments, enhancements: e.target.value })} 
+                                        style={{width: '100%', height: '100%', inset: 0, boxSizing: 'border-box',}}
+                                        />
+                                        {/* visible only when printing */}
+                                    </div>  
                                 </p>
-                                <p className="MsoNormal">
-                                    <span lang="EN-US" className="inl-10">&nbsp;</span>
-                                </p>
-                                <p className="MsoNormal">
-                                    <span lang="EN-US" className="inl-10">The number of tutorial problems associated with CLO 2 (C-3) has
-                                        been increased as proposed in earlier CRR.</span>
-                                </p>
+
                             </td>
                         </tr>
                     </tbody>
@@ -975,15 +1056,17 @@ function CRRComponent() {
                         <tr className="inl-156">
                             <td width="100%" valign="top" className="inl-147">
                                 <p className="MsoNormal">
-                                    <span lang="EN-US" className="inl-10">6. Outline any changes in the
+                                    <span lang="EN-US" className="inl-10" style={{display: 'block', marginBottom: '5px'}}><span style={{fontWeight: 'bold'}}>6. Outline:</span> any changes in the
                                         future delivery or structure of the Course that this
-                                        semester/term's experience may prompt </span><span lang="EN-US" className="inl-58">to improve student's performance</span><span lang="EN-US" className="inl-10"></span>
-                                </p>
-                                <p className="MsoNormal">
-                                    <span lang="EN-US" className="inl-10">&nbsp;</span>
-                                </p>
-                                <p className="MsoNormal">
-                                    <span lang="EN-US" className="inl-10">None </span>
+                                        semester/term's experience may prompt to improve student's performance</span>
+                                    <div className="print-text" >{comments.outline}</div>
+                                    <div>
+                                        <textarea className="comment-textarea" rows={2} value={comments.outline} 
+                                        onChange={e => setComments({ ...comments, outline: e.target.value })} 
+                                        style={{width: '100%', height: '100%', inset: 0, boxSizing: 'border-box',}}
+                                        />
+                                        {/* visible only when printing */}
+                                    </div>                                         
                                 </p>
                             </td>
                         </tr>
@@ -1006,21 +1089,23 @@ function CRRComponent() {
                                     className="MsoTableGrid inl-157"
                                     width="100%"
                                     cellSpacing="0"
-                                    cellPadding="0">
+                                    cellPadding="0"
+                                    style={{ border: '0px solid while' }}
+                                >
                                     <tbody>
-                                        <tr className="inl-101">
+                                        <tr className="inl-101" style={{ borderTop: 0, borderLeft: 0, borderRight: 0, borderBottom: '0px solid black' }}>
                                             <td width="57" valign="top" className="inl-158">
-                                                <p className="MsoNormal">
+                                                <p className="MsoNormal" style={{ textAlign: 'right' }}>
                                                     <span lang="EN-US" className="inl-10">Name:</span>
                                                 </p>
                                             </td>
                                             <td width="350" valign="top" className="inl-159">
-                                                <p className="MsoNormal">
-                                                    <span lang="EN-US" className="inl-10">&nbsp;</span>
+                                                <p className="MsoNormal" style={{textAlign: 'center'}}>
+                                                    <span lang="EN-US" className="inl-10" >{recap.faculty}</span>
                                                 </p>
                                             </td>
-                                            <td width="51" valign="top" className="inl-160">
-                                                <p className="MsoNormal">
+                                            <td width="51" valign="top" className="inl-160" >
+                                                <p className="MsoNormal" style={{ textAlign: 'right' }}>
                                                     <span lang="EN-US" className="inl-10">Date:</span>
                                                 </p>
                                             </td>
@@ -1030,7 +1115,7 @@ function CRRComponent() {
                                                 </p>
                                             </td>
                                         </tr>
-                                        <tr className="inl-149">
+                                        <tr className="inl-149" style={{ borderTop: 0, borderLeft: 0, borderRight: 0, borderBottom: '0px solid black' }}>
                                             <td width="57" valign="top" className="inl-158">
                                                 <p className="MsoNormal">
                                                     <span lang="EN-US" className="inl-10">&nbsp;</span>
@@ -1063,19 +1148,19 @@ function CRRComponent() {
                                     cellSpacing="0"
                                     cellPadding="0">
                                     <tbody>
-                                        <tr className="inl-101">
+                                        <tr className="inl-101" style={{ borderTop: 0, borderLeft: 0, borderRight: 0, borderBottom: '0px solid black' }}>
                                             <td width="57" valign="top" className="inl-158">
-                                                <p className="MsoNormal">
+                                                <p className="MsoNormal" style={{ textAlign: 'right' }}>
                                                     <span lang="EN-US" className="inl-10">Name:</span>
                                                 </p>
                                             </td>
                                             <td width="350" valign="top" className="inl-159">
-                                                <p className="MsoNormal">
-                                                    <span lang="EN-US" className="inl-10">&nbsp;</span>
+                                                <p className="MsoNormal" style={{textAlign: 'center'}}>
+                                                    <span lang="EN-US" className="inl-10">Dr. Muhammad Umar Siddiqui</span>
                                                 </p>
                                             </td>
                                             <td width="51" valign="top" className="inl-160">
-                                                <p className="MsoNormal">
+                                                <p className="MsoNormal" style={{ textAlign: 'right' }}>
                                                     <span lang="EN-US" className="inl-10">Date:</span>
                                                 </p>
                                             </td>
@@ -1085,7 +1170,7 @@ function CRRComponent() {
                                                 </p>
                                             </td>
                                         </tr>
-                                        <tr className="inl-149">
+                                        <tr className="inl-149" style={{ borderTop: 0, borderLeft: 0, borderRight: 0, borderBottom: '0px solid black' }}>
                                             <td width="57" valign="top" className="inl-158">
                                                 <p className="MsoNormal">
                                                     <span lang="EN-US" className="inl-10">&nbsp;</span>
@@ -1109,9 +1194,6 @@ function CRRComponent() {
                                         </tr>
                                     </tbody>
                                 </table>
-                                <p className="MsoNormal">
-                                    <span lang="EN-US" className="inl-10">&nbsp;</span>
-                                </p>
                                 <p className="MsoNormal">
                                     <span lang="EN-US" className="inl-10">&nbsp;</span>
                                 </p>

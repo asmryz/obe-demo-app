@@ -138,6 +138,8 @@ export const useSheetStore = create((set) => {
     .slice(0, 2)
     .concat(defaultSheetData.slice(2));
   return {
+    activeTabIndex: 0,
+    setActiveTabIndex: (activeTabIndex) => set({ activeTabIndex }),
     gradeChart: {},
     setGradeChart: (chart) => set({ gradeChart: chart }),
     recap: null,
@@ -163,6 +165,8 @@ export const useSheetStore = create((set) => {
       ),
     groupedPlanTotals: {},
     setGroupedPlanTotals: (totals) => set({ groupedPlanTotals: totals }),
+    aggPLOs: {},
+    setAggPLOs: (aggPLOs) => set({ aggPLOs, ahhPLOS: aggPLOs }),
     // ...other state/actions...
     sheetData: defaultSheetData,
     multiCLOData,

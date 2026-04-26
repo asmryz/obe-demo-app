@@ -44,7 +44,7 @@ li.MsoAcetate,
 div.MsoAcetate {
 	margin: 0cm;
 	font-size: 9pt;
-	font-family: "Segoe UI", sans-serif;
+	font-family: "Times New Roman", serif;
 }
 p.MsoListParagraph,
 li.MsoListParagraph,
@@ -101,18 +101,18 @@ span.FooterChar {
 	font-family: "Times New Roman", serif;
 }
 span.BalloonTextChar {
-	font-family: "Segoe UI", sans-serif;
+	font-family: "Times New Roman", serif;
 }
 .MsoChpDefault {
 	font-size: 10pt;
-	font-family: "Calibri", sans-serif;
+	font-family: "Times New Roman", serif;
 }
 /* Page Definitions */
 @page {
 }
 @page WordSection1 {
 	size: 612pt 792pt;
-	margin: 0.50in 0.50in;
+	margin: 0.5in 0.5in;
 }
 div.WordSection1 {
 	page: WordSection1;
@@ -121,7 +121,7 @@ div.WordSection1 {
 /* Style Definitions */
 table.MsoNormalTable {
 	font-size: 10pt;
-	font-family: "Calibri", sans-serif;
+	font-family: "Times New Roman", serif;
 }
 table.MsoTableGrid {
 	border: solid windowtext 0px;
@@ -163,7 +163,7 @@ table.TableGrid1 {
 	text-align: center;
 }
 .inl-7 {
-	mso-bidi-font-weight: normal;
+	color: black;
 }
 .inl-8 {
 	font-size: 18pt;
@@ -311,7 +311,7 @@ table.TableGrid1 {
 	height: 28.6pt;
 }
 .inl-26 {
-	font-family: "Segoe UI Symbol", sans-serif;
+	font-family: "Times New Roman", serif;
 	/* mso-bidi-font-family: "Segoe UI Symbol"; */
 	color: #222222;
 	background: white;
@@ -561,11 +561,11 @@ table.TableGrid1 {
 	mso-ignore: vglayout;
 }
 .inl-53 {
-	font-family: "Arial", sans-serif;
+	font-family: "Times New Roman", serif;
 	color: black;
 }
 .inl-54 {
-	/* font-family: "Arial", sans-serif; */
+	/* font-family: "Times New Roman", serif; */
 	color: black;
 }
 .inl-55 {
@@ -740,7 +740,6 @@ table.TableGrid1 {
 }
 .inl-77 {
 	font-size: 11pt;
-	vertical-align: top;
 	color: black;
 }
 .inl-78 {
@@ -803,43 +802,61 @@ table.TableGrid1 {
 	padding: 0cm 5.4pt 0cm 5.4pt;
 	height: 28.3pt;
 }
+textarea {
+	background-color: rgb(224, 224, 224);
+	font-family: inherit;
+}
 /* Make textarea fill its table cell and remove inner border */
 .inl-93 textarea,
 .inl-94 textarea,
 .MsoNormal textarea {
 	width: 100%;
 	height: 100%;
-	min-height: 2.2em;
+	min-height: 0;
 	box-sizing: border-box;
 	border: 0;
 	padding: 0.25em 0.35em;
 	margin: 0;
 	display: block;
-	resize: vertical;
-	background: transparent;
+	resize: none;
+	background-color: #bbbbbb;
 	font-family: inherit;
-	font-size: 0.95em;
+	font-size: 1em;
 	outline: none;
+}
+
+.comment-textarea {
+	appearance: none;
+	-webkit-appearance: none;
+	/* background: #ebebeb !important; */
+	background-color: #eeeeee !important;
+	/* border: 1px solid #9ca3af !important; */
+	padding: 4px 8px !important;
 }
 /* Print: show plain text instead of textarea boundaries */
 @media print {
-	.inl-93 textarea {
+	.inl-93 textarea,
+	.inl-58 textarea,
+	input.comment-textarea,
+    .comment-textarea 
+     {
 		display: none !important;
 	}
-	.inl-93 .print-text {
-		display: block !important;
+	.print-text {
+		display: inline !important;
 		color: black;
-        text-align: left;
+		text-align: left;
+		font-family: "Times New Roman", Times, serif;
 	}
 }
 
 @media screen {
-	.inl-93 .print-text {
+	.print-text {
 		display: none;
 	}
 }
 
-.inl-93 .print-text {
+.print-text {
 	padding: 0.25em 0.35em;
 	white-space: pre-wrap;
 	font-family: inherit;
@@ -964,7 +981,7 @@ table.TableGrid1 {
 	mso-border-top-alt: solid windowtext 0.5pt;
 	mso-border-left-alt: solid windowtext 0.5pt;
 	mso-border-alt: solid windowtext 0.5pt;
-	padding: 0cm 5.4pt 0cm 5.4pt;
+	padding: 0;
 	height: 37.75pt;
 }
 .inl-94 {
@@ -1302,10 +1319,8 @@ table.TableGrid1 {
 	border-left: none;
 	border-bottom: solid windowtext 1pt;
 	border-right: solid windowtext 1pt;
-	mso-border-top-alt: solid windowtext 0.5pt;
-	mso-border-left-alt: solid windowtext 0.5pt;
-	mso-border-alt: solid windowtext 0.5pt;
 	padding: 0cm 5.4pt 0cm 5.4pt;
+	color: black;
 }
 .inl-140 {
 	width: 29.56%;
@@ -1313,10 +1328,8 @@ table.TableGrid1 {
 	border-left: none;
 	border-bottom: solid windowtext 1pt;
 	border-right: solid windowtext 1pt;
-	mso-border-top-alt: solid windowtext 0.5pt;
-	mso-border-left-alt: solid windowtext 0.5pt;
-	mso-border-alt: solid windowtext 0.5pt;
 	padding: 0cm 5.4pt 0cm 5.4pt;
+	color: black;
 }
 .inl-141 {
 	width: 25%;
@@ -1324,10 +1337,8 @@ table.TableGrid1 {
 	border-left: none;
 	border-bottom: solid windowtext 1pt;
 	border-right: solid windowtext 1pt;
-	mso-border-top-alt: solid windowtext 0.5pt;
-	mso-border-left-alt: solid windowtext 0.5pt;
-	mso-border-alt: solid windowtext 0.5pt;
 	padding: 0cm 5.4pt 0cm 5.4pt;
+	color: black;
 }
 .inl-142 {
 	mso-yfti-irow: 2;
