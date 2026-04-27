@@ -280,7 +280,7 @@ export const CLOApply = ({ rid, closid }) => {
 
         let cloArr = [...multiCLO]
 
-        if (cloArr[0][delLoc[0] + 1] === null) {
+        if (cloArr[0][delLoc[0]] !== null && cloArr[0][delLoc[0] + 1] === null) {
             cloArr = cloArr.map((row, rowIndex) =>
                 rowIndex === 0
                     ? row.map((cell, idx) => idx === delLoc[0] + 1 ? head : cell)
