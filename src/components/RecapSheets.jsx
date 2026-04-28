@@ -7,15 +7,14 @@ import { useRecapStore } from '../store/recapStore';
 import { useSheetStore } from '../store/sheetStore';
 import { CLOApply } from './CLOApply';
 
-
 export const RecapSheets = () => {
-    const { rid, setRID, setCLOSid, setRecap, setActiveTabIndex } = useSheetStore()
+    const { rid, setRID, setCLOSid, setRecap, setActiveTabIndex,  } = useSheetStore()
     // const [selectedRid, setSelectedRid] = useState(null);
     // const [cloSid, setCloSid] = useState(null);
     const recapsByQuery = useRecapStore((state) => state.recapsByQuery);
-    const lastQuery = useRecapStore((state) => state.lastQuery);
     const isLoading = useRecapStore((state) => state.isLoading);
     const error = useRecapStore((state) => state.error);
+    const lastQuery = useRecapStore((state) => state.lastQuery);
     const fetchRecaps = useRecapStore((state) => state.fetchRecaps);
     const getRecapResource = useRecapStore((state) => state.getRecapResource);
     const [search, setSearch] = useState(lastQuery);
@@ -34,9 +33,6 @@ export const RecapSheets = () => {
 
         return () => clearTimeout(timeoutId);
     }, [normalizedSearch, hasCachedRecaps, fetchRecaps]);
-
-
-    
 
     const handleRecapClick = (event, selectedRecap) => {
         event.preventDefault();
@@ -57,11 +53,12 @@ export const RecapSheets = () => {
                 setRecap(recap);
             }
         });
+        // console.log(`closid >> ${closid}`)
         setActiveTabIndex(1);
     };
 
     if (rid !== null) {
-        return <CLOApply rid={rid} />;
+        return <CLOApply rid={rid} closid={null} edit={false}/>;
     }
 
     return (

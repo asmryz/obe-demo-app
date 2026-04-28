@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react'
 import { api } from '../api/index.js'
 import { useRecapStore } from '../store/recapStore.js'
 import { ToggleButton } from './ToggleButton'
+import { useSheetStore } from '../store/sheetStore.js'
 
 // import { useSheetStore } from '../store/sheetStore.js'
 
@@ -12,42 +13,57 @@ import { ToggleButton } from './ToggleButton'
 
 
 
-export const CLOApply = ({ rid, closid }) => {
+export const CLOApply = ({ rid, closid = null, edit = false }) => {
     const { getRecapResource } = useRecapStore()
+    const { getCLOSheet, cloSid } = useSheetStore();
     const { recap, error } = use(getRecapResource(rid))
+
+    const activeClosid = closid ?? cloSid;
+    // eslint-disable-next-line no-unused-vars
+    const { data: cloSheetData, error: cloError } = edit && activeClosid !== null
+        ? use(getCLOSheet(activeClosid))
+        : { data: null, error: null };
+    console.log(recap, cloSheetData)
     // const { multiCLOData, headsData, statusData } = useSheetStore((state) => state);
     const recapRows = Array.isArray(recap?.data) ? recap.data : []
     const cloRows = Array.isArray(recap?.clo) ? recap.clo : []
-
-    // const fourthElements = recapRows.map((row) => (Array.isArray(row) ? row[3] : undefined))
-    const [showAllColumns, setShowAllColumns] = useState(false)
-    const [heads, setHeads] = useState({})
-    const [multiCLO, setMultiCLO] = useState(
-        () => {
-            // Each row should only have its first 3 elements
-            let arr = recapRows.map(row => Array.isArray(row) ? row.slice(0, 3) : [row]);
-            arr.splice(1, 0, [null, null, null]) // Insert an empty row for CLO selection;
-            return arr;
-        }
-    )
-    const [editableIndex, setEditableIndex] = useState(-1)
-    const [del, setDel] = useState({})
-    const [selCLO, setSelCLO] = useState(0)
-    const [status, setStatus] = useState({})
-    const [editColumn, setEditColumn] = useState([])
-    const [total, setTotal] = useState(editColumn[2])
-    const [clipboardCache, setClipboardCache] = useState([])
-    const [clipboardArray, setClipboardArray] = useState([])
-    const [clipboardActive, setClipboardActive] = useState(false)
-    const [save, setSave] = useState(false)
-    const clipboardAvailable = typeof navigator !== 'undefined' && navigator.clipboard && typeof navigator.clipboard.read === 'function'
-
+    const initialMultiCLO = getInitialMultiCLO()
     const firstRow = Array.isArray(recapRows[0]) ? recapRows[0] : []
     const firstEmptyCellIndex = firstRow.findIndex((cell) => cell === '')
     const lastThreeColumnsStartIndex = Math.max(firstRow.length - 3, 0)
     const canHideMiddleColumns = firstEmptyCellIndex !== -1 && firstEmptyCellIndex + 1 < lastThreeColumnsStartIndex
+    const initialEditableIndex = edit ? 3 : -1
+    const initialEditColumn = initialEditableIndex !== -1 ? getEditColumn(initialEditableIndex) : []
+    const initialHeads = edit ? getHeadsFromMultiCLO(initialMultiCLO) : {}
+    const initialStatus = edit ? getStatusFromHeads(initialHeads) : {}
+    const initialSave = edit && Object.keys(initialStatus).length > 0 && Object.values(initialStatus).every(Boolean)
+
+    // const fourthElements = recapRows.map((row) => (Array.isArray(row) ? row[3] : undefined))
+    const [showAllColumns, setShowAllColumns] = useState(false)
+    const [heads, setHeads] = useState(initialHeads)
+    const [multiCLO, setMultiCLO] = useState(initialMultiCLO)
+    const [editableIndex, setEditableIndex] = useState(initialEditableIndex)
+    const [del, setDel] = useState({})
+    const [selCLO, setSelCLO] = useState(0)
+    const [status, setStatus] = useState(initialStatus)
+    const [editColumn, setEditColumn] = useState(initialEditColumn)
+    const [total, setTotal] = useState(initialEditColumn[2])
+    const [clipboardCache, setClipboardCache] = useState([])
+    const [clipboardArray, setClipboardArray] = useState([])
+    const [clipboardActive, setClipboardActive] = useState(false)
+    const [save, setSave] = useState(initialSave)
+    const clipboardAvailable = typeof navigator !== 'undefined' && navigator.clipboard && typeof navigator.clipboard.read === 'function'
 
     // console.log(` >> ${JSON.stringify(recap)}`)
+
+
+    // if(closid !== null) {
+    //     const { data, error: cloError } = use(getCLOSheet(closid))
+    //     if (cloError) {
+    //         return <p>{cloError}</p>
+    //     }
+    //     console.log(` >> ${JSON.stringify(data)}`)
+    // }
 
     // Save CLO Sheet to backend
     const saveCLOSheet = async () => {
@@ -81,7 +97,7 @@ export const CLOApply = ({ rid, closid }) => {
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         checkSaveStatus();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [status, recapRows, firstEmptyCellIndex]);
 
     // Returns the sum of all nth elements in heads[key]
@@ -122,8 +138,7 @@ export const CLOApply = ({ rid, closid }) => {
 
     const handleEditableHead = (index) => {
         setEditableIndex(index)
-        let col = recapRows.map((row) => row[index])
-        col.splice(1, 0, null)
+        const col = getEditColumn(index)
         setEditColumn(col)
         setClipboardCache(col.slice(3))
         setTotal(col[2])
@@ -134,6 +149,47 @@ export const CLOApply = ({ rid, closid }) => {
             return { ...prev, [key]: [] };
         })
         //console.log(editColumn)
+    }
+
+    function getEditColumn(index) {
+        const col = recapRows.map((row) => row[index])
+        col.splice(1, 0, null)
+        return col
+    }
+
+    function getInitialMultiCLO() {
+        if (edit && Array.isArray(cloSheetData)) {
+            return cloSheetData
+        }
+
+        const arr = recapRows.map(row => Array.isArray(row) ? row.slice(0, 3) : [row])
+        arr.splice(1, 0, [null, null, null]) // Insert an empty row for CLO selection;
+        return arr
+    }
+
+    function getHeadsFromMultiCLO(rows) {
+        if (!Array.isArray(rows) || rows.length < 3 || !Array.isArray(rows[0])) {
+            return {}
+        }
+
+        return rows[0].slice(3).reduce((acc, head, columnOffset) => {
+            if (head === null || head === undefined || head === '') {
+                return acc
+            }
+
+            const columnIndex = columnOffset + 3
+            const values = rows.map((row) => Array.isArray(row) ? row[columnIndex] : undefined)
+            const key = values[0]
+            acc[key] = [...(acc[key] || []), values]
+            return acc
+        }, {})
+    }
+
+    function getStatusFromHeads(initialHeads) {
+        return Object.keys(initialHeads).reduce((acc, key) => {
+            acc[key] = initialHeads[key].length > 0
+            return acc
+        }, {})
     }
 
     const readClipboardItems = async (e) => {
@@ -329,7 +385,7 @@ export const CLOApply = ({ rid, closid }) => {
     return (
         <section>
             {/* Hidden input to capture Ctrl+V and onPaste events */}
-            {closid}
+            <pre>{JSON.stringify({ edit, rid })}</pre>
             <input
                 style={{ position: 'absolute', left: '-9999px', width: 0, height: 0, opacity: 0 }}
                 tabIndex={-1}
@@ -342,7 +398,24 @@ export const CLOApply = ({ rid, closid }) => {
                 }}
             />
             <h3>CLOApply {rid}</h3>
-
+            <table id="course">
+                <tr>
+                    <th style={{ textAlign: 'right' }}>Batch :</th>
+                    <td>{recap.batch}</td>
+                </tr>
+                <tr>
+                    <th style={{ textAlign: 'right' }}>Fcuity :</th>
+                    <td>{recap.faculty}</td>
+                </tr>
+                <tr>
+                    <th style={{ textAlign: 'right' }}>Course :</th>
+                    <td>{recap.course}</td>
+                </tr>
+                <tr>
+                    <th style={{ textAlign: 'right' }}>Semester : </th>
+                    <td>{recap.semester} {recap.year}</td>
+                </tr>
+            </table>
             <ToggleButton
                 checked={showAllColumns}
                 onToggle={() => setShowAllColumns((prev) => !prev)}
@@ -364,7 +437,7 @@ export const CLOApply = ({ rid, closid }) => {
                                             const content = cell === null ? '' : typeof cell === 'object' ? JSON.stringify(cell) : cell
                                             return rowIndex === 0 || rowIndex === 1
                                                 ? <th key={`cell-${rowIndex}-${cellIndex}`}>
-                                                    {cellIndex > 2 && cellIndex < firstEmptyCellIndex
+                                                    {edit && cellIndex > 2 && cellIndex < firstEmptyCellIndex
                                                         ? (<a href="#!" onClick={() => handleEditableHead(cellIndex)}>{content}</a>)
                                                         : content}
                                                 </th>
@@ -523,27 +596,40 @@ export const CLOApply = ({ rid, closid }) => {
                         <div style={{ display: 'flex', justifyContent: 'flex-end', flex: '1' }}>
                             {multiCLO.length > 0 && (
                                 <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                    <div style={{ height: '50px', border: '1px solid #d3d3d3', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                        {save ? <span style={{ color: 'green', fontWeight: 'bold' }}>All CLOs saved!</span> : <span style={{ color: 'red', fontWeight: 'bold' }}>CLOs not saved</span>}
-                                        <button onClick={saveCLOSheet} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }} title="Save CLO Sheet">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 48 48" fill="#000000"><g fill="none" stroke="#979797" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3"><path d="M42.5 11c0 4.418-8.283 8-18.5 8S5.5 15.418 5.5 11M43 24.205C43 28.51 34.493 32 24 32S5 28.51 5 24.205M11.5 24a.5.5 0 0 0 0-1m0 1a.5.5 0 0 1 0-1" /><path d="M5.5 11c0-4.418 8.283-8 18.5-8s18.5 3.582 18.5 8c0 0 .5 5 .5 13s-.5 13-.5 13c0 4.418-8.283 8-18.5 8S5.5 41.418 5.5 37c0 0-.5-5-.5-13s.5-13 .5-13" /><path d="M11.5 37a.5.5 0 0 0 0-1m0 1a.5.5 0 0 1 0-1M18 25.75a.5.5 0 0 0 0-1m0 1a.5.5 0 0 1 0-1m0 14a.5.5 0 0 0 0-1m0 1a.5.5 0 0 1 0-1" /></g></svg>
-                                            <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
-                                                <defs>
-                                                    <path id="SVGJ5kDdewH" fill="#fff" d="M24 19c10.217 0 18.5-3.582 18.5-8S34.217 3 24 3S5.5 6.582 5.5 11s8.283 8 18.5 8" />
-                                                </defs>
-                                                <g fill="none" strokeWidth="3">
-                                                    <path fill="#8fbffa" d="M5.5 11c0-4.418 8.283-8 18.5-8s18.5 3.582 18.5 8c0 0 .5 5 .5 13s-.5 13-.5 13c0 4.418-8.283 8-18.5 8S5.5 41.418 5.5 37c0 0-.5-5-.5-13s.5-13 .5-13" />
-                                                    <use href="#SVGJ5kDdewH" />
-                                                    <use href="#SVGJ5kDdewH" />
-                                                    <path stroke="#2859c5" strokeLinecap="round" strokeLinejoin="round" d="M42.5 11c0 4.418-8.283 8-18.5 8S5.5 15.418 5.5 11M43 24.205C43 28.51 34.493 32 24 32S5 28.51 5 24.205M11.5 24a.5.5 0 0 0 0-1m0 1a.5.5 0 0 1 0-1" />
-                                                    <path stroke="#2859c5" strokeLinecap="round" strokeLinejoin="round" d="M5.5 11c0-4.418 8.283-8 18.5-8s18.5 3.582 18.5 8c0 0 .5 5 .5 13s-.5 13-.5 13c0 4.418-8.283 8-18.5 8S5.5 41.418 5.5 37c0 0-.5-5-.5-13s.5-13 .5-13" />
-                                                    <path stroke="#2859c5" strokeLinecap="round" strokeLinejoin="round" d="M11.5 37a.5.5 0 0 0 0-1m0 1a.5.5 0 0 1 0-1M18 25.75a.5.5 0 0 0 0-1m0 1a.5.5 0 0 1 0-1m0 14a.5.5 0 0 0 0-1m0 1a.5.5 0 0 1 0-1" />
-                                                </g>
-                                            </svg>
-                                        </button>
+                                    <div style={{ height: '50px', border: '0px solid #d3d3d3', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                        
+                                        <a href='#!' onClick={save && saveCLOSheet}
+                                            style={{
+                                                opacity: save ? 1 : 0.5,
+                                                cursor: save ? 'pointer' : 'not-allowed',
+                                                textDecoration: 'none',
+                                                margin: '16px 12px',
+                                            }}
+                                            title={save ? 'Sheet Synchroinized' : 'Sheet not Synchroinized'}>
+                                            {save ? (
+                                                <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+                                                    <defs>
+                                                        <path id="SVGJ5kDdewH" fill="#fff" d="M24 19c10.217 0 18.5-3.582 18.5-8S34.217 3 24 3S5.5 6.582 5.5 11s8.283 8 18.5 8" />
+                                                    </defs>
+                                                    <g fill="none" strokeWidth="3">
+                                                        <path fill="#8fbffa" d="M5.5 11c0-4.418 8.283-8 18.5-8s18.5 3.582 18.5 8c0 0 .5 5 .5 13s-.5 13-.5 13c0 4.418-8.283 8-18.5 8S5.5 41.418 5.5 37c0 0-.5-5-.5-13s.5-13 .5-13" />
+                                                        <use href="#SVGJ5kDdewH" />
+                                                        <use href="#SVGJ5kDdewH" />
+                                                        <path stroke="#2859c5" strokeLinecap="round" strokeLinejoin="round" d="M42.5 11c0 4.418-8.283 8-18.5 8S5.5 15.418 5.5 11M43 24.205C43 28.51 34.493 32 24 32S5 28.51 5 24.205M11.5 24a.5.5 0 0 0 0-1m0 1a.5.5 0 0 1 0-1" />
+                                                        <path stroke="#2859c5" strokeLinecap="round" strokeLinejoin="round" d="M5.5 11c0-4.418 8.283-8 18.5-8s18.5 3.582 18.5 8c0 0 .5 5 .5 13s-.5 13-.5 13c0 4.418-8.283 8-18.5 8S5.5 41.418 5.5 37c0 0-.5-5-.5-13s.5-13 .5-13" />
+                                                        <path stroke="#2859c5" strokeLinecap="round" strokeLinejoin="round" d="M11.5 37a.5.5 0 0 0 0-1m0 1a.5.5 0 0 1 0-1M18 25.75a.5.5 0 0 0 0-1m0 1a.5.5 0 0 1 0-1m0 14a.5.5 0 0 0 0-1m0 1a.5.5 0 0 1 0-1" />
+                                                    </g>
+                                                </svg>
+                                            ) : (
+                                                <svg x mlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 48 48" fill="#000000"><g fill="none" stroke="#979797" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3"><path d="M42.5 11c0 4.418-8.283 8-18.5 8S5.5 15.418 5.5 11M43 24.205C43 28.51 34.493 32 24 32S5 28.51 5 24.205M11.5 24a.5.5 0 0 0 0-1m0 1a.5.5 0 0 1 0-1" /><path d="M5.5 11c0-4.418 8.283-8 18.5-8s18.5 3.582 18.5 8c0 0 .5 5 .5 13s-.5 13-.5 13c0 4.418-8.283 8-18.5 8S5.5 41.418 5.5 37c0 0-.5-5-.5-13s.5-13 .5-13" /><path d="M11.5 37a.5.5 0 0 0 0-1m0 1a.5.5 0 0 1 0-1M18 25.75a.5.5 0 0 0 0-1m0 1a.5.5 0 0 1 0-1m0 14a.5.5 0 0 0 0-1m0 1a.5.5 0 0 1 0-1" /></g></svg>
+                                            )}
+                                        </a>
+                                        {save ? <span style={{ color: 'green', fontWeight: 'bold' }}>Marks Reconciliation Verified</span> : <span style={{ color: 'red', fontWeight: 'bold' }}>Marks Reconciliation Not Verified</span>}
                                     </div>
                                     <div>
-                                        <table style={{ marginLeft: '20px' }}>
+                                        <table style={{
+                                            // marginLeft: '20px' 
+                                        }}>
                                             <tbody>
                                                 {multiCLO.map((row, i) => (
                                                     <tr key={`multi-${i}`}>
@@ -561,9 +647,9 @@ export const CLOApply = ({ rid, closid }) => {
                     </div>
                 </>
             )}
-            {/* <pre>
+            <pre>
                 {multiCLO && multiCLO.map((row) => JSON.stringify(row)).join(`,\n`)}
-            </pre> */}
+            </pre>
             {cloRows.length > 0 && (
                 <div style={{ overflowX: 'auto', marginTop: '16px' }}>
                     <h4>CLOs</h4>

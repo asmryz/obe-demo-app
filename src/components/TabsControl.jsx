@@ -44,46 +44,47 @@ function TabsControl() {
                 </div>
             ),
         },
+        ...(hasSelectedRecap && cloSid ? [
+            {
+                label: "OBE",
+                content: (
+                    <div>
+                        <FileUpload />
+                        {sheetData ? (
+                            <Suspense fallback={<p>Loading student marks...</p>}>
+                                <div style={{ textAlign: 'center', padding: '20px' }}>
+                                    <CLOSheet closid={cloSid} rid={rid} />
+                                </div>
+                            </Suspense>
+                        ) : (
+                            <p>Please upload an Excel file to view marks.</p>
+                        )}
+                    </div>
+                ),
+            },
+        ] : []),
         ...(hasSelectedRecap ? [
         {
-            label: "OBE",
-            content: (
-                <div>
-                    <FileUpload />
-                    {cloSid ? sheetData ? (
-                        <Suspense fallback={<p>Loading student marks...</p>}>
-                            <div style={{ textAlign: 'center', padding: '20px' }}>
-                                <CLOSheet closid={cloSid} rid={rid} />
-                            </div>
-                        </Suspense>
-                    ) : (
-                        <p>Please upload an Excel file to view marks.</p>
-                    ) : (
-                        <CLOApply rid={rid} />
-                    )}
-                </div>
-            ),
-        },
-        // {
-        //     label: "Settings",
-        //     content: (
-        //         <div>
-        //             <h2>⚙️ Settings</h2>
-        //             <p>Manage your preferences here.</p>
-        //         </div>
-        //     ),
-        // },
-        {
-            label: "CRR",
+            label: "CLO Sheet",
             content: (
                 <>
-                    <button onClick={handlePrint}>Print</button>
-                    <div ref={ref}>
-                        <CRRComponent />
-                    </div>
+                    <CLOApply rid={rid} closid={cloSid} edit={true}/>
                 </>
             ),
         },
+        ] : []),
+        ...(hasSelectedRecap && cloSid ? [
+            {
+                label: "CRR",
+                content: (
+                    <>
+                        <button onClick={handlePrint}>Print</button>
+                        <div ref={ref}>
+                            <CRRComponent />
+                        </div>
+                    </>
+                ),
+            },
         ] : []),
         {
             label: "CLO List",

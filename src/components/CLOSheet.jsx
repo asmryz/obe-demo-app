@@ -27,7 +27,7 @@ const grades = [
 ]
 
 
-function CLOSheet({ closid, rid }) {
+function CLOSheet({ closid, rid}) {
 
     // Group and sum marks by first word for display
     const { getCLOSheet } = useSheetStore()
