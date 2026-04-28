@@ -39,7 +39,7 @@ function CLOSheet({ closid, rid}) {
     // eslint-disable-next-line no-unused-vars
     const { data, clo: cloRows = [] } = incomingData
 
-    console.log(recap)
+    // console.log(recap)
 
     const arr = data[ENUMS.CLO].slice(3)
     // const clo = [...new Set(arr.filter((x) => typeof x === 'number'))]
@@ -165,7 +165,7 @@ function CLOSheet({ closid, rid}) {
         return cohort
     })
     //console.log([...new Set(recap.clo.map(c => c.plo).sort((a, b) => a - b))])
-    console.log(cohort);
+    // console.log(cohort);
 
     const cohortPloColumns = Array.from(
         new Set(cohort.flatMap((student) => Object.keys(student).filter((key) => key.startsWith('PLO'))))
@@ -548,7 +548,7 @@ function CLOSheet({ closid, rid}) {
                     })}
                 </tbody>
             </table>
-            {console.log(aggPLOs)}
+            {/* {console.log(aggPLOs)} */}
             <h2>CLO Achievement Summary</h2>
             <table id="clo-summary">
                 <thead>

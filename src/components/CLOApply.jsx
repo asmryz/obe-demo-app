@@ -11,6 +11,20 @@ import { useSheetStore } from '../store/sheetStore.js'
 
 // import { useEffect } from 'react'
 
+const recapHeaderLabels = {
+    "Letter Grade": "Grade",
+    "Mid Term Paper 1": "Mid Term",
+    "Final Paper 1": "Final",
+}
+
+const formatRecapCell = (cell) => {
+    if (cell === null) return ''
+    if (typeof cell === 'object') return JSON.stringify(cell)
+    if (typeof cell !== 'string') return cell
+
+    const normalizedCell = cell.replace(/\s+/g, ' ').trim()
+    return recapHeaderLabels[normalizedCell] ?? cell
+}
 
 
 export const CLOApply = ({ rid, closid = null, edit = false }) => {
@@ -23,7 +37,7 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
     const { data: cloSheetData, error: cloError } = edit && activeClosid !== null
         ? use(getCLOSheet(activeClosid))
         : { data: null, error: null };
-    console.log(recap, cloSheetData)
+    // console.log(recap, cloSheetData)
     // const { multiCLOData, headsData, statusData } = useSheetStore((state) => state);
     const recapRows = Array.isArray(recap?.data) ? recap.data : []
     const cloRows = Array.isArray(recap?.clo) ? recap.clo : []
@@ -48,7 +62,7 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
     const [status, setStatus] = useState(initialStatus)
     const [editColumn, setEditColumn] = useState(initialEditColumn)
     const [total, setTotal] = useState(initialEditColumn[2])
-    const [clipboardCache, setClipboardCache] = useState([])
+    const [clipboardCache, setClipboardCache] = useState(initialEditColumn.slice(3))
     const [clipboardArray, setClipboardArray] = useState([])
     const [clipboardActive, setClipboardActive] = useState(false)
     const [save, setSave] = useState(initialSave)
@@ -249,13 +263,13 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
         }
         let saveCache = clipboardCache;
         if (clipboardCache.length === 0) {
-            // If clipboardCache is empty, save an empty row of the correct length
-            saveCache = new Array(editColumn.length - 3).fill('');
+            saveCache = editColumn.slice(3);
         }
         const key = editColumn[0];
+        const existingHeadRows = heads[key] || [];
         const rows = multiCLO.map((row, index) => [
             ...row,
-            index === 0 ? heads[key].length === 0 ? key : null
+            index === 0 ? existingHeadRows.length === 0 ? key : null
                 : index === 1 ? Number(selCLO)
                     : index === 2 ? Number(total)
                         : index > 2 ? saveCache[index - 3]
@@ -434,7 +448,7 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
                                         .map((cell, cellIndex) => ({ cell, cellIndex }))
                                         .filter(({ cellIndex }) => !shouldHideColumn(cellIndex))
                                         .map(({ cell, cellIndex }) => {
-                                            const content = cell === null ? '' : typeof cell === 'object' ? JSON.stringify(cell) : cell
+                                            const content = formatRecapCell(cell)
                                             return rowIndex === 0 || rowIndex === 1
                                                 ? <th key={`cell-${rowIndex}-${cellIndex}`}>
                                                     {edit && cellIndex > 2 && cellIndex < firstEmptyCellIndex
@@ -632,7 +646,7 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
                                         }}>
                                             <tbody>
                                                 {multiCLO.map((row, i) => (
-                                                    <tr key={`multi-${i}`}>
+                                                    <tr key={`multi-${i}`} style={{height: '30px'}}>
                                                         {row.map((cell, j) => (
                                                             <td key={`multi-${i}-${j}`}>{cell === null ? '' : typeof cell === 'object' ? JSON.stringify(cell) : cell}</td>
                                                         ))}
