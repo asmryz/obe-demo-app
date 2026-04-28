@@ -163,7 +163,7 @@ export const CLOApply = ({ rid, closid }) => {
                         }
                         arr = arr.map(v => (isNaN(Number(v)) ? v : Number(v).toFixed(2)));
                         setClipboardArray(arr);
-                        setClipboardCache(arr);
+                        setClipboardCache(arr.map(a => Number(a)));
                         setClipboardActive(true);
                     }
                 }
@@ -196,10 +196,10 @@ export const CLOApply = ({ rid, closid }) => {
             // If clipboardCache is empty, save an empty row of the correct length
             saveCache = new Array(editColumn.length - 3).fill('');
         }
-        let rowsCopy = [...multiCLO]
-        const rows = rowsCopy.map((row, index) => [
-            ...row.slice(0, rowsCopy.length),
-            index === 0 ? heads[editColumn[0]].length === 0 ? editColumn[0] : null
+        const key = editColumn[0];
+        const rows = multiCLO.map((row, index) => [
+            ...row,
+            index === 0 ? heads[key].length === 0 ? key : null
                 : index === 1 ? Number(selCLO)
                     : index === 2 ? Number(total)
                         : index > 2 ? saveCache[index - 3]
@@ -209,7 +209,6 @@ export const CLOApply = ({ rid, closid }) => {
         // console.log(rows)
         // Assign the last element of rows to heads[editColumn[0]]
 
-        const key = editColumn[0];
         setDel(prev => {
             const prevArr = prev[key] || [];
             // Get the length of the array stored at prev[key] (or 0 if undefined)

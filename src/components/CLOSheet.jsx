@@ -180,7 +180,7 @@ function CLOSheet({ closid, rid }) {
             const studentPlo = Number(student[ploKey]) || 0
             const ploTotal = Number(totals[ploKey]) || 0
             const achieved = ploTotal ? (studentPlo / ploTotal * 100) : 0
-            const achievedFlag = grade === 'F' ? 0 : achieved <= kpi ? 0 : 1
+            const achievedFlag = grade === 'F' ? 0 : achieved < kpi ? 0 : 1
 
             acc[ploKey] = acc[ploKey] || { achieved: 0, notAchieved: 0, students: [] }
             acc[ploKey].achieved += achievedFlag
@@ -528,7 +528,7 @@ function CLOSheet({ closid, rid }) {
                                     const studentPlo = Number(student[ploKey]) || 0
                                     const ploTotal = Number(totals[ploKey]) || 0
                                     const achieved = ploTotal ? (studentPlo / ploTotal * 100) : 0
-                                    sumPLOs[ploKey] = grade === 'F' ? 0 : achieved <= kpi ? 0 : 1
+                                    sumPLOs[ploKey] = grade === 'F' ? 0 : achieved < kpi ? 0 : 1
                                     return (
                                         <td key={`cohort-cell-${student.regno || index}-${ploKey}`}
                                             style={{
