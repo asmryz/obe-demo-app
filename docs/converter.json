@@ -1,0 +1,342 @@
+[
+  {
+    "code": "ME2405-T",
+    "title": "Thermodynamics",
+    "semester": "3rd ",
+    "clo": "CLO1",
+    "statement": "Distinguish different thermodynamic systems from a given scenario or device description and categorize such systems appropriately for subsequent analysis",
+    "domain": "Cognitive",
+    "taxonomy": "2",
+    "plo": "PLO1"
+  },
+  {
+    "code": "ME2405-T",
+    "title": "Thermodynamics",
+    "semester": "3rd ",
+    "clo": "CLO2",
+    "statement": "Determine state characteristics for working fluids undergoing various thermodynamic processes, Solve simple thermodynamic problems using the ideal gas EOS and the thermodynamic tables and Apply mass conservation, energy conservation and entropy balance relationships to thermodynamic problems related to closed and open systems.",
+    "domain": "Cognitive",
+    "taxonomy": "3",
+    "plo": "PLO2"
+  },
+  {
+    "code": "ME2405-T",
+    "title": "Thermodynamics",
+    "semester": "3rd ",
+    "clo": "CLO3",
+    "statement": "Analyze the thermodynamic performance characteristics of reciprocating engines, cyclic devices and flow devices using thermodynamic property tables and/or the ideal gas equation of state",
+    "domain": "Cognitive",
+    "taxonomy": "4",
+    "plo": "PLO2"
+  },
+  {
+    "code": "ME2405-L",
+    "title": "Thermodynamics",
+    "semester": "3rd ",
+    "clo": "CLO1",
+    "statement": "Interpret the different parameters related to experiments and relate the interactions of those parameters with engineering principles.",
+    "domain": "Cognitive",
+    "taxonomy": "2",
+    "plo": "PLO9"
+  },
+  {
+    "code": "ME2405-L",
+    "title": "Thermodynamics",
+    "semester": "3rd ",
+    "clo": "CLO2",
+    "statement": "Reproduce the Setup for weekly experiments and lab exams",
+    "domain": "Psychomotor",
+    "taxonomy": "2",
+    "plo": "PLO9"
+  },
+  {
+    "code": "ME2405-L",
+    "title": "Thermodynamics",
+    "semester": "3rd ",
+    "clo": "CLO3",
+    "statement": "Participate responsibly to complete a task",
+    "domain": "Affective",
+    "taxonomy": "2",
+    "plo": "PLO9"
+  },
+  {
+    "code": "ME2405-L",
+    "title": "Thermodynamics",
+    "semester": "3rd ",
+    "clo": "CLO4",
+    "statement": "Construct hardware of open ended project for given constraints.",
+    "domain": "Psychomotor",
+    "taxonomy": "3",
+    "plo": "PLO3"
+  },
+  {
+    "code": "ME2405-L",
+    "title": "Thermodynamics",
+    "semester": "3rd ",
+    "clo": "CLO5",
+    "statement": "Propose solution to the assigned open ended project for given constraints. ",
+    "domain": "Cognitive",
+    "taxonomy": "6",
+    "plo": "PLO3"
+  },
+  {
+    "code": "ME2405-L",
+    "title": "Thermodynamics",
+    "semester": "3rd ",
+    "clo": "CLO6",
+    "statement": "Demonstrate project management skills for project scheduling, execution and completion.",
+    "domain": "Affective",
+    "taxonomy": "3",
+    "plo": "PLO11"
+  },
+  {
+    "code": "ME4703-T",
+    "title": "Heat Transfer",
+    "semester": "8th",
+    "clo": "CLO1",
+    "statement": "Explain the principles of heat transfer.",
+    "domain": "Cognitive",
+    "taxonomy": "2",
+    "plo": "PLO1"
+  },
+  {
+    "code": "ME4703-T",
+    "title": "Heat Transfer",
+    "semester": "8th",
+    "clo": "CLO2",
+    "statement": "Solve the governing mathematical equations for conduction, convection and radiation heat transfer.",
+    "domain": "Cognitive",
+    "taxonomy": "3",
+    "plo": "PLO2"
+  },
+  {
+    "code": "ME4703-T",
+    "title": "Heat Transfer",
+    "semester": "8th",
+    "clo": "CLO3",
+    "statement": "Examine the thermal design of heat exchangers.",
+    "domain": "Cognitive",
+    "taxonomy": "5",
+    "plo": "PLO3"
+  },
+  {
+    "code": "ME4703-L",
+    "title": "Heat Transfer",
+    "semester": "8th",
+    "clo": "CLO1",
+    "statement": "Investigate assigned problem for given constraints.",
+    "domain": "Cognitive",
+    "taxonomy": "4",
+    "plo": "PLO4"
+  },
+  {
+    "code": "ME4703-L",
+    "title": "Heat Transfer",
+    "semester": "8th",
+    "clo": "CLO2",
+    "statement": "Construct hardware for assigned project.",
+    "domain": "Psychomotor",
+    "taxonomy": "3",
+    "plo": "PLO4"
+  },
+  {
+    "code": "ME4703-L",
+    "title": "Heat Transfer",
+    "semester": "8th",
+    "clo": "CLO3",
+    "statement": "Write weekly lab reports",
+    "domain": "Cognitive",
+    "taxonomy": "3",
+    "plo": "PLO9"
+  },
+  {
+    "code": "ME4703-L",
+    "title": "Heat Transfer",
+    "semester": "8th",
+    "clo": "CLO4",
+    "statement": "Reproduce the Setup for weekly experiments and lab exams",
+    "domain": "Psychomotor",
+    "taxonomy": "2",
+    "plo": "PLO9"
+  },
+  {
+    "code": "ME4703-L",
+    "title": "Heat Transfer",
+    "semester": "8th",
+    "clo": "CLO5",
+    "statement": "Participate responsibly to complete a task",
+    "domain": "Affective",
+    "taxonomy": "2",
+    "plo": "PLO9"
+  },
+  {
+    "code": "ME2351",
+    "title": "Foreign Languages",
+    "semester": "Elective",
+    "clo": "CLO1",
+    "statement": "Recall alphabets, numbers, verbs, pronouns, daily routine life sentences in German language.",
+    "domain": "Cognitive",
+    "taxonomy": "1",
+    "plo": "PLO10"
+  },
+  {
+    "code": "ME2351",
+    "title": "Foreign Languages",
+    "semester": "Elective",
+    "clo": "CLO2",
+    "statement": "Interpret  questions, articles, daily conversation at home as well as at  outdoors should respond effectively",
+    "domain": "Cognitive",
+    "taxonomy": "2",
+    "plo": "PLO10"
+  },
+  {
+    "code": "ME2351",
+    "title": "Foreign Languages",
+    "semester": "Elective",
+    "clo": "CLO3",
+    "statement": "Present the assigned topic in German language with confidence and clarity in public speaking projects.",
+    "domain": "Affective",
+    "taxonomy": "2",
+    "plo": "PLO12"
+  },
+  {
+    "code": "ME1112",
+    "title": "Communication & Presentation Skills",
+    "semester": "1st",
+    "clo": "CLO 1",
+    "statement": "Interpret words and sentences clearly and efficiently.",
+    "domain": "Cognitive",
+    "taxonomy": "2",
+    "plo": "PLO 10"
+  },
+  {
+    "code": "ME1112",
+    "title": "Communication & Presentation Skills",
+    "semester": "1st",
+    "clo": "CLO 2",
+    "statement": "Demonstrate written and oral presentation skills by preparing presentation materials / assignments",
+    "domain": "Cognitive",
+    "taxonomy": "3",
+    "plo": "PLO 10"
+  },
+  {
+    "code": "ME1112",
+    "title": "Communication & Presentation Skills",
+    "semester": "1st",
+    "clo": "CLO 3",
+    "statement": "Communicate effectively in both written and oral forms.",
+    "domain": "Affective",
+    "taxonomy": "2",
+    "plo": "PLO 10"
+  },
+  {
+    "code": "ME4731",
+    "title": "Supply Chain Management",
+    "semester": "Elective",
+    "clo": "CLO1",
+    "statement": "Explain key supply chain concepts, strategies, scope, and challenges, demonstrating foundational engineering knowledge through reasoning and theoretical evaluation.",
+    "domain": "Cognitive",
+    "taxonomy": "2",
+    "plo": "PLO1"
+  },
+  {
+    "code": "ME4731",
+    "title": "Supply Chain Management",
+    "semester": "Elective",
+    "clo": "CLO2",
+    "statement": "Apply quantitative techniques to solve supply chain problems using data-driven methods, demonstrating problem-solving skills through numerical analysis",
+    "domain": "Cognitive",
+    "taxonomy": "3",
+    "plo": "PLO2"
+  },
+  {
+    "code": "ME4731",
+    "title": "Supply Chain Management",
+    "semester": "Elective",
+    "clo": "CLO3",
+    "statement": "Analyse sales data to design and develop an interactive Power BI dashboard, integrating project management principles to enhance data-driven decision-making.",
+    "domain": "Cognitive",
+    "taxonomy": "4",
+    "plo": "PLO11"
+  },
+  {
+    "code": "ME4731",
+    "title": "Supply Chain Management",
+    "semester": "Elective",
+    "clo": "CLO4",
+    "statement": "Demonstrate awareness of sustainable supply chain practices by presenting a case study that evaluates their economic, environmental, and social impacts, fostering a responsible approach toward engineering and society.",
+    "domain": "Cognitive",
+    "taxonomy": "3",
+    "plo": "PLO7"
+  },
+  {
+    "code": "ME4834",
+    "title": "Machine Learning",
+    "semester": "Elective",
+    "clo": "CLO1",
+    "statement": "Illustrate the principal models used in machine learning and the types of problems to which they are typically applied",
+    "domain": "Cognitive",
+    "taxonomy": "2",
+    "plo": "PLO1"
+  },
+  {
+    "code": "ME4834",
+    "title": "Machine Learning",
+    "semester": "Elective",
+    "clo": "CLO2",
+    "statement": "Differentiate the assumption made in each model and the strengths and weakness of each model",
+    "domain": "Cognitive",
+    "taxonomy": "2",
+    "plo": "PLO2"
+  },
+  {
+    "code": "ME4834",
+    "title": "Machine Learning",
+    "semester": "Elective",
+    "clo": "CLO3",
+    "statement": "Distinguish which model or models would be most appropriate upon which machine learning problems",
+    "domain": "Cognitive",
+    "taxonomy": "6",
+    "plo": "PLO4"
+  },
+  {
+    "code": "ME4834",
+    "title": "Machine Learning",
+    "semester": "Elective",
+    "clo": "CLO4",
+    "statement": "Construct the principal models in machine learning to solve the complex engineering problems",
+    "domain": "Cognitive",
+    "taxonomy": "5",
+    "plo": "PLO5"
+  },
+  {
+    "code": "ME4734",
+    "title": "Sensors and Sensing Technologies",
+    "semester": "Elective",
+    "clo": "CLO1",
+    "statement": "Demonstrate the operations/ working of electronic sensors and actuators.",
+    "domain": "Cognitive",
+    "taxonomy": "2",
+    "plo": "PLO1"
+  },
+  {
+    "code": "ME4734",
+    "title": "Sensors and Sensing Technologies",
+    "semester": "Elective",
+    "clo": "CLO2",
+    "statement": "Identify sensors for measuring the various physical quantities. ",
+    "domain": "Cognitive",
+    "taxonomy": "3",
+    "plo": "PLO2"
+  },
+  {
+    "code": "ME4734",
+    "title": "Sensors and Sensing Technologies",
+    "semester": "Elective",
+    "clo": "CLO3",
+    "statement": "Design and Develop the sensors networks using different technologies/ methods with desired properties.",
+    "domain": "Cognitive",
+    "taxonomy": "4",
+    "plo": "PLO3"
+  }
+]

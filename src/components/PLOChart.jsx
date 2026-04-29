@@ -44,6 +44,9 @@ const PLOChart = ({label, achieved, notAchieved}) => {
         display: true,
         text: label,
         font: { size: 18, weight: "bold" },
+        padding: {
+          bottom: 34,
+        },
       },
 
       // ⭐ Data Labels config
@@ -73,7 +76,7 @@ const PLOChart = ({label, achieved, notAchieved}) => {
   };
 
   return (
-    <div style={{ width: "100%", height: "260px" }}>
+    <div style={{ width: "100%", height: "290px" }}>
       <Bar data={data} options={options} />
     </div>
   );

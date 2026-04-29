@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict 14Wo4fmtI2h5qxtVwu9synIq3ljE6NXrKDcuhD7AJjjYYz2a9cgnpfKbI0gxyBu
+\restrict pVJfUwq8eb6DlHEw1EO0umk8oqL4dUr7tD1c4eSGoaTUQwnqRE1FGq0Nwmo2eM6
 
 -- Dumped from database version 18.1 (Debian 18.1-1.pgdg13+2)
 -- Dumped by pg_dump version 18.3 (Ubuntu 18.3-1.pgdg24.04+1)
@@ -27,9 +27,9 @@ DROP DATABASE IF EXISTS obe;
 CREATE DATABASE obe WITH TEMPLATE = template0 ENCODING = 'UTF8' LOCALE_PROVIDER = libc LOCALE = 'en_US.utf8';
 
 
-\unrestrict 14Wo4fmtI2h5qxtVwu9synIq3ljE6NXrKDcuhD7AJjjYYz2a9cgnpfKbI0gxyBu
+\unrestrict pVJfUwq8eb6DlHEw1EO0umk8oqL4dUr7tD1c4eSGoaTUQwnqRE1FGq0Nwmo2eM6
 \connect obe
-\restrict 14Wo4fmtI2h5qxtVwu9synIq3ljE6NXrKDcuhD7AJjjYYz2a9cgnpfKbI0gxyBu
+\restrict pVJfUwq8eb6DlHEw1EO0umk8oqL4dUr7tD1c4eSGoaTUQwnqRE1FGq0Nwmo2eM6
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -774,7 +774,41 @@ ii. The operation of logic gates, flip flops, memory, sequential circuits and pr
 	(309, 1, 'Use concepts of simple modeling elements of various engineering disciplines to construct models of systems of interest.', 'Cognitive', 3, 1, 70),
 	(310, 2, 'Apply the models derived (in the form of differential equations) and formulate and run simulations of the model for conditions of interest.', 'Cognitive', 3, 5, 70),
 	(311, 3, 'Analyze the results of a simulation and compare them with analytical results obtained from the derived model.', 'Cognitive', 4, 2, 70),
-	(48, 2, 'Solve problems of ODEs, Linear Algebra and related topics. ', 'Cognitive', 3, 2, 14);
+	(48, 2, 'Solve problems of ODEs, Linear Algebra and related topics. ', 'Cognitive', 3, 2, 14),
+	(312, 1, 'Distinguish different thermodynamic systems from a given scenario or device description and categorize such systems appropriately for subsequent analysis', 'Cognitive', 2, 1, 80),
+	(313, 2, 'Determine state characteristics for working fluids undergoing various thermodynamic processes, Solve simple thermodynamic problems using the ideal gas EOS and the thermodynamic tables and Apply mass conservation, energy conservation and entropy balance relationships to thermodynamic problems related to closed and open systems.', 'Cognitive', 3, 2, 80),
+	(314, 3, 'Analyze the thermodynamic performance characteristics of reciprocating engines, cyclic devices and flow devices using thermodynamic property tables and/or the ideal gas equation of state', 'Cognitive', 4, 2, 80),
+	(315, 1, 'Interpret the different parameters related to experiments and relate the interactions of those parameters with engineering principles.', 'Cognitive', 2, 9, 81),
+	(316, 2, 'Reproduce the Setup for weekly experiments and lab exams', 'Psychomotor', 2, 9, 81),
+	(317, 3, 'Participate responsibly to complete a task', 'Affective', 2, 9, 81),
+	(318, 4, 'Construct hardware of open ended project for given constraints.', 'Psychomotor', 3, 3, 81),
+	(319, 5, 'Propose solution to the assigned open ended project for given constraints. ', 'Cognitive', 6, 3, 81),
+	(320, 6, 'Demonstrate project management skills for project scheduling, execution and completion.', 'Affective', 3, 11, 81),
+	(321, 1, 'Explain the principles of heat transfer.', 'Cognitive', 2, 1, 82),
+	(322, 2, 'Solve the governing mathematical equations for conduction, convection and radiation heat transfer.', 'Cognitive', 3, 2, 82),
+	(323, 3, 'Examine the thermal design of heat exchangers.', 'Cognitive', 5, 3, 82),
+	(324, 1, 'Investigate assigned problem for given constraints.', 'Cognitive', 4, 4, 83),
+	(325, 2, 'Construct hardware for assigned project.', 'Psychomotor', 3, 4, 83),
+	(326, 3, 'Write weekly lab reports', 'Cognitive', 3, 9, 83),
+	(327, 4, 'Reproduce the Setup for weekly experiments and lab exams', 'Psychomotor', 2, 9, 83),
+	(328, 5, 'Participate responsibly to complete a task', 'Affective', 2, 9, 83),
+	(329, 1, 'Recall alphabets, numbers, verbs, pronouns, daily routine life sentences in German language.', 'Cognitive', 1, 10, 84),
+	(330, 2, 'Interpret  questions, articles, daily conversation at home as well as at  outdoors should respond effectively', 'Cognitive', 2, 10, 84),
+	(331, 3, 'Present the assigned topic in German language with confidence and clarity in public speaking projects.', 'Affective', 2, 12, 84),
+	(332, 1, 'Interpret words and sentences clearly and efficiently.', 'Cognitive', 2, 10, 85),
+	(333, 2, 'Demonstrate written and oral presentation skills by preparing presentation materials / assignments', 'Cognitive', 3, 10, 85),
+	(334, 3, 'Communicate effectively in both written and oral forms.', 'Affective', 2, 10, 85),
+	(335, 1, 'Explain key supply chain concepts, strategies, scope, and challenges, demonstrating foundational engineering knowledge through reasoning and theoretical evaluation.', 'Cognitive', 2, 1, 86),
+	(336, 2, 'Apply quantitative techniques to solve supply chain problems using data-driven methods, demonstrating problem-solving skills through numerical analysis', 'Cognitive', 3, 2, 86),
+	(337, 3, 'Analyse sales data to design and develop an interactive Power BI dashboard, integrating project management principles to enhance data-driven decision-making.', 'Cognitive', 4, 11, 86),
+	(338, 4, 'Demonstrate awareness of sustainable supply chain practices by presenting a case study that evaluates their economic, environmental, and social impacts, fostering a responsible approach toward engineering and society.', 'Cognitive', 3, 7, 86),
+	(339, 1, 'Illustrate the principal models used in machine learning and the types of problems to which they are typically applied', 'Cognitive', 2, 1, 87),
+	(340, 2, 'Differentiate the assumption made in each model and the strengths and weakness of each model', 'Cognitive', 2, 2, 87),
+	(341, 3, 'Distinguish which model or models would be most appropriate upon which machine learning problems', 'Cognitive', 6, 4, 87),
+	(342, 4, 'Construct the principal models in machine learning to solve the complex engineering problems', 'Cognitive', 5, 5, 87),
+	(343, 1, 'Demonstrate the operations/ working of electronic sensors and actuators.', 'Cognitive', 2, 1, 88),
+	(344, 2, 'Identify sensors for measuring the various physical quantities. ', 'Cognitive', 3, 2, 88),
+	(345, 3, 'Design and Develop the sensors networks using different technologies/ methods with desired properties.', 'Cognitive', 4, 3, 88);
 
 
 --
@@ -786,8 +820,7 @@ INSERT INTO public.closheet VALUES
 	(3, 403, '[["S.No", "Name", "Reg.No", "Assignment 1", null, "Lab Work 1", "Final Paper 1", "manual 1", null, "General Viva 1", "Project 1", null, null], [null, null, null, 1, 4, 1, 1, 1, 5, 5, 2, 3, 4], [null, null, null, 10, 4, 5, 30, 7, 7, 5, 9, 13, 10], [1, "Shahmeer", "1845143", 1, 4, 2, 22.5, 4.75, 5.25, 3, 9, 9, 5], [2, "Hassin  Sikander", "2245102", 10, 4, 5, 20.5, 5.25, 4.75, 4, 9, 9, 5], [3, "Hussain  Hasnain", "2245103", 8, 3, 3, 20, 6.75, 7, 3, 9, 10, 5], [4, "Mohammad Shabbir Tarwari", "2245104", 10, 4, 5, 25, 6.25, 6.75, 4, 9, 10, 5], [5, "Ahmad  Foad", "2245110", 8, 4, 4, 21, 6.25, 6.25, 3, 9, 10, 5], [6, "Rayyan Ahmed Thakur", "2245118", 10, 4, 5, 17, 4, 4, 3, 9, 10, 5], [7, "Syed Faaiz Raza Zaidi", "2245120", 10, 4, 5, 19, 3.25, 4, 3, 9, 9, 5], [8, "Um E Abiha", "2245124", 8, 4, 4, 20.5, 4.75, 5.75, 3, 9, 9, 5], [9, "Hunain  Muhammad Iqbal", "2245126", 10, 4, 5, 25, 6, 6.25, 3, 9, 9, 5]]', 388),
 	(2, 449, '[["S.No", "Name", "Reg.No", "Assignment 1", "Assignment 2", "Test 1", null, "Test 2", "Mid Term Paper 1", null, "Final Paper 1", null], [null, null, null, 2, 2, 1, 2, 2, 1, 2, 1, 2], [null, null, null, 5, 5, 6, 9, 15, 10, 15, 10, 25], [1, "Sohaib Ali Surhio", "1945122", 3, 3, 6, 9, 10.5, 5, 3, 2.5, 12.8], [2, "Jawwad Raza", "2245115", 5, 5, 5.5, 4, 9.1, 5.5, 6, 5, 10.6], [3, "Ameen  Naushad", "2345105", 2.5, 2.5, 3.5, 6.5, 11, 7, 10.5, 6.5, 20.6], [4, "Muhammad  Muhib", "2345118", 2.5, 2.5, 5, 9, 6.5, 7.5, 13.5, 8.5, 20.6], [5, "Mohammad Aqeel Anjarwala", "2345132", 2.5, 2.5, 5.5, 9, 9.2, 8.5, 15, 7.5, 15.6], [6, "Abdul Basit Hussain", "2345135", 4.45, 4.45, 4, 5, 8.7, 6.5, 11, 5.5, 10.6], [7, "Aleeza  Shahbaz", "2445101", 4, 4, 4.5, 5.5, 6.8, 5.5, 7.5, 5, 12.2], [8, "Geeta  Khurana", "2445108", 5, 5, 6, 6.5, 7.2, 6.5, 7, 5.5, 11.6], [9, "Hussain  Hasnain", "2445110", 5, 5, 5.5, 9, 11, 7.5, 15, 4, 18.4], [10, "Kaydin Asher Alfred Lobo", "2445111", 4, 4, 5, 9, 9, 6, 11.5, 6, 20.6], [11, "Muhammad Hamza Yaqoob", "2445112", 0, 0, 0, 0, 0, 0, 0, 0, 0], [12, "Muhammad Huzaifa", "2445113", 3, 3, 5, 9, 8.6, 7, 15, 4, 21.1], [13, "Murtaza Ali Yousuf Ali Bohra", "2445116", 5, 5, 5, 9, 12, 7, 13.5, 7, 17.3], [14, "Roshni", "2445118", 4.7, 4.7, 5, 6, 11.7, 5.5, 10, 6.5, 16.2], [15, "Salahuddin Dossal", "2445119", 4.45, 4.45, 6, 9, 7.4, 5, 9.5, 4.5, 13.4], [16, "Hasan  Gohar Ahmed", "2445132", 5, 5, 4.5, 9, 4.8, 7, 13, 5.5, 16.2], [17, "Wasib Aizaz Khan", "2445147", 3, 3, 5.5, 7.5, 4, 6.5, 6.5, 3.5, 15.6], [18, "Sabih  Ahmed", "2445150", 5, 5, 4.5, 6.5, 9.6, 7, 8.5, 4.5, 12.8]]', 431),
 	(4, 7, '[["S.No", "Name", "Reg.No", "Final Paper 1", null, null, "Mid Term Paper 1", null, "Presentation 1", "Report 1", "Test 1", "Test 2"], [null, null, null, 1, 2, 3, 1, 2, 3, 2, 1, 2], [null, null, null, 13, 13, 14, 10, 10, 15, 5, 10, 10], [1, "Muhammad Yoksal Khan", "2045143", "0.00", "0.00", "0.00", "5.75", "5.75", 0, 0, 5, 0], [2, "Ahtisham  Qayyum", "2145101", "6.67", "6.67", "6.67", "4.00", "4.00", 13, 5, 6, 10], [3, "Ayesha Khan  Nangraj", "2145102", "11.33", "11.33", "11.33", "9.00", "9.00", 15, 5, 9, 10], [4, "Syed Nayyer Abbas", "2145103", "8.17", "8.17", "8.17", "8.50", "8.50", 15, 5, 8, 10], [5, "Eeqan  Arif", "2145104", "11.50", "11.50", "11.50", "10.00", "10.00", 15, 5, 10, 10], [6, "Hatim  Mustafa", "2145105", "10.50", "10.50", "10.50", "10.00", "10.00", 15, 5, 10, 10], [7, "Khowaja Aboul Kalam", "2145106", "7.83", "7.83", "7.83", "6.00", "6.00", 15, 5, 10, 10], [8, "Muhammad Azan Khan", "2145107", "10.00", "10.00", "10.00", "9.50", "9.50", 15, 5, 8, 10], [9, "Moiz Ullah Khan", "2145108", "10.25", "10.25", "10.25", "6.00", "6.00", 15, 5, 10, 10], [10, "Mubeen Raza Qazi", "2145109", "10.50", "10.50", "10.50", "9.25", "9.25", 15, 5, 8, 10], [11, "Muhammad  Hussain", "2145110", "11.33", "11.33", "11.33", "9.00", "9.00", 15, 5, 8, 10], [12, "Muhammad  Qamber", "2145111", "11.17", "11.17", "11.17", "8.75", "8.75", 15, 5, 8, 10], [13, "Shaikh Shahbaz Ali", "2145115", "0.00", "0.00", "0.00", "7.25", "7.25", 13, 5, 8, 10], [14, "Waniza  Khan", "2145117", "11.67", "11.67", "11.67", "10.00", "10.00", 15, 5, 10, 10], [15, "Abdul Momin  Sahito", "2145119", "11.67", "11.67", "11.67", "10.00", "10.00", 15, 5, 9, 10], [16, "Abdul Mueed Shaikh", "2145120", "11.33", "11.33", "11.33", "9.50", "9.50", 15, 5, 7, 10], [17, "Ali  Naqi", "2145122", "5.50", "5.50", "5.50", "6.25", "6.25", 10, 5, 6, 10], [18, "Muhammad Minam Ur Rehman Khan", "2145124", "10.33", "10.33", "10.33", "10.00", "10.00", 15, 5, 10, 10], [19, "Syed Muhammad Umer Ali Qadri", "2145125", "11.00", "11.00", "11.00", "9.00", "9.00", 15, 5, 10, 10], [20, "Burhanuddin  Ali", "2145128", "10.83", "10.83", "10.83", "9.50", "9.50", 15, 5, 8, 10]]', 7),
-	(5, 118, '[["S.No", "Name", "Reg.No", "Quiz 1", "Quiz 2", "Quiz 3", "Assignment 1", "Assignment 2", "Final Paper 1", null, null, null, "Mid Term Paper 1", null, null], [null, null, null, 1, 3, 4, 2, 3, 1, 2, 3, 4, 1, 1, 2], [null, null, null, 10, 10, 10, 5, 5, 8, 12, 10, 10, 5, 7, 8], [1, "Syed Mohammad Mujtaba", "1945171", 7, 7, 4.5, 3, 3, 5, 2, 8, 7, 4, 5, 4.5], [2, "Deepak  Rai", "2045132", 4, 9, 10, 5, 5, 3, 12, 8, 9, 0, 5, 5], [3, "Moosa  Raza", "2045139", 7, 3.5, 1, 3.5, 3, 4, 2, 7, 5, 0, 4.5, 3.5], [4, "Muhammad  Furqan", "2045142", 8.5, 7, 9, 4, 3.5, 6, 11, 9, 10, 4, 6, 7], [5, "Mujtaba  Qamar", "2045144", 9, 4.5, 8, 4.5, 4.5, 5.5, 6.5, 3.5, 4, 4, 6, 6], [6, "Usman  Asim", "2045152", 8, 8, 7, 4, 4, 1.5, 3, 9, 7, 4, 5, 5.5], [7, "Ammar  Shabbir", "2045158", 6, 9, 10, 5, 4.5, 5.5, 7, 9.5, 10, 5, 6, 7.5], [8, "Shaheryar Khan Zai", "2045161", 7, 7.5, 9.5, 4, 3.5, 4.5, 5, 9, 8, 4, 6, 7], [9, "Mateen  Mackanifar", "2045165", 9, 10, 10, 4, 3.5, 7, 12, 7.5, 9, 5, 6, 7]]', 114),
-	(6, 4, '[["S.No", "Name", "Reg.No", "Quiz 1", "Quiz 2", null, "Quiz 3", "Assignment 1", "Assignment 2", "Final Paper 1", null, null, "Mid Term Paper 1", null, null, null], [null, null, null, 1, 2, 3, 3, 1, 2, 1, 2, 3, 1, 2, 2, 2], [null, null, null, 10, 5, 5, 10, 5, 5, 12, 14, 14, 5, 5, 5, 5], [1, "Bilal Ahmed Khan", "1945133", 10, "4.00", "5.00", 9.5, 5, 5, "3.00", "0.00", "3.50", "4.00", "0.00", "4.00", "2.00"], [2, "Manoj  Kumar", "1945170", 9, "5.00", "3.50", 9, 5, 5, "4.50", "3.00", "0.00", "5.00", "3.00", "3.00", "0.00"], [3, "Deepak  Rai", "2045132", 10, "3.50", "5.00", 10, 5, 5, "0.00", "3.50", "6.00", "5.00", "0.00", "1.00", "1.00"], [4, "Hamza Ahmed Siddiqui", "2045134", 3, "0.00", "0.00", 0, 0, 0, "0.00", "0.00", "0.00", "5.00", "0.00", "0.00", "1.00"], [5, "Moosa  Raza", "2045139", 0, "1.00", "0.00", 0, 0, 0, "0.00", "0.00", "0.00", "5.00", "0.00", "0.00", "0.00"], [6, "Ayesha Khan  Nangraj", "2145102", 8, "4.50", "3.00", 8.5, 5, 5, "3.00", "6.00", "3.00", "1.00", "4.00", "3.00", "1.00"], [7, "Syed Nayyer Abbas", "2145103", 6, "4.00", "4.00", 10, 5, 4, "4.50", "8.50", "8.00", "5.00", "3.00", "5.00", "5.00"], [8, "Eeqan  Arif", "2145104", 5, "3.00", "5.00", 10, 4, 4, "6.00", "12.00", "9.00", "5.00", "4.00", "4.00", "5.00"], [9, "Hatim  Mustafa", "2145105", 7, "4.50", "5.00", 10, 4, 5, "10.00", "14.00", "12.50", "5.00", "2.00", "2.00", "4.00"], [10, "Khowaja Aboul Kalam", "2145106", 7, "2.50", "2.50", 8, 4, 4, "2.00", "3.50", "1.50", "4.00", "0.00", "4.00", "0.00"], [11, "Muhammad Azan Khan", "2145107", 7, "4.00", "4.50", 10, 4, 4, "8.00", "12.00", "11.50", "2.00", "4.00", "5.00", "4.00"], [12, "Moiz Ullah Khan", "2145108", 7, "5.00", "5.00", 7, 4, 4, "9.50", "1.50", "0.00", "5.00", "4.00", "3.00", "2.00"], [13, "Mubeen Raza Qazi", "2145109", 7, "3.00", "2.00", 7, 5, 5, "3.00", "7.00", "6.00", "3.00", "2.00", "3.00", "2.00"], [14, "Muhammad  Hussain", "2145110", 7, "4.00", "4.00", 10, 4, 4, "7.00", "11.00", "12.00", "3.00", "5.00", "5.00", "4.00"], [15, "Muhammad  Qamber", "2145111", 7, "3.00", "3.00", 9, 5, 5, "4.00", "4.00", "6.00", "3.00", "2.00", "2.00", "2.00"], [16, "Shaikh Shahbaz Ali", "2145115", 6, "0.00", "0.00", 10, 5, 5, "0.00", "0.00", "0.00", "2.00", "3.00", "3.00", "2.00"], [17, "Waniza  Khan", "2145117", 10, "5.00", "4.00", 10, 5, 5, "12.00", "13.00", "13.00", "5.00", "5.00", "5.00", "5.00"], [18, "Abdul Momin  Sahito", "2145119", 7, "4.00", "4.00", 5, 5, 5, "3.00", "1.00", "1.00", "3.00", "2.00", "3.00", "3.00"], [19, "Abdul Mueed Shaikh", "2145120", 8, "5.00", "3.00", 9.5, 4, 4, "2.50", "2.00", "2.00", "5.00", "3.00", "4.00", "3.00"], [20, "Ali  Naqi", "2145122", 3, "3.00", "4.00", 1, 5, 5, "1.00", "1.00", "0.00", "3.00", "3.00", "2.00", "2.00"], [21, "Muhammad Minam Ur Rehman Khan", "2145124", 8, "3.50", "4.00", 10, 4, 4, "12.00", "9.00", "11.50", "5.00", "4.00", "5.00", "5.00"], [22, "Syed Muhammad Umer Ali Qadri", "2145125", 8, "3.00", "4.00", 10, 4, 4, "11.50", "7.00", "10.50", "5.00", "4.00", "5.00", "5.00"], [23, "Taimoor Ahmed Siddiqui", "2145126", 4, "4.00", "3.00", 9.5, 4, 4, "5.00", "5.50", "5.00", "5.00", "4.00", "5.00", "2.00"], [24, "Burhanuddin  Ali", "2145128", 9, "5.00", "5.00", 10, 5, 5, "10.00", "13.50", "9.50", "4.00", "4.00", "5.00", "5.00"]]', 4);
+	(5, 118, '[["S.No", "Name", "Reg.No", "Quiz 1", "Quiz 2", "Quiz 3", "Assignment 1", "Assignment 2", "Final Paper 1", null, null, null, "Mid Term Paper 1", null, null], [null, null, null, 1, 3, 4, 2, 3, 1, 2, 3, 4, 1, 1, 2], [null, null, null, 10, 10, 10, 5, 5, 8, 12, 10, 10, 5, 7, 8], [1, "Syed Mohammad Mujtaba", "1945171", 7, 7, 4.5, 3, 3, 5, 2, 8, 7, 4, 5, 4.5], [2, "Deepak  Rai", "2045132", 4, 9, 10, 5, 5, 3, 12, 8, 9, 0, 5, 5], [3, "Moosa  Raza", "2045139", 7, 3.5, 1, 3.5, 3, 4, 2, 7, 5, 0, 4.5, 3.5], [4, "Muhammad  Furqan", "2045142", 8.5, 7, 9, 4, 3.5, 6, 11, 9, 10, 4, 6, 7], [5, "Mujtaba  Qamar", "2045144", 9, 4.5, 8, 4.5, 4.5, 5.5, 6.5, 3.5, 4, 4, 6, 6], [6, "Usman  Asim", "2045152", 8, 8, 7, 4, 4, 1.5, 3, 9, 7, 4, 5, 5.5], [7, "Ammar  Shabbir", "2045158", 6, 9, 10, 5, 4.5, 5.5, 7, 9.5, 10, 5, 6, 7.5], [8, "Shaheryar Khan Zai", "2045161", 7, 7.5, 9.5, 4, 3.5, 4.5, 5, 9, 8, 4, 6, 7], [9, "Mateen  Mackanifar", "2045165", 9, 10, 10, 4, 3.5, 7, 12, 7.5, 9, 5, 6, 7]]', 114);
 	
 
 
@@ -874,7 +907,16 @@ INSERT INTO public.course VALUES
 	(78, 'ME4823', 'Management Sciences Elective ( Engineering and Management)', 8),
 	(79, 'ME4824', 'Social Sciences (Organizational Behaviour)', 8),
 	(39, 'ME3502-T', 'Fluid Mechanics', 4),
-	(38, 'ME3502-L', 'Fluid Mechanics', 4);
+	(38, 'ME3502-L', 'Fluid Mechanics', 4),
+	(80, 'ME2405-T', 'Thermodynamics', 3),
+	(81, 'ME2405-L', 'Thermodynamics', 3),
+	(82, 'ME4703-T', 'Heat Transfer', 8),
+	(83, 'ME4703-L', 'Heat Transfer', 8),
+	(84, 'ME2351', 'Foreign Languages', 0),
+	(85, 'ME1112', 'Communication & Presentation Skills', 1),
+	(86, 'ME4731', 'Supply Chain Management', 0),
+	(87, 'ME4834', 'Machine Learning', 0),
+	(88, 'ME4734', 'Sensors and Sensing Technologies', 0);
 
 
 --
@@ -969,7 +1011,16 @@ INSERT INTO public.curriculum_courses VALUES
 	(76, 78, 1),
 	(77, 79, 1),
 	(78, 39, 1),
-	(79, 38, 1);
+	(79, 38, 1),
+	(80, 80, 1),
+	(81, 81, 1),
+	(82, 82, 1),
+	(83, 83, 1),
+	(84, 84, 1),
+	(85, 85, 1),
+	(86, 86, 1),
+	(87, 87, 1),
+	(88, 88, 1);
 
 
 --
@@ -1046,7 +1097,6 @@ INSERT INTO public.offered_courses VALUES
 	(5, 17, 3, 'Spring', 2022, 'BEME 2 - Section A', 5),
 	(6, 10, 13, 'Spring', 2022, 'BEME 2 - Section A', 6),
 	(7, 19, 46, 'Spring', 2022, 'BEME 2 - Section A', 7),
-	(8, NULL, 38, 'Spring', 2022, 'BEME 2 - Section A', 8),
 	(9, NULL, 43, 'Spring', 2022, 'BEME 2 - Section A', 9),
 	(10, 31, 39, 'Spring', 2022, 'BEME 4 - Section A', 10),
 	(11, 32, 5, 'Spring', 2022, 'BEME 4 - Section A', 11),
@@ -1084,13 +1134,9 @@ INSERT INTO public.offered_courses VALUES
 	(43, 67, 16, 'Spring', 2022, 'BEME 6 - Section B', 43),
 	(44, 55, 7, 'Spring', 2022, 'BEME 6 - Section B', 44),
 	(45, 56, 50, 'Spring', 2022, 'BEME 6 - Section B', 45),
-	(46, NULL, 30, 'Spring', 2022, 'BEME 8 - Section A', 46),
-	(47, NULL, 35, 'Spring', 2022, 'BEME 8 - Section A', 47),
 	(48, 71, 13, 'Spring', 2022, 'BEME 8 - Section A', 48),
 	(49, 72, 10, 'Spring', 2022, 'BEME 8 - Section A', 49),
 	(50, 73, 3, 'Spring', 2022, 'BEME 8 - Section A', 50),
-	(51, NULL, 30, 'Spring', 2022, 'BEME 8 - Section B', 51),
-	(52, NULL, 35, 'Spring', 2022, 'BEME 8 - Section B', 52),
 	(53, 71, 13, 'Spring', 2022, 'BEME 8 - Section B', 53),
 	(54, 72, 10, 'Spring', 2022, 'BEME 8 - Section B', 54),
 	(55, 73, 3, 'Spring', 2022, 'BEME 8 - Section B', 55),
@@ -1106,7 +1152,6 @@ INSERT INTO public.offered_courses VALUES
 	(65, NULL, 22, 'Summer', 2022, 'BEME - Elective', 71),
 	(66, 2, 5, 'Summer', 2022, 'BEME - Open', 72),
 	(67, 25, 55, 'Summer', 2022, 'BEME - Open', 73),
-	(68, NULL, 10, 'Summer', 2022, 'BEME - Open', 74),
 	(69, 36, 7, 'Summer', 2022, 'BEME - Open', 75),
 	(70, 37, 50, 'Summer', 2022, 'BEME - Open', 76),
 	(71, 39, 19, 'Summer', 2022, 'BEME - Open', 77),
@@ -1119,7 +1164,6 @@ INSERT INTO public.offered_courses VALUES
 	(78, 49, 48, 'Summer', 2022, 'BEME - Open', 84),
 	(79, 67, 20, 'Summer', 2022, 'BEME - Open', 85),
 	(80, 58, 53, 'Summer', 2022, 'BEME - Open', 86),
-	(81, NULL, 30, 'Summer', 2022, 'BEME - Open', 87),
 	(82, 71, 39, 'Summer', 2022, 'BEME - Open', 88),
 	(83, 1, 54, 'Fall', 2022, 'BEME 1 - Section A', 89),
 	(84, 2, 27, 'Fall', 2022, 'BEME 1 - Section A', 90),
@@ -1136,8 +1180,6 @@ INSERT INTO public.offered_courses VALUES
 	(95, 28, 7, 'Fall', 2022, 'BEME 3 - Section A', 101),
 	(96, 29, 27, 'Fall', 2022, 'BEME 3 - Section A', 102),
 	(97, 20, 13, 'Fall', 2022, 'BEME 3 - Section A', 103),
-	(98, NULL, 30, 'Fall', 2022, 'BEME 3 - Section A', 104),
-	(99, NULL, 35, 'Fall', 2022, 'BEME 3 - Section A', 105),
 	(100, 40, 50, 'Fall', 2022, 'BEME 5 - Section A', 106),
 	(101, 79, 30, 'Fall', 2022, 'BEME 5 - Section A', 107),
 	(102, 78, 35, 'Fall', 2022, 'BEME 5 - Section A', 108),
@@ -1215,19 +1257,13 @@ INSERT INTO public.offered_courses VALUES
 	(174, 67, 21, 'Spring', 2023, 'BEME 6 - Section B', 181),
 	(175, 55, 7, 'Spring', 2023, 'BEME 6 - Section B', 182),
 	(176, 56, 3, 'Spring', 2023, 'BEME 6 - Section B', 183),
-	(177, NULL, 30, 'Spring', 2023, 'BEME 8 - Section A', 184),
-	(178, NULL, 35, 'Spring', 2023, 'BEME 8 - Section A', 185),
 	(179, 71, 13, 'Spring', 2023, 'BEME 8 - Section A', 186),
 	(180, 72, 10, 'Spring', 2023, 'BEME 8 - Section A', 187),
 	(181, 73, 3, 'Spring', 2023, 'BEME 8 - Section A', 188),
-	(182, NULL, 30, 'Spring', 2023, 'BEME 8 - Section B', 189),
-	(183, NULL, 35, 'Spring', 2023, 'BEME 8 - Section B', 190),
 	(184, 71, 13, 'Spring', 2023, 'BEME 8 - Section B', 191),
 	(185, 72, 10, 'Spring', 2023, 'BEME 8 - Section B', 192),
 	(186, 73, 3, 'Spring', 2023, 'BEME 8 - Section B', 193),
 	(187, 68, 35, 'Spring', 2023, 'BEME - Elective', 194),
-	(188, NULL, 26, 'Spring', 2023, 'BEME - Elective', 195),
-	(189, NULL, 21, 'Spring', 2023, 'BEME - Elective', 196),
 	(190, 30, 1, 'Spring', 2023, 'BEME - Open', 197),
 	(191, NULL, 27, 'Spring', 2023, 'BEME - Open', 198),
 	(192, 64, 10, 'Spring', 2023, 'BEME - Open', 199),
@@ -1243,7 +1279,6 @@ INSERT INTO public.offered_courses VALUES
 	(202, 45, 27, 'Summer', 2023, 'BEME - Open', 214),
 	(203, 53, 39, 'Summer', 2023, 'BEME - Open', 215),
 	(204, 54, 8, 'Summer', 2023, 'BEME - Open', 216),
-	(205, NULL, 30, 'Summer', 2023, 'BEME - Open', 217),
 	(206, NULL, 13, 'Summer', 2023, 'BEME - Open', 218),
 	(207, 64, 48, 'Summer', 2023, 'BEME - Open', 219),
 	(208, 72, 13, 'Summer', 2023, 'BEME - Open', 220),
@@ -1258,13 +1293,12 @@ INSERT INTO public.offered_courses VALUES
 	(217, 17, 7, 'Fall', 2023, 'BEME 1 - Section A', 229),
 	(218, 22, 7, 'Fall', 2023, 'BEME 3 - Section A', 230),
 	(219, 23, 50, 'Fall', 2023, 'BEME 3 - Section A', 231),
+	(205, 83, 30, 'Summer', 2023, 'BEME - Open', 217),
 	(220, 24, 5, 'Fall', 2023, 'BEME 3 - Section A', 232),
 	(221, 25, 55, 'Fall', 2023, 'BEME 3 - Section A', 233),
 	(222, 28, 7, 'Fall', 2023, 'BEME 3 - Section A', 234),
 	(223, 29, 19, 'Fall', 2023, 'BEME 3 - Section A', 235),
 	(224, 20, 13, 'Fall', 2023, 'BEME 3 - Section A', 236),
-	(225, NULL, 30, 'Fall', 2023, 'BEME 3 - Section A', 237),
-	(226, NULL, 35, 'Fall', 2023, 'BEME 3 - Section A', 238),
 	(227, 40, 50, 'Fall', 2023, 'BEME 5 - Section A', 239),
 	(228, 79, 30, 'Fall', 2023, 'BEME 5 - Section A', 240),
 	(229, 78, 35, 'Fall', 2023, 'BEME 5 - Section A', 241),
@@ -1293,7 +1327,6 @@ INSERT INTO public.offered_courses VALUES
 	(252, 64, 10, 'Fall', 2023, 'BEME 7 - Section B', 262),
 	(253, 69, 19, 'Fall', 2023, 'BEME - Elective', 263),
 	(254, 74, 4, 'Fall', 2023, 'BEME - Elective', 264),
-	(255, NULL, 30, 'Fall', 2023, 'BEME - Open', 265),
 	(256, 73, 35, 'Fall', 2023, 'BEME - Open', 266),
 	(257, 12, 55, 'Spring', 2024, 'BEME 2 - Section A', 272),
 	(258, 13, 27, 'Spring', 2024, 'BEME 2 - Section A', 273),
@@ -1320,20 +1353,14 @@ INSERT INTO public.offered_courses VALUES
 	(279, 67, 24, 'Spring', 2024, 'BEME 6 - Section A', 294),
 	(280, 55, 55, 'Spring', 2024, 'BEME 6 - Section A', 295),
 	(281, 56, 50, 'Spring', 2024, 'BEME 6 - Section A', 296),
-	(282, NULL, 30, 'Spring', 2024, 'BEME 8 - Section A', 297),
-	(283, NULL, 10, 'Spring', 2024, 'BEME 8 - Section A', 298),
 	(284, 71, 13, 'Spring', 2024, 'BEME 8 - Section A', 299),
 	(285, 72, 10, 'Spring', 2024, 'BEME 8 - Section A', 300),
 	(286, 73, 35, 'Spring', 2024, 'BEME 8 - Section A', 301),
-	(287, NULL, 30, 'Spring', 2024, 'BEME 8 - Section B', 302),
-	(288, NULL, 10, 'Spring', 2024, 'BEME 8 - Section B', 303),
 	(289, 71, 13, 'Spring', 2024, 'BEME 8 - Section B', 304),
 	(290, 72, 10, 'Spring', 2024, 'BEME 8 - Section B', 305),
 	(291, 73, 35, 'Spring', 2024, 'BEME 8 - Section B', 306),
-	(292, NULL, 38, 'Spring', 2024, 'BEME - Elective', 307),
 	(293, NULL, 18, 'Spring', 2024, 'BEME - Elective', 308),
 	(294, 68, 35, 'Spring', 2024, 'BEME - Elective', 309),
-	(295, NULL, 27, 'Spring', 2024, 'BEME - Elective', 310),
 	(296, 76, 21, 'Spring', 2024, 'BEME - Elective', 311),
 	(297, 75, 21, 'Spring', 2024, 'BEME - Elective', 311),
 	(298, 30, 45, 'Spring', 2024, 'BEME - Open', 312),
@@ -1343,7 +1370,6 @@ INSERT INTO public.offered_courses VALUES
 	(302, 79, 30, 'Summer', 2024, 'BEME - Open', 317),
 	(303, 49, 7, 'Summer', 2024, 'BEME - Open', 318),
 	(304, 50, 27, 'Summer', 2024, 'BEME - Open', 319),
-	(305, NULL, 30, 'Summer', 2024, 'BEME - Open', 320),
 	(306, 61, 2, 'Summer', 2024, 'BEME - Open', 321),
 	(307, 64, 10, 'Summer', 2024, 'BEME - Open', 322),
 	(308, 1, 5, 'Fall', 2024, 'BEME 1 - Section A', 323),
@@ -1371,8 +1397,6 @@ INSERT INTO public.offered_courses VALUES
 	(330, 28, 2, 'Fall', 2024, 'BEME 3 - Section A', 345),
 	(331, 29, 19, 'Fall', 2024, 'BEME 3 - Section A', 346),
 	(332, 20, 7, 'Fall', 2024, 'BEME 3 - Section A', 347),
-	(333, NULL, 30, 'Fall', 2024, 'BEME 3 - Section A', 348),
-	(334, NULL, 35, 'Fall', 2024, 'BEME 3 - Section A', 349),
 	(335, 40, 50, 'Fall', 2024, 'BEME 5 - Section A', 350),
 	(336, 79, 30, 'Fall', 2024, 'BEME 5 - Section A', 351),
 	(337, 78, 35, 'Fall', 2024, 'BEME 5 - Section A', 352),
@@ -1392,8 +1416,6 @@ INSERT INTO public.offered_courses VALUES
 	(351, 61, 2, 'Fall', 2024, 'BEME 7 - Section A', 364),
 	(352, 63, 39, 'Fall', 2024, 'BEME 7 - Section A', 365),
 	(353, 64, 10, 'Fall', 2024, 'BEME 7 - Section A', 366),
-	(354, NULL, 37, 'Fall', 2024, 'BEME - Elective', 367),
-	(355, NULL, 27, 'Fall', 2024, 'BEME - Elective', 368),
 	(356, 74, 4, 'Fall', 2024, 'BEME - Elective', 369),
 	(357, 11, 36, 'Fall', 2024, 'BEME - Open', 370),
 	(358, NULL, 48, 'Fall', 2024, 'BEME - Open', 371),
@@ -1435,14 +1457,10 @@ INSERT INTO public.offered_courses VALUES
 	(394, 67, 10, 'Spring', 2025, 'BEME 6 - Section A', 409),
 	(395, 55, 7, 'Spring', 2025, 'BEME 6 - Section A', 410),
 	(396, 56, 50, 'Spring', 2025, 'BEME 6 - Section A', 411),
-	(397, NULL, 30, 'Spring', 2025, 'BEME 8 - Section A', 412),
-	(398, NULL, 35, 'Spring', 2025, 'BEME 8 - Section A', 413),
 	(399, 71, 39, 'Spring', 2025, 'BEME 8 - Section A', 414),
 	(400, 72, 10, 'Spring', 2025, 'BEME 8 - Section A', 415),
 	(401, 73, 35, 'Spring', 2025, 'BEME 8 - Section A', 416),
 	(402, 68, 35, 'Spring', 2025, 'BEME - Elective', 417),
-	(403, NULL, 2, 'Spring', 2025, 'BEME - Elective', 418),
-	(404, NULL, 34, 'Spring', 2025, 'BEME - Elective', 419),
 	(405, 11, 11, 'Spring', 2025, 'BEME - Open', 420),
 	(406, 30, 55, 'Spring', 2025, 'BEME - Open', 421),
 	(407, NULL, 55, 'Spring', 2025, 'BEME - Open', 422),
@@ -1454,14 +1472,12 @@ INSERT INTO public.offered_courses VALUES
 	(413, 46, 8, 'Summer', 2025, 'BEME - Open', 432),
 	(414, 45, 8, 'Summer', 2025, 'BEME - Open', 432),
 	(415, 50, 48, 'Summer', 2025, 'BEME - Open', 433),
-	(416, NULL, 10, 'Summer', 2025, 'BEME - Open', 434),
 	(417, 64, 34, 'Summer', 2025, 'BEME - Open', 435),
 	(418, 2, 48, 'Fall', 2025, 'BEME 1 - Section A', 436),
 	(419, 3, 44, 'Fall', 2025, 'BEME 1 - Section A', 437),
 	(420, 4, 7, 'Fall', 2025, 'BEME 1 - Section A', 438),
 	(421, 5, 55, 'Fall', 2025, 'BEME 1 - Section A', 439),
 	(422, 6, 8, 'Fall', 2025, 'BEME 1 - Section A', 440),
-	(423, NULL, 31, 'Fall', 2025, 'BEME 1 - Section A', 441),
 	(424, 7, 25, 'Fall', 2025, 'BEME 1 - Section A', 442),
 	(425, 8, 30, 'Fall', 2025, 'BEME 1 - Section A', 443),
 	(426, 9, 50, 'Fall', 2025, 'BEME 1 - Section A', 444),
@@ -1476,6 +1492,7 @@ INSERT INTO public.offered_courses VALUES
 	(435, 28, 10, 'Fall', 2025, 'BEME 3 - Section A', 453),
 	(436, 29, 19, 'Fall', 2025, 'BEME 3 - Section A', 454),
 	(437, 21, 14, 'Fall', 2025, 'BEME 3 - Section B', 455),
+	(416, 82, 10, 'Summer', 2025, 'BEME - Open', 434),
 	(438, 22, 7, 'Fall', 2025, 'BEME 3 - Section B', 456),
 	(439, 23, 19, 'Fall', 2025, 'BEME 3 - Section B', 457),
 	(440, 24, 2, 'Fall', 2025, 'BEME 3 - Section B', 458),
@@ -1505,10 +1522,44 @@ INSERT INTO public.offered_courses VALUES
 	(464, 74, 4, 'Fall', 2025, 'BEME - Elective', 480),
 	(465, NULL, 48, 'Fall', 2025, 'BEME - Open', 481),
 	(466, NULL, 51, 'Fall', 2025, 'BEME - Open', 482),
-	(467, NULL, 32, 'Fall', 2025, 'BEME - Open', 483),
-	(468, NULL, 30, 'Fall', 2025, 'BEME - Open', 484),
-	(469, NULL, 35, 'Fall', 2025, 'BEME - Open', 485),
-	(470, 71, 39, 'Fall', 2025, 'BEME - Open', 486);
+	(470, 71, 39, 'Fall', 2025, 'BEME - Open', 486),
+	(8, 84, 38, 'Spring', 2022, 'BEME 2 - Section A', 8),
+	(46, 83, 30, 'Spring', 2022, 'BEME 8 - Section A', 46),
+	(47, 82, 35, 'Spring', 2022, 'BEME 8 - Section A', 47),
+	(51, 83, 30, 'Spring', 2022, 'BEME 8 - Section B', 51),
+	(52, 82, 35, 'Spring', 2022, 'BEME 8 - Section B', 52),
+	(68, 80, 10, 'Summer', 2022, 'BEME - Open', 74),
+	(81, 83, 30, 'Summer', 2022, 'BEME - Open', 87),
+	(98, 81, 30, 'Fall', 2022, 'BEME 3 - Section A', 104),
+	(99, 80, 35, 'Fall', 2022, 'BEME 3 - Section A', 105),
+	(177, 83, 30, 'Spring', 2023, 'BEME 8 - Section A', 184),
+	(178, 82, 35, 'Spring', 2023, 'BEME 8 - Section A', 185),
+	(182, 83, 30, 'Spring', 2023, 'BEME 8 - Section B', 189),
+	(183, 82, 35, 'Spring', 2023, 'BEME 8 - Section B', 190),
+	(188, 86, 26, 'Spring', 2023, 'BEME - Elective', 195),
+	(189, 88, 21, 'Spring', 2023, 'BEME - Elective', 196),
+	(225, 81, 30, 'Fall', 2023, 'BEME 3 - Section A', 237),
+	(226, 80, 35, 'Fall', 2023, 'BEME 3 - Section A', 238),
+	(255, 83, 30, 'Fall', 2023, 'BEME - Open', 265),
+	(282, 83, 30, 'Spring', 2024, 'BEME 8 - Section A', 297),
+	(283, 82, 10, 'Spring', 2024, 'BEME 8 - Section A', 298),
+	(287, 83, 30, 'Spring', 2024, 'BEME 8 - Section B', 302),
+	(288, 82, 10, 'Spring', 2024, 'BEME 8 - Section B', 303),
+	(292, 84, 38, 'Spring', 2024, 'BEME - Elective', 307),
+	(295, 88, 27, 'Spring', 2024, 'BEME - Elective', 310),
+	(305, 83, 30, 'Summer', 2024, 'BEME - Open', 320),
+	(333, 81, 30, 'Fall', 2024, 'BEME 3 - Section A', 348),
+	(334, 80, 35, 'Fall', 2024, 'BEME 3 - Section A', 349),
+	(354, 84, 37, 'Fall', 2024, 'BEME - Elective', 367),
+	(355, 88, 27, 'Fall', 2024, 'BEME - Elective', 368),
+	(397, 83, 30, 'Spring', 2025, 'BEME 8 - Section A', 412),
+	(398, 82, 35, 'Spring', 2025, 'BEME 8 - Section A', 413),
+	(403, 86, 2, 'Spring', 2025, 'BEME - Elective', 418),
+	(404, 87, 34, 'Spring', 2025, 'BEME - Elective', 419),
+	(423, 85, 31, 'Fall', 2025, 'BEME 1 - Section A', 441),
+	(467, 84, 32, 'Fall', 2025, 'BEME - Open', 483),
+	(468, 81, 30, 'Fall', 2025, 'BEME - Open', 484),
+	(469, 80, 35, 'Fall', 2025, 'BEME - Open', 485);
 
 
 --
@@ -2072,21 +2123,21 @@ INSERT INTO public.recaps VALUES
 -- Name: closheet_closid_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.closheet_closid_seq', 7, true);
+SELECT pg_catalog.setval('public.closheet_closid_seq', 5, true);
 
 
 --
 -- Name: course_cid_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.course_cid_seq', 79, true);
+SELECT pg_catalog.setval('public.course_cid_seq', 88, true);
 
 
 --
 -- Name: crs_cloid_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.crs_cloid_seq', 311, true);
+SELECT pg_catalog.setval('public.crs_cloid_seq', 345, true);
 
 
 --
@@ -2100,7 +2151,7 @@ SELECT pg_catalog.setval('public.curiculum_curid_seq', 2, true);
 -- Name: curriculum_courses_ccid_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.curriculum_courses_ccid_seq', 79, true);
+SELECT pg_catalog.setval('public.curriculum_courses_ccid_seq', 88, true);
 
 
 --
@@ -2285,5 +2336,5 @@ ALTER TABLE ONLY public.plo
 -- PostgreSQL database dump complete
 --
 
-\unrestrict 14Wo4fmtI2h5qxtVwu9synIq3ljE6NXrKDcuhD7AJjjYYz2a9cgnpfKbI0gxyBu
+\unrestrict pVJfUwq8eb6DlHEw1EO0umk8oqL4dUr7tD1c4eSGoaTUQwnqRE1FGq0Nwmo2eM6
 
