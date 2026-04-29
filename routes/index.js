@@ -2,6 +2,26 @@ import express from "express";
 const router = express.Router();
 import { db } from "../db.js";
 
+let closheetWithdrawsColumnReady;
+
+// function ensureClosheetWithdrawsColumn() {
+//   if (!closheetWithdrawsColumnReady) {
+//     closheetWithdrawsColumnReady = (async () => {
+//       await db.query(`
+//         ALTER TABLE closheet
+//         ADD COLUMN IF NOT EXISTS withdraws jsonb NOT NULL DEFAULT '[]'::jsonb;
+//       `);
+//       await db.query(`
+//         UPDATE closheet
+//         SET withdraws = '[]'::jsonb
+//         WHERE withdraws IS NULL;
+//       `);
+//     })();
+//   }
+
+//   return closheetWithdrawsColumnReady;
+// }
+
 router.get("/recaps", async (req, res) => {
   try {
     const search = (req.query.q || "").toString().trim();
@@ -117,6 +137,8 @@ router.get("/recaps/:rid", async (req, res) => {
 
 router.get("/closheet/:closid", async (req, res) => {
   try {
+    // await ensureClosheetWithdrawsColumn();
+
     const closid = Number(req.params.closid);
 
     if (!Number.isInteger(closid)) {
@@ -125,7 +147,7 @@ router.get("/closheet/:closid", async (req, res) => {
     }
 
     const closheetQuery = `
-            SELECT closid, rid, offid, data
+            SELECT closid, rid, offid, data, COALESCE(withdraws, '[]'::jsonb) AS withdraws
             FROM closheet
             WHERE closid = $1;
         `;
@@ -164,12 +186,36 @@ router.get("/closheet/:closid", async (req, res) => {
 // Save CLO Sheet
 router.post("/closheet", async (req, res) => {
   try {
-    const { rid, multiCLO } = req.body;
+    // await ensureClosheetWithdrawsColumn();
+
+    const { rid, multiCLO, withdraws = [], cloSid } = req.body;
     if (!rid || !multiCLO) {
       return res.status(400).json({ error: "Missing rid or multiCLO" });
     }
+
+    if (cloSid !== null && cloSid !== undefined) {
+      const updateQuery = `
+            UPDATE closheet
+            SET data = $1::jsonb,
+                withdraws = $2::jsonb
+            WHERE closid = $3
+            RETURNING *;
+        `;
+      const result = await db.query(updateQuery, [
+        JSON.stringify(multiCLO),
+        JSON.stringify(withdraws),
+        cloSid,
+      ]);
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: "CLO Sheet not found" });
+      }
+
+      return res.json({ success: true, closheet: result.rows[0] });
+    }
+
     const insertQuery = `
-            INSERT INTO closheet (rid, offid, data)
+            INSERT INTO closheet (rid, offid, data, withdraws)
             VALUES (
               $1,
               (
@@ -179,10 +225,15 @@ router.post("/closheet", async (req, res) => {
                 ORDER BY oc.offid
                 LIMIT 1
               ),
-              $2::jsonb
+              $2::jsonb,
+              $3::jsonb
             ) RETURNING *;
         `;
-    const result = await db.query(insertQuery, [rid, JSON.stringify(multiCLO)]);
+    const result = await db.query(insertQuery, [
+      rid,
+      JSON.stringify(multiCLO),
+      JSON.stringify(withdraws),
+    ]);
     res.json({ success: true, closheet: result.rows[0] });
   } catch (err) {
     console.error("Error saving CLO Sheet:", err);

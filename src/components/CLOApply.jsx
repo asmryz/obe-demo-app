@@ -1,7 +1,7 @@
 import React from 'react'
 import PasterIcon from './PasterIcon'
 import { use } from 'react'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { api } from '../api/index.js'
 import { useRecapStore } from '../store/recapStore.js'
 import { ToggleButton } from './ToggleButton'
@@ -34,9 +34,9 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
 
     const activeClosid = closid ?? cloSid;
     // eslint-disable-next-line no-unused-vars
-    const { data: cloSheetData, error: cloError } = edit && activeClosid !== null
+    const { data: cloSheetData, withdraws: cloSheetWithdraws, error: cloError } = edit && activeClosid !== null
         ? use(getCLOSheet(activeClosid))
-        : { data: null, error: null };
+        : { data: null, withdraws: [], error: null };
     // console.log(recap, cloSheetData)
     // const { multiCLOData, headsData, statusData } = useSheetStore((state) => state);
     const recapRows = Array.isArray(recap?.data) ? recap.data : []
@@ -51,6 +51,11 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
     const initialHeads = edit ? getHeadsFromMultiCLO(initialMultiCLO) : {}
     const initialStatus = edit ? getStatusFromHeads(initialHeads) : {}
     const initialSave = edit && Object.keys(initialStatus).length > 0 && Object.values(initialStatus).every(Boolean)
+    const loadedWithdraws = useMemo(
+        () => Array.isArray(cloSheetWithdraws) ? cloSheetWithdraws : [],
+        [cloSheetWithdraws]
+    )
+    const loadedWithdrawsKey = useMemo(() => JSON.stringify(loadedWithdraws), [loadedWithdraws])
 
     // const fourthElements = recapRows.map((row) => (Array.isArray(row) ? row[3] : undefined))
     const [showAllColumns, setShowAllColumns] = useState(false)
@@ -66,6 +71,9 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
     const [clipboardArray, setClipboardArray] = useState([])
     const [clipboardActive, setClipboardActive] = useState(false)
     const [save, setSave] = useState(initialSave)
+    const [withdraws, setWithdraws] = useState(loadedWithdraws)
+    const syncingWithdrawsRef = useRef(false)
+    const syncedWithdrawsKeyRef = useRef(loadedWithdrawsKey)
     const clipboardAvailable = typeof navigator !== 'undefined' && navigator.clipboard && typeof navigator.clipboard.read === 'function'
 
     // console.log(` >> ${JSON.stringify(recap)}`)
@@ -84,7 +92,9 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
         try {
             await api.post('/closheet', {
                 rid,
-                multiCLO
+                multiCLO, 
+                withdraws,
+                cloSid
             });
             alert('CLO Sheet saved successfully!');
         } catch (err) {
@@ -109,10 +119,39 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
     // Re-evaluate save status whenever status or recapRows changes
 
     useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         checkSaveStatus();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [status, recapRows, firstEmptyCellIndex]);
+
+    useEffect(() => {
+        if (edit && Array.isArray(cloSheetData)) {
+            setSave(false);
+        }
+    }, [edit, cloSheetData]);
+
+    useEffect(() => {
+        if (!edit) return;
+        if (syncedWithdrawsKeyRef.current === loadedWithdrawsKey) {
+            return;
+        }
+
+        syncingWithdrawsRef.current = true;
+        syncedWithdrawsKeyRef.current = loadedWithdrawsKey;
+        setWithdraws(loadedWithdraws);
+    }, [edit, cloSheetData, loadedWithdraws, loadedWithdrawsKey]);
+
+    useEffect(() => {
+        if (!edit) return;
+        if (syncingWithdrawsRef.current) {
+            syncingWithdrawsRef.current = false;
+            return;
+        }
+
+        const currentWithdraws = Array.isArray(withdraws) ? withdraws : [];
+        if (loadedWithdrawsKey !== JSON.stringify(currentWithdraws)) {
+            setSave(true);
+        }
+    }, [edit, loadedWithdrawsKey, withdraws]);
 
     // Returns the sum of all nth elements in heads[key]
     function verify(key, rowIndex) {
@@ -396,10 +435,20 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
         }
     }
 
+    function markWithdraw(regNo) {
+        return () => {
+            if (withdraws.includes(regNo)) {
+                setWithdraws(prev => prev.filter(r => r !== regNo))
+            } else {
+                setWithdraws(prev => [...prev, regNo])
+            }
+        }
+    }
+
     return (
         <section>
             {/* Hidden input to capture Ctrl+V and onPaste events */}
-            <pre>{JSON.stringify({ edit, rid })}</pre>
+            <pre>{JSON.stringify({ edit, rid, cloSid })}</pre>
             <input
                 style={{ position: 'absolute', left: '-9999px', width: 0, height: 0, opacity: 0 }}
                 tabIndex={-1}
@@ -413,22 +462,24 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
             />
             <h3>CLOApply {rid}</h3>
             <table id="course">
-                <tr>
-                    <th style={{ textAlign: 'right' }}>Batch :</th>
-                    <td>{recap.batch}</td>
-                </tr>
-                <tr>
-                    <th style={{ textAlign: 'right' }}>Fcuity :</th>
-                    <td>{recap.faculty}</td>
-                </tr>
-                <tr>
-                    <th style={{ textAlign: 'right' }}>Course :</th>
-                    <td>{recap.course}</td>
-                </tr>
-                <tr>
-                    <th style={{ textAlign: 'right' }}>Semester : </th>
-                    <td>{recap.semester} {recap.year}</td>
-                </tr>
+                <tbody>
+                    <tr>
+                        <th style={{ textAlign: 'right' }}>Batch :</th>
+                        <td>{recap.batch}</td>
+                    </tr>
+                    <tr>
+                        <th style={{ textAlign: 'right' }}>Fcuity :</th>
+                        <td>{recap.faculty}</td>
+                    </tr>
+                    <tr>
+                        <th style={{ textAlign: 'right' }}>Course :</th>
+                        <td>{recap.course}</td>
+                    </tr>
+                    <tr>
+                        <th style={{ textAlign: 'right' }}>Semester : </th>
+                        <td>{recap.semester} {recap.year}</td>
+                    </tr>
+                </tbody>
             </table>
             <ToggleButton
                 checked={showAllColumns}
@@ -449,13 +500,15 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
                                         .filter(({ cellIndex }) => !shouldHideColumn(cellIndex))
                                         .map(({ cell, cellIndex }) => {
                                             const content = formatRecapCell(cell)
+                                            const isFailGrade = cellIndex === row.length - 2 && String(content).trim() === 'F'
                                             return rowIndex === 0 || rowIndex === 1
                                                 ? <th key={`cell-${rowIndex}-${cellIndex}`}>
                                                     {edit && cellIndex > 2 && cellIndex < firstEmptyCellIndex
                                                         ? (<a href="#!" onClick={() => handleEditableHead(cellIndex)}>{content}</a>)
                                                         : content}
                                                 </th>
-                                                : <td key={`cell-${rowIndex}-${cellIndex}`}>{content}</td>
+                                                : <td key={`cell-${rowIndex}-${cellIndex}`}
+                                                    style={{ color: withdraws.includes(row[2]) && cellIndex > 2 ? 'red' : '' }}>{cellIndex === row.length - 2 ? (<a href='#!' onClick={markWithdraw(row[2])}  style={{ color: isFailGrade ? 'red' : undefined }}>{withdraws.includes(row[2]) && isFailGrade ? 'W' : content}</a>) : content}</td>
                                         })}
                                 </tr>
                             ))}
@@ -466,7 +519,7 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
                             <span style={{}}>
                                 <pre style={{ marginTop: '12px' }}>{JSON.stringify(recapRows.map((row) => row[editableIndex]))}</pre>
                                 <pre style={{ marginTop: '12px' }}>
-                                    {printObject({ editableIndex, total, editColumn, clipboardArray, clipboardCache, selCLO, heads, status, save })}
+                                    {printObject({ withdraws, editableIndex, total, editColumn, clipboardArray, clipboardCache, selCLO, heads, status, save })}
                                     {/* {JSON.stringify({ total, editColumn, clipboardArray, clipboardCache, selCLO, heads })} */}
                                 </pre>
                             </span>
@@ -611,7 +664,7 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
                             {multiCLO.length > 0 && (
                                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                                     <div style={{ height: '50px', border: '0px solid #d3d3d3', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                        
+
                                         <a href='#!' onClick={save && saveCLOSheet}
                                             style={{
                                                 opacity: save ? 1 : 0.5,
@@ -646,7 +699,7 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
                                         }}>
                                             <tbody>
                                                 {multiCLO.map((row, i) => (
-                                                    <tr key={`multi-${i}`} style={{height: '30px'}}>
+                                                    <tr key={`multi-${i}`} style={{ height: '30px' }}>
                                                         {row.map((cell, j) => (
                                                             <td key={`multi-${i}-${j}`}>{cell === null ? '' : typeof cell === 'object' ? JSON.stringify(cell) : cell}</td>
                                                         ))}

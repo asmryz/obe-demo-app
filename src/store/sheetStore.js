@@ -1,6 +1,21 @@
 import { create } from "zustand";
 import { api } from "../api/index.js";
 
+const parseWithdraws = (value) => {
+  if (Array.isArray(value)) return value;
+
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+
+  return [];
+};
+
 const defaultSheetData = [
   [
     "S.No",
@@ -203,12 +218,14 @@ export const useSheetStore = create((set) => {
           .get(`/closheet/${closid}`)
           .then(({ data }) => ({
             data: data?.data ?? null,
+            withdraws: parseWithdraws(data?.withdraws),
             clo: Array.isArray(data?.clo) ? data.clo : [],
             closheet: data ?? null,
             error: null,
           }))
           .catch((err) => ({
             data: null,
+            withdraws: [],
             clo: [],
             closheet: null,
             error: err?.response?.data?.error || err.message,

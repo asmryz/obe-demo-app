@@ -36,8 +36,7 @@ function CLOSheet({ closid, rid}) {
 
     const incomingData = use(getCLOSheet(closid))
     const [kpi, setKpi] = useState(50)
-    // eslint-disable-next-line no-unused-vars
-    const { data, clo: cloRows = [] } = incomingData
+    const { data, clo: cloRows = [], withdraws = [] } = incomingData
 
     // console.log(recap)
 
@@ -394,7 +393,9 @@ function CLOSheet({ closid, rid}) {
                                     const total = Math.round(row.slice(3).reduce((total, mark) => total + (Number(mark) || 0), 0).toFixed(2))
                                     const gradeObj = grades.find(({ start, end }) => total >= start && total <= end)
                                     const gradeName = gradeObj?.grade ?? ''
-                                    return gradeName
+                                    const isWithdrawn = withdraws.includes(row[2])
+                                        || withdraws.includes(String(row[2]))
+                                    return isWithdrawn && gradeName === 'F' ? 'W' : gradeName
                                 })()}</td>
                             </tr>
                         )
