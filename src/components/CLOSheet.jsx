@@ -27,7 +27,7 @@ const grades = [
 ]
 
 
-function CLOSheet({ closid, rid}) {
+function CLOSheet({ closid, rid }) {
 
     // Group and sum marks by first word for display
     const { getCLOSheet } = useSheetStore()
@@ -116,14 +116,19 @@ function CLOSheet({ closid, rid}) {
         }
 
         cloHdr.forEach(([cloKey, items]) => {
+            const isWithdrawn = withdraws.includes(row[2])
+                || withdraws.includes(String(row[2]))
             const stdTotal = items.reduce((sum, item) => sum + (Number(row[item.sno + 2]) || 0), 0);
             const cloTotal = items.reduce((sum, item) => sum + (Number(item.total) || 0), 0);
             const achieved = cloTotal ? (stdTotal / cloTotal * 100) : 0
-            studentCLOs[`CLO${cloKey}`] = achieved <= kpi ? 0 : 1
+            studentCLOs[`CLO${cloKey}`] = isWithdrawn ? 0 : achieved < kpi ? 0 : 1
         })
 
         return studentCLOs
     })
+
+    // console.log(calCLOs)
+    console.log(cloSummary(calCLOs, clo))
 
     const ploMap = (recap?.clo ?? []).reduce((acc, cloRow) => {
         const cloNo = Number(cloRow.clo)
@@ -169,7 +174,7 @@ function CLOSheet({ closid, rid}) {
     const cohortPloColumns = Array.from(
         new Set(cohort.flatMap((student) => Object.keys(student).filter((key) => key.startsWith('PLO'))))
     ).sort((a, b) => Number(a.replace('PLO', '')) - Number(b.replace('PLO', '')))
-    
+
     const aggPLOs = cohort.reduce((acc, student) => {
         const { regno, name, ...stdPLOTotal } = student
         const stdTotal = Math.round(Object.values(stdPLOTotal).reduce((sum, val) => sum + (Number(val) || 0), 0))
@@ -266,7 +271,7 @@ function CLOSheet({ closid, rid}) {
             return acc
         }, {})
     )
-    const recapHeads = hdr.slice(1)
+    const recapHeads = hdr.slice(3)
     const recapHeadRanges = recapHeads.reduce((acc, head) => {
         const lastEnd = acc.length ? acc[acc.length - 1].end : 3
         acc.push({ head: typeof head.head === 'string' ? head.head.replace(/\s*Paper\s*1/g, '') : head.head, start: lastEnd, end: lastEnd + head.span })
@@ -274,6 +279,7 @@ function CLOSheet({ closid, rid}) {
     }, [])
 
     const cloSummaryRows = cloSummary(calCLOs, clo)
+    
     return (
         <div className="marks-list">
             rid = {rid} closid = {closid}
@@ -376,29 +382,32 @@ function CLOSheet({ closid, rid}) {
                                 <th>Total</th>
                                 <th>Grade</th>
                             </tr>
-                        ) : (
-                            <tr key={`row-${rowIndex}`}>
-                                <td>{row[0] ?? ''}</td>
-                                <td style={{ textAlign: 'left' }}>{row[1] ?? ''}</td>
-                                <td>{row[2] ?? ''}</td>
-                                {recapHeadRanges.map(({ head, start, end }) => {
-                                    const sum = row
-                                        .slice(start, end)
-                                        .reduce((total, mark) => total + (Number(mark) || 0), 0)
-                                    return <td key={`recap-${rowIndex}-${head}`}>{sum}</td>
-                                })}
-                                <td>{row.slice(3).reduce((total, mark) => total + (Number(mark) || 0), 0).toFixed(2)}</td>
-                                <td>{Math.round(row.slice(3).reduce((total, mark) => total + (Number(mark) || 0), 0).toFixed(2))}</td>
-                                <td>{(() => {
-                                    const total = Math.round(row.slice(3).reduce((total, mark) => total + (Number(mark) || 0), 0).toFixed(2))
-                                    const gradeObj = grades.find(({ start, end }) => total >= start && total <= end)
-                                    const gradeName = gradeObj?.grade ?? ''
-                                    const isWithdrawn = withdraws.includes(row[2])
-                                        || withdraws.includes(String(row[2]))
-                                    return isWithdrawn && gradeName === 'F' ? 'W' : gradeName
-                                })()}</td>
-                            </tr>
-                        )
+                        ) : (() => {
+                            const isWithdrawn = withdraws.includes(row[2])
+                                || withdraws.includes(String(row[2]))
+                            const style = isWithdrawn ? { color: 'red', fontWeight: 'bold' } : undefined
+                            return (
+                                <tr key={`row-${rowIndex}`}>
+                                    <td>{row[0] ?? ''}</td>
+                                    <td style={{ textAlign: 'left' }}>{row[1] ?? ''}</td>
+                                    <td >{row[2] ?? ''}</td>
+                                    {recapHeadRanges.map(({ head, start, end }) => {
+                                        const sum = row
+                                            .slice(start, end)
+                                            .reduce((total, mark) => total + (Number(mark) || 0), 0)
+                                        return <td key={`recap-${rowIndex}-${head}`} style={style}>{sum}</td>
+                                    })}
+                                    <td style={style}>{row.slice(3).reduce((total, mark) => total + (Number(mark) || 0), 0).toFixed(2)}</td>
+                                    <td style={style}>{Math.round(row.slice(3).reduce((total, mark) => total + (Number(mark) || 0), 0).toFixed(2))}</td>
+                                    <td style={style}>{(() => {
+                                        const total = Math.round(row.slice(3).reduce((total, mark) => total + (Number(mark) || 0), 0).toFixed(2))
+                                        const gradeObj = grades.find(({ start, end }) => total >= start && total <= end)
+                                        const gradeName = gradeObj?.grade ?? ''
+                                        return isWithdrawn && gradeName === 'F' ? 'W' : gradeName
+                                    })()}</td>
+                                </tr>
+                            )
+                        })()
                     ))}
                 </tbody>
             </table>
@@ -466,12 +475,12 @@ function CLOSheet({ closid, rid}) {
                                 )),
                                 <td
                                     key={`cell-${rowIndex}-${cloKey}-total`}
-                                    style={{ color: parseFloat(achieved) <= kpi ? 'red' : 'black', fontWeight: parseFloat(achieved) <= kpi ? 'bold' : 'normal' }}>
+                                    style={{ color: parseFloat(achieved) < kpi ? 'red' : 'black', fontWeight: parseFloat(achieved) < kpi ? 'bold' : 'normal' }}>
                                     {stdTotal}
                                 </td>,
                                 <td
                                     key={`cell-${rowIndex}-${cloKey}-achieved`}
-                                    style={{ color: parseFloat(achieved) <= kpi ? 'red' : 'black', fontWeight: parseFloat(achieved) <= kpi ? 'bold' : 'normal' }}>
+                                    style={{ color: parseFloat(achieved) < kpi ? 'red' : 'black', fontWeight: parseFloat(achieved) < kpi ? 'bold' : 'normal' }}>
                                     {achieved}
                                 </td>
                             ]
@@ -518,7 +527,7 @@ function CLOSheet({ closid, rid}) {
                         const stdTotal = Math.round(Object.values(stdPLOTotal).reduce((sum, val) => sum + (Number(val) || 0), 0))
                         const grade = grades.find(({ start, end }) => stdTotal >= start && stdTotal <= end)?.grade ?? ''
                         const sumPLOs = Object.fromEntries(cohortPloColumns.map((ploKey) => [ploKey, 0]))
-                        
+
                         // console.log(sumPLOs)
                         return (
                             <tr key={`cohort-row-${student.regno || index}`}>
@@ -562,13 +571,13 @@ function CLOSheet({ closid, rid}) {
                 </thead>
                 <tbody>
                     {cloSummaryRows.map(([cloKey, [achievedCount, notAchievedCount]]) => {
-                        const totalCount = achievedCount + notAchievedCount
+                        const totalCount = achievedCount + (notAchievedCount - withdraws.length)
                         const achievedPct = totalCount ? ((achievedCount / totalCount) * 100).toFixed(2) : '0.00'
                         return (
                             <tr key={`cal-${cloKey}`}>
                                 <td>{cloKey}</td>
                                 <td>{achievedCount}</td>
-                                <td>{notAchievedCount}</td>
+                                <td>{notAchievedCount - withdraws.length}</td>
                                 <td>{achievedPct}%</td>
                             </tr>
                         )
@@ -578,9 +587,9 @@ function CLOSheet({ closid, rid}) {
             <h2>CLO Achievement Charts</h2>
             <div style={{ display: 'flex', flexWrap: 'nowrap', gap: '16px', overflowX: 'auto', alignItems: 'flex-start' }}>
                 {cloSummaryRows.map(([cloKey, [achievedCount, notAchievedCount]]) => {
-                    const totalCount = achievedCount + notAchievedCount
+                    const totalCount = achievedCount + notAchievedCount - withdraws.length
                     const achievedPct = totalCount ? ((achievedCount / totalCount) * 100).toFixed(2) : '0.00'
-                    const notAchievedPct = totalCount ? ((notAchievedCount / totalCount) * 100).toFixed(2) : '0.00'
+                    const notAchievedPct = totalCount ? ((notAchievedCount - withdraws.length / totalCount) * 100).toFixed(2) : '0.00'
                     return (
                         <div
                             key={`cal-${cloKey}`}
