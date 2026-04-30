@@ -856,6 +856,21 @@ textarea {
 	}
 }
 
+.report-readonly .comment-textarea {
+	display: none !important;
+}
+
+.report-readonly .print-text {
+	display: inline !important;
+	color: black;
+	text-align: left;
+	font-family: "Times New Roman", Times, serif;
+}
+
+.report-readonly div.print-text {
+	display: block !important;
+}
+
 .print-text {
 	padding: 0.25em 0.35em;
 	white-space: pre-wrap;

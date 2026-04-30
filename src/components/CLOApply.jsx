@@ -29,7 +29,7 @@ const formatRecapCell = (cell) => {
 
 export const CLOApply = ({ rid, closid = null, edit = false }) => {
     const { getRecapResource } = useRecapStore()
-    const { getCLOSheet, cloSid } = useSheetStore();
+    const { getCLOSheet, cloSid, setWithdraws: setStoreWithdraws } = useSheetStore();
     const { recap, error } = use(getRecapResource(rid))
 
     const activeClosid = closid ?? cloSid;
@@ -152,6 +152,10 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
             setSave(true);
         }
     }, [edit, loadedWithdrawsKey, withdraws]);
+
+    useEffect(() => {
+        setStoreWithdraws(withdraws);
+    }, [setStoreWithdraws, withdraws]);
 
     // Returns the sum of all nth elements in heads[key]
     function verify(key, rowIndex) {
@@ -665,7 +669,7 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
                                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                                     <div style={{ height: '50px', border: '0px solid #d3d3d3', display: 'flex', alignItems: 'center', gap: '12px' }}>
 
-                                        <a href='#!' onClick={save && saveCLOSheet}
+                                        <a href='#!' onClick={save ? saveCLOSheet : undefined}
                                             style={{
                                                 opacity: save ? 1 : 0.5,
                                                 cursor: save ? 'pointer' : 'not-allowed',
@@ -688,7 +692,7 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
                                                     </g>
                                                 </svg>
                                             ) : (
-                                                <svg x mlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 48 48" fill="#000000"><g fill="none" stroke="#979797" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3"><path d="M42.5 11c0 4.418-8.283 8-18.5 8S5.5 15.418 5.5 11M43 24.205C43 28.51 34.493 32 24 32S5 28.51 5 24.205M11.5 24a.5.5 0 0 0 0-1m0 1a.5.5 0 0 1 0-1" /><path d="M5.5 11c0-4.418 8.283-8 18.5-8s18.5 3.582 18.5 8c0 0 .5 5 .5 13s-.5 13-.5 13c0 4.418-8.283 8-18.5 8S5.5 41.418 5.5 37c0 0-.5-5-.5-13s.5-13 .5-13" /><path d="M11.5 37a.5.5 0 0 0 0-1m0 1a.5.5 0 0 1 0-1M18 25.75a.5.5 0 0 0 0-1m0 1a.5.5 0 0 1 0-1m0 14a.5.5 0 0 0 0-1m0 1a.5.5 0 0 1 0-1" /></g></svg>
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 48 48" fill="#000000"><g fill="none" stroke="#979797" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3"><path d="M42.5 11c0 4.418-8.283 8-18.5 8S5.5 15.418 5.5 11M43 24.205C43 28.51 34.493 32 24 32S5 28.51 5 24.205M11.5 24a.5.5 0 0 0 0-1m0 1a.5.5 0 0 1 0-1" /><path d="M5.5 11c0-4.418 8.283-8 18.5-8s18.5 3.582 18.5 8c0 0 .5 5 .5 13s-.5 13-.5 13c0 4.418-8.283 8-18.5 8S5.5 41.418 5.5 37c0 0-.5-5-.5-13s.5-13 .5-13" /><path d="M11.5 37a.5.5 0 0 0 0-1m0 1a.5.5 0 0 1 0-1M18 25.75a.5.5 0 0 0 0-1m0 1a.5.5 0 0 1 0-1m0 14a.5.5 0 0 0 0-1m0 1a.5.5 0 0 1 0-1" /></g></svg>
                                             )}
                                         </a>
                                         {save ? <span style={{ color: 'green', fontWeight: 'bold' }}>Marks Reconciliation Verified</span> : <span style={{ color: 'red', fontWeight: 'bold' }}>Marks Reconciliation Not Verified</span>}

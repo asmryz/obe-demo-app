@@ -2,12 +2,13 @@
 import './CRRComponent.css'
 import logo from '../assets/logo.jpg'
 import { useSheetStore } from '../store/sheetStore'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { api } from '../api/index.js'
 
 
 
 function CRRComponent() {
-    const { gradeChart, recap, groupedPlanTotals, cloSummary, calCLOs, aggPLOs } = useSheetStore()
+    const { cloSid, gradeChart, recap, groupedPlanTotals, cloSummary, calCLOs, aggPLOs, withdraws, report, setReport } = useSheetStore()
     const [comments, setComments] = useState({
         reason: '',
         PLO: Array.from({ length: aggPLOs.length }, () => ''),
@@ -18,6 +19,8 @@ function CRRComponent() {
         assessment: '',
         enhancements: '',
         outline: '',
+        cloComments: '',
+        ploComments: '',
 
     })
     const [KPI, setKPI] = useState(50)
@@ -30,6 +33,38 @@ function CRRComponent() {
     const creditValue = getCreditValue(course)
     const contactHours = creditValue ? Number(creditValue) * 16 : ''
     const studentCount = Array.isArray(recap?.data) ? Math.max(recap.data.length - 2, 0) : ''
+    const hasSavedReport = report
+        && typeof report === 'object'
+        && !Array.isArray(report)
+        && Object.keys(report).length > 0
+
+    useEffect(() => {
+        if (cloSid === null || cloSid === undefined) {
+            return
+        }
+
+        api.get(`/closheet/${cloSid}/report`)
+            .then(({ data }) => {
+                const loadedReport = data?.report ?? {}
+                setReport(loadedReport)
+
+                if (
+                    loadedReport
+                    && typeof loadedReport === 'object'
+                    && !Array.isArray(loadedReport)
+                    && Object.keys(loadedReport).length > 0
+                ) {
+                    setComments((prev) => ({
+                        ...prev,
+                        ...loadedReport,
+                        PLO: Array.isArray(loadedReport.PLO) ? loadedReport.PLO : prev.PLO,
+                    }))
+                }
+            })
+            .catch((err) => {
+                console.error('Failed to load report:', err?.response?.data?.error || err.message)
+            })
+    }, [cloSid, setReport])
 
     function getCreditValue(course = '') {
         const plusCredit = course.match(/\((\d+)\s*\+\s*(\d+)\)/)
@@ -69,9 +104,50 @@ function CRRComponent() {
         }
         return word + 's';
     }
+    async function handleSave() {
+        const commentLabels = {
+            reason: 'Reason',
+            evaluation: 'Student Evaluation',
+            suggestions: 'Suggestions',
+            moderators: 'Moderators',
+            curriculum: 'Curriculum',
+            assessment: 'Assessment',
+            enhancements: 'Enhancements',
+            outline: 'Outline',
+            cloComments: 'CLO Instructor Comments',
+            ploComments: 'PLO Instructor Comments',
+        }
+        const emptyCommentKeys = Object.entries(comments)
+            .filter(([key, value]) => key !== 'PLO' && String(value ?? '').trim().length === 0)
+            .map(([key]) => commentLabels[key] ?? key)
+        const emptyPLOIndexes = comments.PLO
+            .map((value, index) => String(value ?? '').trim().length === 0 ? `PLO ${index + 1}` : '')
+            .filter(Boolean)
+
+        if (emptyCommentKeys.length > 0 || emptyPLOIndexes.length > 0) {
+            alert(`Please fill these fields before saving:\n${[...emptyCommentKeys, ...emptyPLOIndexes].join('\n')}`)
+            return
+        }
+
+        if (cloSid === null || cloSid === undefined) {
+            alert('CLO Sheet id is missing.')
+            return
+        }
+
+        try {
+            const { data } = await api.post(`/closheet/${cloSid}/report`, {
+                report: comments,
+            })
+            setReport(data?.closheet?.report ?? comments)
+            alert('Report saved successfully.')
+        } catch (err) {
+            alert('Failed to save report: ' + (err?.response?.data?.error || err.message))
+        }
+    }
     return (
-        <section className="crr-page inl-1">
+        <section className={`crr-page inl-1 ${hasSavedReport ? 'report-readonly' : ''}`}>
             <div className="WordSection1">
+                {!hasSavedReport && <button onClick={handleSave}>Save</button>}
                 <table
                     className="MsoNormalTable inl-2"
                     border="0"
@@ -262,18 +338,7 @@ function CRRComponent() {
                                                 <span lang="EN-US" className="inl-10">{toPlural(key)} {value}%</span>
                                             </p>
                                         ))}
-                                {/* <p className="MsoNormal">
-                                    <span lang="EN-US" className="inl-10">Quizzes 30%</span>
-                                </p>
-                                <p className="MsoNormal">
-                                    <span lang="EN-US" className="inl-10">Assignments 10%</span>
-                                </p>
-                                <p className="MsoNormal">
-                                    <span lang="EN-US" className="inl-10">Midterm 20%</span>
-                                </p>
-                                <p className="MsoNormal">
-                                    <span lang="EN-US" className="inl-10">Final 40%</span>
-                                </p> */}
+
                             </td>
                         </tr>
                     </tbody>
@@ -302,71 +367,6 @@ function CRRComponent() {
                                     </p>
                                 </td>
                             ))}
-                            {/* <td width="5%" className="inl-59">
-                                <p className="MsoNormal inl-6" align="center">
-                                    <span lang="EN-US" className="inl-58">A+</span>
-                                </p>
-                            </td>
-                            <td width="4%" className="inl-60">
-                                <p className="MsoNormal inl-6" align="center">
-                                    <span lang="EN-US" className="inl-58">A</span>
-                                </p>
-                            </td>
-                            <td width="4%" className="inl-61">
-                                <p className="MsoNormal inl-6" align="center">
-                                    <span lang="EN-US" className="inl-58">A-</span>
-                                </p>
-                            </td>
-                            <td width="5%" className="inl-62">
-                                <p className="MsoNormal inl-6" align="center">
-                                    <span lang="EN-US" className="inl-58">B+</span>
-                                </p>
-                            </td>
-                            <td width="3%" className="inl-63">
-                                <p className="MsoNormal inl-6" align="center">
-                                    <span lang="EN-US" className="inl-58">B</span>
-                                </p>
-                            </td>
-                            <td width="4%" className="inl-64">
-                                <p className="MsoNormal inl-6" align="center">
-                                    <span lang="EN-US" className="inl-58">B-</span>
-                                </p>
-                            </td>
-                            <td width="4%" className="inl-65">
-                                <p className="MsoNormal inl-6" align="center">
-                                    <span lang="EN-US" className="inl-66">C+</span>
-                                </p>
-                            </td>
-                            <td width="3%" className="inl-67">
-                                <p className="MsoNormal inl-6" align="center">
-                                    <span lang="EN-US" className="inl-66">C</span>
-                                </p>
-                            </td>
-                            <td width="4%" className="inl-68">
-                                <p className="MsoNormal inl-6" align="center">
-                                    <span lang="EN-US" className="inl-66">C-</span>
-                                </p>
-                            </td>
-                            <td width="5%" className="inl-59">
-                                <p className="MsoNormal inl-6" align="center">
-                                    <span lang="EN-US" className="inl-66">D+</span>
-                                </p>
-                            </td>
-                            <td width="3%" className="inl-69">
-                                <p className="MsoNormal inl-6" align="center">
-                                    <span lang="EN-US" className="inl-66">D</span>
-                                </p>
-                            </td>
-                            <td width="6%" className="inl-70">
-                                <p className="MsoNormal inl-6" align="center">
-                                    <span lang="EN-US" className="inl-66">D-</span>
-                                </p>
-                            </td>
-                            <td width="6%" className="inl-70">
-                                <p className="MsoNormal inl-6" align="center">
-                                    <span lang="EN-US" className="inl-58">F</span>
-                                </p>
-                            </td> */}
                             <td width="7%" className="inl-71">
                                 <p className="MsoNormal inl-72" align="center">
                                     <span lang="EN-US" className="inl-58">W</span><span lang="EN-US" className="inl-10">*</span><span lang="EN-US" className="inl-73"></span>
@@ -387,78 +387,13 @@ function CRRComponent() {
                             {gradeChart && Object.entries(gradeChart).map(([, value], index) => (
                                 <td key={index} width="5%" className="inl-59">
                                     <p className="MsoNormal inl-6" align="center">
-                                        <span lang="EN-US" className="inl-58">{value}</span>
+                                        <span lang="EN-US" className="inl-58">{value !== 0 && index === Object.keys(gradeChart).length - 1 ? value - withdraws.length : value}</span>
                                     </p>
                                 </td>
                             ))}
-                            {/* <td width="5%" className="inl-78">
-                                <p className="MsoNormal inl-6" align="center">
-                                    <span lang="EN-US" className="inl-58">2</span>
-                                </p>
-                            </td>
-                            <td width="4%" className="inl-79">
-                                <p className="MsoNormal inl-6" align="center">
-                                    <span lang="EN-US" className="inl-58">1</span>
-                                </p>
-                            </td>
-                            <td width="4%" className="inl-80">
-                                <p className="MsoNormal inl-6" align="center">
-                                    <span lang="EN-US" className="inl-58">4</span>
-                                </p>
-                            </td>
-                            <td width="5%" className="inl-81">
-                                <p className="MsoNormal inl-6" align="center">
-                                    <span lang="EN-US" className="inl-58">1</span>
-                                </p>
-                            </td>
-                            <td width="3%" className="inl-82">
-                                <p className="MsoNormal inl-6" align="center">
-                                    <span lang="EN-US" className="inl-58">2</span>
-                                </p>
-                            </td>
-                            <td width="4%" className="inl-83">
-                                <p className="MsoNormal inl-6" align="center">
-                                    <span lang="EN-US" className="inl-58">0</span>
-                                </p>
-                            </td>
-                            <td width="4%" className="inl-84">
-                                <p className="MsoNormal inl-6" align="center">
-                                    <span lang="EN-US" className="inl-58">1</span>
-                                </p>
-                            </td>
-                            <td width="3%" className="inl-85">
-                                <p className="MsoNormal inl-6" align="center">
-                                    <span lang="EN-US" className="inl-58">2</span>
-                                </p>
-                            </td>
-                            <td width="4%" className="inl-86">
-                                <p className="MsoNormal inl-6" align="center">
-                                    <span lang="EN-US" className="inl-58">3</span>
-                                </p>
-                            </td>
-                            <td width="5%" className="inl-78">
-                                <p className="MsoNormal inl-6" align="center">
-                                    <span lang="EN-US" className="inl-58">0</span>
-                                </p>
-                            </td> */}
-                            {/* <td width="3%" className="inl-87">
-                                <p className="MsoNormal inl-6" align="center">
-                                    <span lang="EN-US" className="inl-58">0</span>
-                                </p>
-                            </td>
-                            <td width="6%" className="inl-88">
-                                <p className="MsoNormal inl-6" align="center">
-                                    <span lang="EN-US" className="inl-58">0</span>
-                                </p>
-                            </td>
-                            <td width="6%" className="inl-88">
-                                <p className="MsoNormal inl-6" align="center">
-                                    <span lang="EN-US" className="inl-58">1</span>
-                                </p>
-                            </td>*/}
                             <td width="7%" className="inl-89">
                                 <p className="MsoNormal inl-6" align="center">
-                                    <span lang="EN-US" className="inl-58">0</span>
+                                    <span lang="EN-US" className="inl-58">{withdraws.length}</span>
                                 </p>
                             </td>
                             <td width="7%" className="inl-90">
@@ -496,21 +431,14 @@ function CRRComponent() {
                         <span lang="EN-US" className="inl-54">&nbsp;</span>
                     </b>
                 </p>
+
+                {/* <p className="MsoNormal inl-99">
+                    <span lang="EN-US" className="inl-10">&nbsp;</span>
+                    </p> */}
                 <p className="MsoNormal inl-96">
                     <b className="inl-97">
-                        <u><span lang="EN-US" className="inl-54">Instructor Comments on CLO attainment</span></u>
+                        <u><span lang="EN-US" className="inl-54">CLO Attainment</span></u>
                     </b>
-                </p>
-                <p className="MsoNormal inl-99">
-                    <span lang="EN-US" className="inl-10">The course has three CLOs, the threshold (KPI) set by the department
-                        for CLO attainment at individual level is 50 %, whereas KPI for cohort
-                        level is 60% i.e. 60% of the students should be able to attain defined
-                        CLOs. It was observed that all three CLOs have been attained.
-                        Following table summarizes CLO attainment at cohort level.
-                    </span>
-                </p>
-                <p className="MsoNormal inl-99">
-                    <span lang="EN-US" className="inl-10">&nbsp;</span>
                 </p>
                 {/* Page break for printing */}
                 {/* <div style={{ pageBreakAfter: 'always' }} /> */}
@@ -586,55 +514,21 @@ function CRRComponent() {
                                 </tr>
                             )
                         })}
-                        {/* <tr className="inl-115">
-                            <td width="32%" valign="top" className="inl-111">
-                                <p className="MsoNormal inl-105" align="center">
-                                    <span lang="EN-US" className="inl-10">CLO 2 : C - 3</span>
-                                </p>
-                            </td>
-                            <td width="29%" valign="top" className="inl-112">
-                                <p className="MsoNormal inl-105" align="center">
-                                    <span lang="EN-US" className="inl-10">70.59%</span>
-                                </p>
-                            </td>
-                            <td width="13%" valign="top" className="inl-113">
-                                <p className="MsoNormal inl-105" align="center">
-                                    <span lang="EN-US" className="inl-10">60</span>
-                                </p>
-                            </td>
-                            <td width="24%" valign="top" className="inl-114">
-                                <p className="MsoNormal inl-103">
-                                    <span lang="EN-US" className="inl-10">CLO 2 attained.</span>
-                                </p>
-                            </td>
-                        </tr>
-                        <tr className="inl-116">
-                            <td width="32%" valign="top" className="inl-111">
-                                <p className="MsoNormal inl-105" align="center">
-                                    <span lang="EN-US" className="inl-10">CLO 3 : C - 4</span>
-                                </p>
-                            </td>
-                            <td width="29%" valign="top" className="inl-112">
-                                <p className="MsoNormal inl-105" align="center">
-                                    <span lang="EN-US" className="inl-10">100%</span>
-                                </p>
-                            </td>
-                            <td width="13%" valign="top" className="inl-113">
-                                <p className="MsoNormal inl-105" align="center">
-                                    <span lang="EN-US" className="inl-10">60</span>
-                                </p>
-                            </td>
-                            <td width="24%" valign="top" className="inl-114">
-                                <p className="MsoNormal inl-103">
-                                    <span lang="EN-US" className="inl-10">CLO 3 attained.</span>
-                                </p>
-                            </td>
-                        </tr> */}
                     </tbody>
                 </table>
+                <div className="MsoNormal inl-133" style={{ marginTop: '10px', marginBottom: '10px' }}>
+                    <span lang="EN-US" className="inl-10" style={{ fontWeight: 'bold' }}>Comments:</span>
+                    <span className="print-text" >{comments.cloComments}</span>
+                    <div>
+                        <textarea className="comment-textarea" value={comments.cloComments}
+                            onChange={e => setComments({ ...comments, cloComments: e.target.value })}
+                            style={{ width: '100%', inset: 0, boxSizing: 'border-box', }}
+                        />
+                    </div>
+                </div>
                 <div className="MsoNormal">&nbsp;</div>
                 <p className="MsoNormal inl-50">
-                    <b className="inl-7"><u><span lang="EN-US" className="inl-54">Instructor Comments on PLO attainment</span></u></b>
+                    <b className="inl-7"><u><span lang="EN-US" className="inl-54">PLO Attainment</span></u></b>
                 </p>
                 <table
                     className="MsoNormalTable inl-55"
@@ -685,7 +579,7 @@ function CRRComponent() {
 
                             const notAchievedPercentage = aggPLOs[`PLO${plo}`].notAchieved / (aggPLOs[`PLO${plo}`].achieved + aggPLOs[`PLO${plo}`].notAchieved) * 100
                             //console.log( notAchievedPercentage, plo)
-                            // console.log(comments)
+                            console.log(cloSid, comments, report)
                             return (
                                 <tr key={`plo-not-achieved-${plo}`} className="inl-123">
                                     <td width="26%" className="inl-124">
@@ -758,45 +652,19 @@ function CRRComponent() {
                                 </tr>
                             )
                         })}
-                        {/* <tr className="inl-128">
-                            <td width="26%" className="inl-129">
-                                <p className="MsoNormal inl-6" align="center">
-                                    <span lang="EN-US" className="inl-58">Percentage of students who have not achieved PLO 2 (CLO2 &amp;
-                                        CLO3)</span>
-                                </p>
-                            </td>
-                            <td width="10%" className="inl-130">
-                                <p className="MsoNormal inl-6" align="center">
-                                    <span lang="EN-US" className="inl-58">12.50%</span>
-                                </p>
-                            </td>
-                            <td width="27%" className="inl-131">
-                                <p className="MsoNormal inl-6" align="center">
-                                    <span lang="EN-US" className="inl-58">&nbsp;</span>
-                                </p>
-                                <p className="MsoNormal inl-6" align="center">
-                                    <span lang="EN-US" className="inl-58">Reason(s) if this percentage is more than 50 (if
-                                        applicable)</span>
-                                </p>
-                                <p className="MsoNormal inl-6" align="center">
-                                    <span lang="EN-US" className="inl-58">&nbsp;</span>
-                                </p>
-                            </td>
-                            <td width="34%" className="inl-132">
-                                <p className="MsoNormal inl-6" align="center">
-                                    <span lang="EN-US" className="inl-58">-</span>
-                                </p>
-                            </td>
-                        </tr> */}
+
                     </tbody>
                 </table>
-                <p className="MsoNormal inl-133" style={{ marginTop: '10px', marginBottom: '10px' }}>
-                    <span lang="EN-US" className="inl-10">It was observed that one student (listed below) was not able to
-                        achieve PLO 2 whereas PLO 1 was achieved by all students. Program
-                        Manager will forward this information to Departmental Quality
-                        Assurance Committee (DQAC), so that his/her progress could be
-                        monitored.<b className="inl-7"></b></span>
-                </p>
+                <div className="MsoNormal inl-133" style={{ marginTop: '10px', marginBottom: '10px' }}>
+                    <span lang="EN-US" className="inl-10" style={{ fontWeight: 'bold' }}>Comments:</span>
+                    <span className="print-text" >{comments.ploComments}</span>
+                    <div>
+                        <textarea className="comment-textarea" value={comments.ploComments}
+                            onChange={e => setComments({ ...comments, ploComments: e.target.value })}
+                            style={{ width: '100%', inset: 0, boxSizing: 'border-box', }}
+                        />
+                    </div>
+                </div>
                 <table
                     className="MsoNormalTable inl-100"
                     border="1"
@@ -855,28 +723,7 @@ function CRRComponent() {
                                 ))
                             );
                         })()}
-                        {/* <tr className="inl-142">
-                            <td width="10%" valign="top" className="inl-143">
-                                <p className="MsoNormal inl-6" align="center">
-                                    <span lang="EN-US" className="inl-10">2</span>
-                                </p>
-                            </td>
-                            <td width="34%" valign="top" className="inl-144">
-                                <p className="MsoNormal">
-                                    <span lang="EN-US">Abdul Basit Hussain</span>
-                                </p>
-                            </td>
-                            <td width="29%" valign="top" className="inl-145">
-                                <p className="MsoNormal inl-6" align="center">
-                                    <span lang="EN-US">2345135</span>
-                                </p>
-                            </td>
-                            <td width="25%" valign="top" className="inl-146">
-                                <p className="MsoNormal inl-6" align="center">
-                                    <span lang="EN-US" className="inl-10">PLO 2</span>
-                                </p>
-                            </td>
-                        </tr> */}
+
                     </tbody>
                 </table>
                 <p className="MsoNormal">
@@ -900,7 +747,7 @@ function CRRComponent() {
                         <tr className="inl-101">
                             <td width="100%" valign="top" className="inl-147">
                                 <p className="MsoNormal">
-                                    <span lang="EN-US" className="inl-10" style={{fontWeight: 'bold'}}>1. Student (Course Evaluation) Questionnaires</span>
+                                    <span lang="EN-US" className="inl-10" style={{ fontWeight: 'bold' }}>1. Student (Course Evaluation) Questionnaires</span>
                                 </p>
                                 <p className="MsoNormal inl-148">
                                     <span lang="EN-US" className="inl-10">Course evaluation's score by the students:</span>
@@ -914,17 +761,16 @@ function CRRComponent() {
                                     </span>
                                     <span className="print-text">{comments.evaluation}%</span>
                                 </p>
-                                <p className="MsoNormal">
-                                    <span lang="EN-US" className="inl-10"  style={{fontWeight: 'bold'}}>Suggestions:</span>
+                                <div className="MsoNormal">
+                                    <span lang="EN-US" className="inl-10" style={{ fontWeight: 'bold' }}>Suggestions:</span>
                                     <span className="print-text" >{comments.suggestions}</span>
                                     <div>
-                                        <textarea className="comment-textarea" value={comments.suggestions} 
-                                        onChange={e => setComments({ ...comments, suggestions: e.target.value })} 
-                                        style={{width: '100%', inset: 0, boxSizing: 'border-box',}}
+                                        <textarea className="comment-textarea" value={comments.suggestions}
+                                            onChange={e => setComments({ ...comments, suggestions: e.target.value })}
+                                            style={{ width: '100%', inset: 0, boxSizing: 'border-box', }}
                                         />
-                                        {/* visible only when printing */}
                                     </div>
-                                </p>
+                                </div>
                             </td>
                         </tr>
                     </tbody>
@@ -939,17 +785,17 @@ function CRRComponent() {
                     <tbody>
                         <tr className="inl-101" style={{ border: '1px solid black' }}>
                             <td width="100%" valign="top" className="inl-150">
-                                <p className="MsoNormal">
-                                    <span lang="EN-US" className="inl-10"  style={{fontWeight: 'bold'}}>2. Moderators (if any): </span>
+                                <div className="MsoNormal">
+                                    <span lang="EN-US" className="inl-10" style={{ fontWeight: 'bold' }}>2. Moderators (if any): </span>
                                     <span className="print-text" >{comments.moderators}</span>
                                     <div>
-                                        <textarea className="comment-textarea" value={comments.moderators} 
-                                        onChange={e => setComments({ ...comments, moderators: e.target.value })} 
-                                        style={{width: '100%', inset: 0, boxSizing: 'border-box',}}
+                                        <textarea className="comment-textarea" value={comments.moderators}
+                                            onChange={e => setComments({ ...comments, moderators: e.target.value })}
+                                            style={{ width: '100%', inset: 0, boxSizing: 'border-box', }}
                                         />
                                         {/* visible only when printing */}
-                                    </div>                                    
-                                </p>
+                                    </div>
+                                </div>
 
 
                             </td>
@@ -966,21 +812,21 @@ function CRRComponent() {
                     <tbody>
                         <tr className="inl-152">
                             <td width="100%" valign="top" className="inl-153">
-                                <p className="MsoNormal">
-                                    <span lang="EN-US" className="inl-10" style={{display: 'block', marginBottom: '5px'}}><span style={{ fontWeight: 'bold' }}>3. Curriculum: </span>comment on the
+                                <div className="MsoNormal">
+                                    <span lang="EN-US" className="inl-10" style={{ display: 'block', marginBottom: '5px' }}><span style={{ fontWeight: 'bold' }}>3. Curriculum: </span>comment on the
                                         continuing appropriateness of the Course curriculum in relation
                                         to the intended learning outcomes (Course objectives) and its
                                         compliance with the HEC Approved / Revised National Curriculum
                                         Guidelines</span>
                                     <div className="print-text" >{comments.curriculum}</div>
                                     <div>
-                                        <textarea className="comment-textarea" rows={4} value={comments.curriculum} 
-                                        onChange={e => setComments({ ...comments, curriculum: e.target.value })} 
-                                        style={{width: '100%', height: '100%', inset: 0, boxSizing: 'border-box',}}
+                                        <textarea className="comment-textarea" rows={4} value={comments.curriculum}
+                                            onChange={e => setComments({ ...comments, curriculum: e.target.value })}
+                                            style={{ width: '100%', height: '100%', inset: 0, boxSizing: 'border-box', }}
                                         />
                                         {/* visible only when printing */}
-                                    </div>                                         
-                                </p>
+                                    </div>
+                                </div>
                             </td>
                         </tr>
                     </tbody>
@@ -996,19 +842,19 @@ function CRRComponent() {
                     <tbody>
                         <tr className="inl-154">
                             <td width="100%" valign="top" className="inl-155">
-                                <p className="MsoNormal">
-                                    <span lang="EN-US" className="inl-10" style={{display: 'block', marginBottom: '5px'}}><span style={{ fontWeight: 'bold' }}>4. Assessment:</span> comment on the continuing effectiveness of
+                                <div className="MsoNormal">
+                                    <span lang="EN-US" className="inl-10" style={{ display: 'block', marginBottom: '5px' }}><span style={{ fontWeight: 'bold' }}>4. Assessment:</span> comment on the continuing effectiveness of
                                         method(s) of assessment in relation to the intended learning
                                         outcomes (Course objectives)</span>
                                     <div className="print-text" >{comments.assessment}</div>
                                     <div>
-                                        <textarea className="comment-textarea" rows={4} value={comments.assessment} 
-                                        onChange={e => setComments({ ...comments, assessment: e.target.value })} 
-                                        style={{width: '100%', height: '100%', inset: 0, boxSizing: 'border-box',}}
+                                        <textarea className="comment-textarea" rows={4} value={comments.assessment}
+                                            onChange={e => setComments({ ...comments, assessment: e.target.value })}
+                                            style={{ width: '100%', height: '100%', inset: 0, boxSizing: 'border-box', }}
                                         />
                                         {/* visible only when printing */}
-                                    </div>  
-                                </p>
+                                    </div>
+                                </div>
                             </td>
                         </tr>
                     </tbody>
@@ -1029,17 +875,17 @@ function CRRComponent() {
                                     </span>
 
                                 </p>
-                                <p className="MsoNormal">
-                                    <span lang="EN-US" className="inl-10" style={{display: 'block', marginBottom: '5px'}}>Faculty Course Review Reports (if any)</span>
+                                <div className="MsoNormal">
+                                    <span lang="EN-US" className="inl-10" style={{ display: 'block', marginBottom: '5px' }}>Faculty Course Review Reports (if any)</span>
                                     <div className="print-text" >{comments.enhancements}</div>
                                     <div>
-                                        <textarea className="comment-textarea" rows={4} value={comments.enhancements} 
-                                        onChange={e => setComments({ ...comments, enhancements: e.target.value })} 
-                                        style={{width: '100%', height: '100%', inset: 0, boxSizing: 'border-box',}}
+                                        <textarea className="comment-textarea" rows={4} value={comments.enhancements}
+                                            onChange={e => setComments({ ...comments, enhancements: e.target.value })}
+                                            style={{ width: '100%', height: '100%', inset: 0, boxSizing: 'border-box', }}
                                         />
                                         {/* visible only when printing */}
-                                    </div>  
-                                </p>
+                                    </div>
+                                </div>
 
                             </td>
                         </tr>
@@ -1055,19 +901,19 @@ function CRRComponent() {
                     <tbody>
                         <tr className="inl-156">
                             <td width="100%" valign="top" className="inl-147">
-                                <p className="MsoNormal">
-                                    <span lang="EN-US" className="inl-10" style={{display: 'block', marginBottom: '5px'}}><span style={{fontWeight: 'bold'}}>6. Outline:</span> any changes in the
+                                <div className="MsoNormal">
+                                    <span lang="EN-US" className="inl-10" style={{ display: 'block', marginBottom: '5px' }}><span style={{ fontWeight: 'bold' }}>6. Outline:</span> any changes in the
                                         future delivery or structure of the Course that this
                                         semester/term's experience may prompt to improve student's performance</span>
                                     <div className="print-text" >{comments.outline}</div>
                                     <div>
-                                        <textarea className="comment-textarea" rows={2} value={comments.outline} 
-                                        onChange={e => setComments({ ...comments, outline: e.target.value })} 
-                                        style={{width: '100%', height: '100%', inset: 0, boxSizing: 'border-box',}}
+                                        <textarea className="comment-textarea" rows={2} value={comments.outline}
+                                            onChange={e => setComments({ ...comments, outline: e.target.value })}
+                                            style={{ width: '100%', height: '100%', inset: 0, boxSizing: 'border-box', }}
                                         />
                                         {/* visible only when printing */}
-                                    </div>                                         
-                                </p>
+                                    </div>
+                                </div>
                             </td>
                         </tr>
                     </tbody>
@@ -1100,7 +946,7 @@ function CRRComponent() {
                                                 </p>
                                             </td>
                                             <td width="350" valign="top" className="inl-159">
-                                                <p className="MsoNormal" style={{textAlign: 'center'}}>
+                                                <p className="MsoNormal" style={{ textAlign: 'center' }}>
                                                     <span lang="EN-US" className="inl-10" >{recap.faculty}</span>
                                                 </p>
                                             </td>
@@ -1155,7 +1001,7 @@ function CRRComponent() {
                                                 </p>
                                             </td>
                                             <td width="350" valign="top" className="inl-159">
-                                                <p className="MsoNormal" style={{textAlign: 'center'}}>
+                                                <p className="MsoNormal" style={{ textAlign: 'center' }}>
                                                     <span lang="EN-US" className="inl-10">Dr. Muhammad Umar Siddiqui</span>
                                                 </p>
                                             </td>

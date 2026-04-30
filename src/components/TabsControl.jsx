@@ -12,7 +12,7 @@ import { CLOApply } from './CLOApply';
 
 function TabsControl() {
     const ref = useRef();
-    const { cloSid, rid, setRID, setCLOSid, setRecap, setActiveTabIndex } = useSheetStore()
+    const { cloSid, rid, setRID, setCLOSid, setRecap, setActiveTabIndex, report } = useSheetStore()
     const sheetData = useSheetStore((state) => state.sheetData);
     const hasSelectedRecap = Boolean(rid);
     const handlePrint = useReactToPrint({
@@ -78,7 +78,9 @@ function TabsControl() {
                 label: "CRR",
                 content: (
                     <>
+                        {Object.keys(report || {}).length > 0 && (
                         <button onClick={handlePrint}>Print</button>
+                        )}
                         <div ref={ref}>
                             <CRRComponent />
                         </div>

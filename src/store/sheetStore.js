@@ -148,7 +148,7 @@ function generateHeadsData(multiCLOData) {
 // Module-level cache for CLO Sheet resources (for use() compatibility)
 const cloSheetResourceCache = new Map();
 
-export const useSheetStore = create((set) => {
+export const useSheetStore = create((set, get) => {
   const multiCLOData = defaultSheetData
     .slice(0, 2)
     .concat(defaultSheetData.slice(2));
@@ -161,8 +161,14 @@ export const useSheetStore = create((set) => {
     setRecap: (recap) => set({ recap }),
     calCLOs: [],
     setCalCLOs: (calCLOs) => set({ calCLOs }),
-    cloSummary: (localCalCLOs = [], cloNumbers = []) =>
-      Object.entries(
+    withdraws: [],
+    setWithdraws: (withdraws) => set({ withdraws: parseWithdraws(withdraws) }),
+    report: {},
+    setReport: (report) => set({ report: report ?? {} }),
+    cloSummary: (localCalCLOs = [], cloNumbers = []) => {
+      const withdrawsCount = parseWithdraws(get().withdraws).length;
+
+      return Object.entries(
         localCalCLOs.reduce((acc, cloObj) => {
           cloNumbers.forEach((cloNo) => {
             const cloKey = `CLO${cloNo}`;
@@ -177,7 +183,11 @@ export const useSheetStore = create((set) => {
           });
           return acc;
         }, {})
-      ),
+      ).map(([cloKey, acc]) => [
+        cloKey,
+        [acc[0], Math.max(acc[1] - withdrawsCount, 0)],
+      ]);
+    },
     groupedPlanTotals: {},
     setGroupedPlanTotals: (totals) => set({ groupedPlanTotals: totals }),
     aggPLOs: {},
@@ -216,16 +226,24 @@ export const useSheetStore = create((set) => {
       if (!cloSheetResourceCache.has(closid)) {
         const cloSheetPromise = api
           .get(`/closheet/${closid}`)
-          .then(({ data }) => ({
-            data: data?.data ?? null,
-            withdraws: parseWithdraws(data?.withdraws),
-            clo: Array.isArray(data?.clo) ? data.clo : [],
-            closheet: data ?? null,
-            error: null,
-          }))
+          .then(({ data }) => {
+            const withdraws = parseWithdraws(data?.withdraws);
+            const report = data?.report ?? {};
+            set({ withdraws, report });
+
+            return {
+              data: data?.data ?? null,
+              withdraws,
+              report,
+              clo: Array.isArray(data?.clo) ? data.clo : [],
+              closheet: data ?? null,
+              error: null,
+            };
+          })
           .catch((err) => ({
             data: null,
             withdraws: [],
+            report: {},
             clo: [],
             closheet: null,
             error: err?.response?.data?.error || err.message,

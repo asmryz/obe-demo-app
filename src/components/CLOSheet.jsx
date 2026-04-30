@@ -36,7 +36,13 @@ function CLOSheet({ closid, rid }) {
 
     const incomingData = use(getCLOSheet(closid))
     const [kpi, setKpi] = useState(50)
-    const { data, clo: cloRows = [], withdraws = [] } = incomingData
+    console.log(incomingData)
+    const { data: rawData, clo: cloRows = [], withdraws = [], report: savedReport = {}, error } = incomingData ?? {}
+    const hasSheetData = Array.isArray(rawData)
+        && Array.isArray(rawData[ENUMS.HEADS])
+        && Array.isArray(rawData[ENUMS.CLO])
+        && Array.isArray(rawData[ENUMS.MAX])
+    const data = hasSheetData ? rawData : [[], [], []]
 
     // console.log(recap)
 
@@ -55,6 +61,10 @@ function CLOSheet({ closid, rid }) {
         setCalCLOs,
         aggPLOs: globalAggPLOs,
         setAggPLOs,
+        cloSid,
+        setCLOSid,
+        report: globalReport,
+        
         cloSummary
     } = useSheetStore(state => state)
     // setGradeChart(localGradeChart)
@@ -201,28 +211,29 @@ function CLOSheet({ closid, rid }) {
     const globalAggPLOsKey = JSON.stringify(globalAggPLOs ?? {})
     const globalCalCLOsKey = JSON.stringify(globalCalCLOs ?? [])
     const calCLOsKey = JSON.stringify(calCLOs)
+    const cloSummaryRows = cloSummary(calCLOs, clo)
+    const calculatedGradeChart = Object.fromEntries(grades.map((g) => [g.grade, 0]))
+    data.forEach((row, rowIndex) => {
+        if (rowIndex > 2) {
+            const total = Math.round(row.slice(3).reduce((total, mark) => total + (Number(mark) || 0), 0).toFixed(2))
+            const gradeObj = grades.find(({ start, end }) => total >= start && total <= end)
+            const gradeName = gradeObj?.grade
+            if (gradeName) {
+                calculatedGradeChart[gradeName] = (calculatedGradeChart[gradeName] || 0) + 1
+            }
+        }
+    })
+    const savedReportKey = JSON.stringify(savedReport ?? {})
+    const globalReportKey = JSON.stringify(globalReport ?? {})
 
     // Update gradeChart in zustand store after rendering recap sheet
     useEffect(() => {
         // Calculate localGradeChart only when data changes
-        const safeData = Array.isArray(data) ? data : []
         const safeGradeChart = gradeChart || {}
-        const newGradeChart = Object.fromEntries(grades.map((g) => [g.grade, 0]))
-        safeData.forEach((row, rowIndex) => {
-            // Only process student rows (skip headers)
-            if (rowIndex > 2) {
-                const total = Math.round(row.slice(3).reduce((total, mark) => total + (Number(mark) || 0), 0).toFixed(2))
-                const gradeObj = grades.find(({ start, end }) => total >= start && total <= end)
-                const gradeName = gradeObj?.grade
-                if (gradeName) {
-                    newGradeChart[gradeName] = (newGradeChart[gradeName] || 0) + 1
-                }
-            }
-        })
         // Only update if changed
-        const chartChanged = JSON.stringify(newGradeChart) !== JSON.stringify(safeGradeChart)
+        const chartChanged = JSON.stringify(calculatedGradeChart) !== JSON.stringify(safeGradeChart)
         if (chartChanged) {
-            setGradeChart(newGradeChart)
+            setGradeChart(calculatedGradeChart)
         }
 
         // Update recap in store if changed
@@ -241,7 +252,12 @@ function CLOSheet({ closid, rid }) {
         if (aggPLOsKey !== globalAggPLOsKey) {
             setAggPLOs(aggPLOs)
         }
-    }, [data, gradeChart, setGradeChart, recap, globalRecap, setRecap, groupedPlanTotals, groupedPlanTotalsKey, globalGroupedPlanTotalsKey, setGroupedPlanTotals, calCLOs, calCLOsKey, globalCalCLOsKey, setCalCLOs, aggPLOs, aggPLOsKey, globalAggPLOsKey, setAggPLOs])
+
+        if (closid !== null && closid !== undefined && closid !== cloSid) {
+            setCLOSid(closid)
+        }
+
+    }, [data, gradeChart, calculatedGradeChart, setGradeChart, recap, globalRecap, setRecap, groupedPlanTotals, groupedPlanTotalsKey, globalGroupedPlanTotalsKey, setGroupedPlanTotals, calCLOs, calCLOsKey, globalCalCLOsKey, setCalCLOs, aggPLOs, aggPLOsKey, globalAggPLOsKey, setAggPLOs, closid, cloSid, setCLOSid, savedReport, savedReportKey, globalReportKey])
 
     const planByHeadAndClo = PLAN.reduce((acc, item) => {
         if (!acc[item.head]) {
@@ -278,8 +294,14 @@ function CLOSheet({ closid, rid }) {
         return acc
     }, [])
 
-    const cloSummaryRows = cloSummary(calCLOs, clo)
-    
+    if (!hasSheetData) {
+        return (
+            <div className="marks-list">
+                <p>{error || 'No CLO sheet data available.'}</p>
+            </div>
+        )
+    }
+
     return (
         <div className="marks-list">
             rid = {rid} closid = {closid}

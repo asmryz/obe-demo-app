@@ -2,24 +2,33 @@ import express from "express";
 const router = express.Router();
 import { db } from "../db.js";
 
-let closheetWithdrawsColumnReady;
+// let closheetColumnsReady;
 
-// function ensureClosheetWithdrawsColumn() {
-//   if (!closheetWithdrawsColumnReady) {
-//     closheetWithdrawsColumnReady = (async () => {
+// function ensureClosheetColumns() {
+//   if (!closheetColumnsReady) {
+//     closheetColumnsReady = (async () => {
 //       await db.query(`
 //         ALTER TABLE closheet
 //         ADD COLUMN IF NOT EXISTS withdraws jsonb NOT NULL DEFAULT '[]'::jsonb;
+//       `);
+//       await db.query(`
+//         ALTER TABLE closheet
+//         ADD COLUMN IF NOT EXISTS report jsonb NOT NULL DEFAULT '{}'::jsonb;
 //       `);
 //       await db.query(`
 //         UPDATE closheet
 //         SET withdraws = '[]'::jsonb
 //         WHERE withdraws IS NULL;
 //       `);
+//       await db.query(`
+//         UPDATE closheet
+//         SET report = '{}'::jsonb
+//         WHERE report IS NULL;
+//       `);
 //     })();
 //   }
 
-//   return closheetWithdrawsColumnReady;
+//   return closheetColumnsReady;
 // }
 
 router.get("/recaps", async (req, res) => {
@@ -137,7 +146,7 @@ router.get("/recaps/:rid", async (req, res) => {
 
 router.get("/closheet/:closid", async (req, res) => {
   try {
-    // await ensureClosheetWithdrawsColumn();
+    // await ensureClosheetColumns();
 
     const closid = Number(req.params.closid);
 
@@ -147,7 +156,9 @@ router.get("/closheet/:closid", async (req, res) => {
     }
 
     const closheetQuery = `
-            SELECT closid, rid, offid, data, COALESCE(withdraws, '[]'::jsonb) AS withdraws
+            SELECT closid, rid, offid, data,
+                   COALESCE(withdraws, '[]'::jsonb) AS withdraws,
+                   COALESCE(report, '{}'::jsonb) AS report
             FROM closheet
             WHERE closid = $1;
         `;
@@ -183,12 +194,85 @@ router.get("/closheet/:closid", async (req, res) => {
   }
 });
 
+router.post("/closheet/:closid/report", async (req, res) => {
+  try {
+    // await ensureClosheetColumns();
+
+    const closid = Number(req.params.closid);
+    const { report = {} } = req.body;
+
+    if (!Number.isInteger(closid)) {
+      res.status(400).json({ error: "Invalid CLO Sheet id" });
+      return;
+    }
+
+    if (report === null || typeof report !== "object" || Array.isArray(report)) {
+      res.status(400).json({ error: "Report must be an object" });
+      return;
+    }
+
+    const updateQuery = `
+      UPDATE closheet
+      SET report = $1::jsonb
+      WHERE closid = $2
+      RETURNING closid, rid, offid, data, withdraws, report;
+    `;
+    const result = await db.query(updateQuery, [
+      JSON.stringify(report),
+      closid,
+    ]);
+
+    if (result.rows.length === 0) {
+      res.status(404).json({ error: "CLO Sheet not found" });
+      return;
+    }
+
+    res.json({ success: true, closheet: result.rows[0] });
+  } catch (err) {
+    console.error("Error updating CLO Sheet report:", err);
+    res.status(500).json({ error: "Failed to update CLO Sheet report" });
+  }
+});
+
+router.get("/closheet/:closid/report", async (req, res) => {
+  try {
+    // await ensureClosheetColumns();
+
+    const closid = Number(req.params.closid);
+
+    if (!Number.isInteger(closid)) {
+      res.status(400).json({ error: "Invalid CLO Sheet id" });
+      return;
+    }
+
+    const reportQuery = `
+      SELECT closid, COALESCE(report, '{}'::jsonb) AS report
+      FROM closheet
+      WHERE closid = $1;
+    `;
+    const result = await db.query(reportQuery, [closid]);
+
+    if (result.rows.length === 0) {
+      res.status(404).json({ error: "CLO Sheet not found" });
+      return;
+    }
+
+    res.json({
+      closid: result.rows[0].closid,
+      report: result.rows[0].report,
+    });
+  } catch (err) {
+    console.error("Error fetching CLO Sheet report:", err);
+    res.status(500).json({ error: "Failed to load CLO Sheet report" });
+  }
+});
+
 // Save CLO Sheet
 router.post("/closheet", async (req, res) => {
   try {
-    // await ensureClosheetWithdrawsColumn();
+    // await ensureClosheetColumns();
 
-    const { rid, multiCLO, withdraws = [], cloSid } = req.body;
+    const { rid, multiCLO, withdraws = [], cloSid, report = {} } = req.body;
     if (!rid || !multiCLO) {
       return res.status(400).json({ error: "Missing rid or multiCLO" });
     }
@@ -197,13 +281,15 @@ router.post("/closheet", async (req, res) => {
       const updateQuery = `
             UPDATE closheet
             SET data = $1::jsonb,
-                withdraws = $2::jsonb
-            WHERE closid = $3
+                withdraws = $2::jsonb,
+                report = $3::jsonb
+            WHERE closid = $4
             RETURNING *;
         `;
       const result = await db.query(updateQuery, [
         JSON.stringify(multiCLO),
         JSON.stringify(withdraws),
+        JSON.stringify(report),
         cloSid,
       ]);
 
@@ -215,7 +301,7 @@ router.post("/closheet", async (req, res) => {
     }
 
     const insertQuery = `
-            INSERT INTO closheet (rid, offid, data, withdraws)
+            INSERT INTO closheet (rid, offid, data, withdraws, report)
             VALUES (
               $1,
               (
@@ -226,13 +312,15 @@ router.post("/closheet", async (req, res) => {
                 LIMIT 1
               ),
               $2::jsonb,
-              $3::jsonb
+              $3::jsonb, 
+              $4::jsonb
             ) RETURNING *;
         `;
     const result = await db.query(insertQuery, [
       rid,
       JSON.stringify(multiCLO),
       JSON.stringify(withdraws),
+      JSON.stringify(report),
     ]);
     res.json({ success: true, closheet: result.rows[0] });
   } catch (err) {
