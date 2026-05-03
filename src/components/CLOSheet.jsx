@@ -489,6 +489,10 @@ function CLOSheet({ closid, rid }) {
                             const stdTotal = items.reduce((sum, item) => sum + (Number(safeRow[item.sno + 2]) || 0), 0).toFixed(2)
                             const cloTotal = items.reduce((sum, item) => sum + (Number(item.total) || 0), 0)
                             const achieved = cloTotal ? (stdTotal / cloTotal * 100).toFixed(2) + '%' : '0%'
+                            const color = parseFloat(achieved) < kpi ? 'red' : 'black'
+                            const fontWeight = parseFloat(achieved) < kpi ? 'bold' : 'normal'
+                            const isWithdrawn = withdraws.includes(row[2]) || withdraws.includes(String(row[2]))
+                            const backgroundColor = isWithdrawn ? 'transparent' : (parseFloat(achieved) < kpi ? '#dadada' : 'transparent')
                             return [
                                 ...items.map((item, index) => (
                                     <td key={`cell-${rowIndex}-${cloKey}-${index}`}>
@@ -497,12 +501,12 @@ function CLOSheet({ closid, rid }) {
                                 )),
                                 <td
                                     key={`cell-${rowIndex}-${cloKey}-total`}
-                                    style={{ color: parseFloat(achieved) < kpi ? 'red' : 'black', fontWeight: parseFloat(achieved) < kpi ? 'bold' : 'normal' }}>
+                                    style={{ color, fontWeight, backgroundColor }}>
                                     {stdTotal}
                                 </td>,
                                 <td
                                     key={`cell-${rowIndex}-${cloKey}-achieved`}
-                                    style={{ color: parseFloat(achieved) < kpi ? 'red' : 'black', fontWeight: parseFloat(achieved) < kpi ? 'bold' : 'normal' }}>
+                                    style={{ color, fontWeight, backgroundColor }}>
                                     {achieved}
                                 </td>
                             ]
@@ -518,6 +522,63 @@ function CLOSheet({ closid, rid }) {
                     })}
                 </tbody>
             </table>
+            <h2>CLO Achievement Summary</h2>
+            <table id="clo-summary">
+                <thead>
+                    <tr>
+                        <th>CLO</th>
+                        <th style={{width: '100px'}}>Achieved</th>
+                        <th style={{width: '100px'}}>Not Achieved</th>
+                        {/* <th>Achieved %</th> */}
+                    </tr>
+                </thead>
+                <tbody>
+                    {cloSummaryRows.map(([cloKey, [achievedCount, notAchievedCount]]) => {
+                        const totalCount = achievedCount + (notAchievedCount)
+                        const achievedPct = totalCount ? ((achievedCount / totalCount) * 100).toFixed(2) : '0.00'
+                        const notAchievedPct = totalCount ? ((notAchievedCount / totalCount) * 100).toFixed(2) : '0.00'
+                        return (
+                            <tr key={`cal-${cloKey}`}>
+                                <td>{cloKey}</td>
+                                <td>{achievedCount}
+                                    <span style={{  
+                                        border: '1px solid #028c0040', 
+                                        borderRadius: '4px', 
+                                        fontSize: '12px',
+                                        marginLeft: '10px', padding: '2px 4px'}}>
+                                        {achievedPct}%
+                                    </span> </td>
+                                <td>{notAchievedCount}
+                                    <span style={{  
+                                        border: '1px solid #4b444440', 
+                                        borderRadius: '4px', 
+                                        fontSize: '12px',
+                                        marginLeft: '10px', padding: '2px 4px'}}>
+                                        {notAchievedPct}%
+                                    </span> </td>
+                                {/* <td>{achievedPct}%</td> */}
+                            </tr>
+                        )
+                    })}
+                </tbody>
+            </table>
+            <h2>CLO Achievement Charts</h2>
+            <div style={{ display: 'flex', flexWrap: 'nowrap', gap: '16px', overflowX: 'auto', alignItems: 'flex-start' }}>
+                {cloSummaryRows.map(([cloKey, [achievedCount, notAchievedCount]]) => {
+                    const totalCount = achievedCount + notAchievedCount
+                    const achievedPct = totalCount ? ((achievedCount / totalCount) * 100).toFixed(2) : '0.00'
+                    const notAchievedPct = totalCount ? ((notAchievedCount / totalCount) * 100).toFixed(2) : '0.00'
+                    return (
+                        <div
+                            key={`cal-${cloKey}`}
+                            style={{ flex: '0 0 320px', padding: '12px', border: '1px solid #ddd', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                            <span style={{ fontSize: '13px' }}>Achieved: {achievedCount} | {achievedPct}%</span>
+                            <span style={{ fontSize: '13px' }}>Not Achieved: {notAchievedCount} | {notAchievedPct}%</span>
+                            <PLOChart label={`${cloKey} Achievement`} achieved={Number(achievedPct)} notAchieved={100 - Number(achievedPct)} />
+                        </div>
+                    )
+                })}
+            </div>
             <h2>Cohort PLO Achievement</h2>
             <table id="cohort-plo-achievement">
                 <thead>
@@ -581,48 +642,7 @@ function CLOSheet({ closid, rid }) {
                 </tbody>
             </table>
             {/* {console.log(aggPLOs)} */}
-            <h2>CLO Achievement Summary</h2>
-            <table id="clo-summary">
-                <thead>
-                    <tr>
-                        <th>CLO</th>
-                        <th>Achieved</th>
-                        <th>Not Achieved</th>
-                        <th>Achieved %</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {cloSummaryRows.map(([cloKey, [achievedCount, notAchievedCount]]) => {
-                        const totalCount = achievedCount + (notAchievedCount - withdraws.length)
-                        const achievedPct = totalCount ? ((achievedCount / totalCount) * 100).toFixed(2) : '0.00'
-                        return (
-                            <tr key={`cal-${cloKey}`}>
-                                <td>{cloKey}</td>
-                                <td>{achievedCount}</td>
-                                <td>{notAchievedCount - withdraws.length}</td>
-                                <td>{achievedPct}%</td>
-                            </tr>
-                        )
-                    })}
-                </tbody>
-            </table>
-            <h2>CLO Achievement Charts</h2>
-            <div style={{ display: 'flex', flexWrap: 'nowrap', gap: '16px', overflowX: 'auto', alignItems: 'flex-start' }}>
-                {cloSummaryRows.map(([cloKey, [achievedCount, notAchievedCount]]) => {
-                    const totalCount = achievedCount + notAchievedCount - withdraws.length
-                    const achievedPct = totalCount ? ((achievedCount / totalCount) * 100).toFixed(2) : '0.00'
-                    const notAchievedPct = totalCount ? ((notAchievedCount - withdraws.length / totalCount) * 100).toFixed(2) : '0.00'
-                    return (
-                        <div
-                            key={`cal-${cloKey}`}
-                            style={{ flex: '0 0 320px', padding: '12px', border: '1px solid #ddd', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                            <span style={{ fontSize: '13px' }}>Achieved: {achievedCount} | {achievedPct}%</span>
-                            <span style={{ fontSize: '13px' }}>Not Achieved: {notAchievedCount} | {notAchievedPct}%</span>
-                            <PLOChart label={`${cloKey} Achievement`} achieved={Number(achievedPct)} notAchieved={100 - Number(achievedPct)} />
-                        </div>
-                    )
-                })}
-            </div>
+
             <h2>Summary</h2>
             <table id="summary">
                 <tbody>

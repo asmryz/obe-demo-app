@@ -43,6 +43,10 @@ export default defineConfig({
     server: {
         https: true,
         host: clientHost,
+        forwardConsole: {
+            unhandledErrors: true,
+            logLevels: ['warn', 'error'],
+        },
         proxy: {
             '/api': {
                 // target: 'https://45.140.185.63:5001',
