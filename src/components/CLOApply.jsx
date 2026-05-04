@@ -95,8 +95,10 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
                 multiCLO, 
                 withdraws,
                 cloSid
+            }).then((data) => {
+                console.log(data)
+                alert('CLO Sheet saved successfully!');
             });
-            alert('CLO Sheet saved successfully!');
         } catch (err) {
             alert('Failed to save CLO Sheet: ' + (err?.response?.data?.error || err.message));
         }
@@ -452,7 +454,7 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
     return (
         <section>
             {/* Hidden input to capture Ctrl+V and onPaste events */}
-            <pre>{JSON.stringify({ edit, rid, cloSid })}</pre>
+            {/* <pre>{JSON.stringify({ edit, rid, cloSid })}</pre> */}
             <input
                 style={{ position: 'absolute', left: '-9999px', width: 0, height: 0, opacity: 0 }}
                 tabIndex={-1}
@@ -464,12 +466,12 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
                     }
                 }}
             />
-            <h3>CLOApply {rid}</h3>
+            {/* <h3>CLOApply {rid}</h3> */}
             <table id="course">
                 <tbody>
                     <tr>
                         <th style={{ textAlign: 'right' }}>Batch :</th>
-                        <td>{recap.batch}</td>
+                        <td style={{width: '500px'}}>{recap.batch}</td>
                     </tr>
                     <tr>
                         <th style={{ textAlign: 'right' }}>Fcuity :</th>
@@ -520,7 +522,7 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
                     </table>
                     {editableIndex !== -1 && (
                         <>
-                            <span style={{}}>
+                            <span style={{ display: 'none'}} id="show-logs">
                                 <pre style={{ marginTop: '12px' }}>{JSON.stringify(recapRows.map((row) => row[editableIndex]))}</pre>
                                 <pre style={{ marginTop: '12px' }}>
                                     {printObject({ withdraws, editableIndex, total, editColumn, clipboardArray, clipboardCache, selCLO, heads, status, save })}
@@ -664,10 +666,24 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
                                 </tbody>
                             </table>
                         </div>
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', flex: '1' }}>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', flex: '1', marginTop: '50px' }}>
                             {multiCLO.length > 0 && (
                                 <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                    <div style={{ height: '50px', border: '0px solid #d3d3d3', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                    <div style={{
+                                        height: '50px',
+                                        border: '0px solid #d3d3d3',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '12px',
+                                        position: 'fixed',
+                                        top: '120px',
+                                        right: '12px',
+                                        zIndex: 1100,
+                                        background: 'white',
+                                        padding: '8px 10px',
+                                        borderRadius: '8px',
+                                        boxShadow: '0 2px 10px rgba(0, 0, 0, 0.12)'
+                                    }}>
 
                                         <a href='#!' onClick={save ? saveCLOSheet : undefined}
                                             style={{
@@ -718,16 +734,16 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
                     </div>
                 </>
             )}
-            <pre>
+            {/* <pre>
                 {multiCLO && multiCLO.map((row) => JSON.stringify(row)).join(`,\n`)}
-            </pre>
+            </pre> */}
             {cloRows.length > 0 && (
                 <div style={{ overflowX: 'auto', marginTop: '16px' }}>
                     <h4>CLOs</h4>
                     <table>
                         <thead>
                             <tr>
-                                {Object.keys(cloRows[0]).map((key) => (
+                                {Object.keys(cloRows[0]).slice(1, 3).map((key) => (
                                     <th key={key}>{key}</th>
                                 ))}
                             </tr>
@@ -735,7 +751,7 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
                         <tbody>
                             {cloRows.map((row, i) => (
                                 <tr key={i}>
-                                    {Object.values(row).map((val, j) => (
+                                    {Object.values(row).slice(1, 3).map((val, j) => (
                                         <td key={j}>{val === null ? '' : typeof val === 'object' ? JSON.stringify(val) : val}</td>
                                     ))}
                                 </tr>
