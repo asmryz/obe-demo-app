@@ -643,7 +643,7 @@ function CLOSheet({ closid, rid }) {
             </table>
             {/* {console.log(aggPLOs)} */}
 
-            <h2>Summary</h2>
+            {/* <h2>Summary</h2>
             <table id="summary">
                 <tbody>
                     {data[ENUMS.HEADS].slice(3).map((head, index) => {
@@ -664,7 +664,7 @@ function CLOSheet({ closid, rid }) {
                         )
                     })}
                 </tbody>
-            </table>
+            </table> */}
 
         </div>
     )

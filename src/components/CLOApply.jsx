@@ -92,7 +92,7 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
         try {
             await api.post('/closheet', {
                 rid,
-                multiCLO, 
+                multiCLO,
                 withdraws,
                 cloSid
             }).then((data) => {
@@ -441,13 +441,28 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
         }
     }
 
+
+    /**
+     * Compare regardless of order (shallow)
+     */
+    const isSameContent = (a, b) => {
+        if (a.length !== b.length) return false;
+        const count = (arr) => arr.reduce((acc, val) => (acc[val] = (acc[val] || 0) + 1, acc), {});
+        const countA = count(a);
+        const countB = count(b);
+        return Object.keys(countA).every(key => countA[key] === countB[key]);
+    };
+
     function markWithdraw(regNo) {
         return () => {
+            let nextWithdraws;
             if (withdraws.includes(regNo)) {
-                setWithdraws(prev => prev.filter(r => r !== regNo))
+                nextWithdraws = withdraws.filter(r => r !== regNo);
             } else {
-                setWithdraws(prev => [...prev, regNo])
+                nextWithdraws = [...withdraws, regNo];
             }
+            setWithdraws(nextWithdraws);
+            setSave(!isSameContent(nextWithdraws, cloSheetWithdraws));
         }
     }
 
@@ -467,11 +482,14 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
                 }}
             />
             {/* <h3>CLOApply {rid}</h3> */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+
             <table id="course">
                 <tbody>
                     <tr>
                         <th style={{ textAlign: 'right' }}>Batch :</th>
-                        <td style={{width: '500px'}}>{recap.batch}</td>
+                        <td style={{ width: '500px' }}>{recap.batch}</td>
                     </tr>
                     <tr>
                         <th style={{ textAlign: 'right' }}>Fcuity :</th>
@@ -487,6 +505,33 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
                     </tr>
                 </tbody>
             </table>
+                </div>
+                <div>
+                {cloRows.length > 0 && (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', margin: '12px 0' }}>
+                        {cloRows.map((cloRow, i) => (
+                            <div key={`clo-card-${i}`} style={{
+                                border: '1px solid #c8d8e8',
+                                borderRadius: '8px',
+                                padding: '10px 14px',
+                                width: '180px',
+                                // background: '#f0f6ff',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '4px',
+                                wordWrap: 'break-word',
+                            }}>
+                                {/* {JSON.stringify(cloRow)} */}
+                                <span style={{ fontWeight: 700, fontSize: '15px' }}>CLO {cloRow.clo}</span>
+                                {/* {cloRow.plo && <span style={{ fontSize: '12px', color: '#555' }}>PLO {cloRow.plo}</span>} */}
+                                {cloRow.statment && <span style={{ fontSize: '15px', color: '#666' }}>{cloRow.statment}</span>}
+                            </div>
+                        ))}
+                    </div>
+                )}
+
+                </div>
+            </div>
             <ToggleButton
                 checked={showAllColumns}
                 onToggle={() => setShowAllColumns((prev) => !prev)}
@@ -494,6 +539,7 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
                 offLabel="Hide Middle"
                 scale={0.7}
             />
+
 
             {recapRows.length > 0 ? (
                 <div style={{ overflowX: 'auto' }}>
@@ -514,7 +560,7 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
                                                         : content}
                                                 </th>
                                                 : <td key={`cell-${rowIndex}-${cellIndex}`}
-                                                    style={{ color: withdraws.includes(row[2]) && cellIndex > 2 ? 'red' : '' }}>{cellIndex === row.length - 2 ? (<a href='#!' onClick={markWithdraw(row[2])}  style={{ color: isFailGrade ? 'red' : undefined }}>{withdraws.includes(row[2]) && isFailGrade ? 'W' : content}</a>) : content}</td>
+                                                    style={{ color: withdraws.includes(row[2]) && cellIndex > 2 ? 'red' : '' }}>{cellIndex === row.length - 2 ? (<a href='#!' onClick={markWithdraw(row[2])} style={{ color: isFailGrade ? 'red' : undefined }}>{withdraws.includes(row[2]) && isFailGrade ? 'W' : content}</a>) : content}</td>
                                         })}
                                 </tr>
                             ))}
@@ -522,7 +568,7 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
                     </table>
                     {editableIndex !== -1 && (
                         <>
-                            <span style={{ display: 'none'}} id="show-logs">
+                            <span style={{ display: 'none' }} id="show-logs">
                                 <pre style={{ marginTop: '12px' }}>{JSON.stringify(recapRows.map((row) => row[editableIndex]))}</pre>
                                 <pre style={{ marginTop: '12px' }}>
                                     {printObject({ withdraws, editableIndex, total, editColumn, clipboardArray, clipboardCache, selCLO, heads, status, save })}
@@ -546,6 +592,8 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
                             cursor: clipboardAvailable ? 'pointer' : 'not-allowed',
                             textDecoration: 'none',
                             margin: '16px 12px',
+                            marginTop: '10px',
+                            display: 'inline-block',
                         }}
                         title={clipboardAvailable ? 'Paste from clipboard' : 'Clipboard API not available'}>
                         Clipboard
@@ -670,18 +718,19 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
                             {multiCLO.length > 0 && (
                                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                                     <div style={{
-                                        height: '50px',
+                                        // height: '50px',
                                         border: '0px solid #d3d3d3',
                                         display: 'flex',
                                         alignItems: 'center',
-                                        gap: '12px',
+                                        justifyContent: 'center',
+                                        // gap: '12px',
                                         position: 'fixed',
-                                        top: '120px',
+                                        top: '130px',
                                         right: '12px',
                                         zIndex: 1100,
                                         background: 'white',
-                                        padding: '8px 10px',
-                                        borderRadius: '8px',
+                                        // padding: '8px 10px',
+                                        borderRadius: '4px',
                                         boxShadow: '0 2px 10px rgba(0, 0, 0, 0.12)'
                                     }}>
 
@@ -690,7 +739,7 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
                                                 opacity: save ? 1 : 0.5,
                                                 cursor: save ? 'pointer' : 'not-allowed',
                                                 textDecoration: 'none',
-                                                margin: '16px 12px',
+                                                margin: '8px 8px',
                                             }}
                                             title={save ? 'Sheet Synchroinized' : 'Sheet not Synchroinized'}>
                                             {save ? (
@@ -708,10 +757,16 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
                                                     </g>
                                                 </svg>
                                             ) : (
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 48 48" fill="#000000"><g fill="none" stroke="#979797" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3"><path d="M42.5 11c0 4.418-8.283 8-18.5 8S5.5 15.418 5.5 11M43 24.205C43 28.51 34.493 32 24 32S5 28.51 5 24.205M11.5 24a.5.5 0 0 0 0-1m0 1a.5.5 0 0 1 0-1" /><path d="M5.5 11c0-4.418 8.283-8 18.5-8s18.5 3.582 18.5 8c0 0 .5 5 .5 13s-.5 13-.5 13c0 4.418-8.283 8-18.5 8S5.5 41.418 5.5 37c0 0-.5-5-.5-13s.5-13 .5-13" /><path d="M11.5 37a.5.5 0 0 0 0-1m0 1a.5.5 0 0 1 0-1M18 25.75a.5.5 0 0 0 0-1m0 1a.5.5 0 0 1 0-1m0 14a.5.5 0 0 0 0-1m0 1a.5.5 0 0 1 0-1" /></g></svg>
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 48 48" fill="#000000">
+                                                    <g fill="none" stroke="#979797" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3">
+                                                        <path d="M42.5 11c0 4.418-8.283 8-18.5 8S5.5 15.418 5.5 11M43 24.205C43 28.51 34.493 32 24 32S5 28.51 5 24.205M11.5 24a.5.5 0 0 0 0-1m0 1a.5.5 0 0 1 0-1" />
+                                                        <path d="M5.5 11c0-4.418 8.283-8 18.5-8s18.5 3.582 18.5 8c0 0 .5 5 .5 13s-.5 13-.5 13c0 4.418-8.283 8-18.5 8S5.5 41.418 5.5 37c0 0-.5-5-.5-13s.5-13 .5-13" />
+                                                        <path d="M11.5 37a.5.5 0 0 0 0-1m0 1a.5.5 0 0 1 0-1M18 25.75a.5.5 0 0 0 0-1m0 1a.5.5 0 0 1 0-1m0 14a.5.5 0 0 0 0-1m0 1a.5.5 0 0 1 0-1" />
+                                                    </g>
+                                                </svg>
                                             )}
                                         </a>
-                                        {save ? <span style={{ color: 'green', fontWeight: 'bold' }}>Marks Reconciliation Verified</span> : <span style={{ color: 'red', fontWeight: 'bold' }}>Marks Reconciliation Not Verified</span>}
+                                        {/* {save ? <span style={{ color: 'green', fontWeight: 'bold' }}>Marks Reconciliation Verified</span> : <span style={{ color: 'red', fontWeight: 'bold' }}>Marks Reconciliation Not Verified</span>} */}
                                     </div>
                                     <div>
                                         <table style={{

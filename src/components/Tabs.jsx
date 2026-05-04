@@ -18,7 +18,9 @@ const Tabs = ({ tabs, onTabSelect }) => {
     return (
         <div className="tabs">
             {/* Headers */}
-            <div className="tab-buttons">
+            
+            <div className="tab-buttons" style={{top: 0}}>
+                <div style={{height: '70px', width: '100%'}}></div>
                 {tabs.map((tab, index) => (
                     <button
                         key={index}
@@ -26,6 +28,7 @@ const Tabs = ({ tabs, onTabSelect }) => {
                             onTabSelect?.(index);
                             setActiveTabIndex(index);
                         }}
+                        style={{ marginLeft: index === 0 ? '20px' : '' }}
                         className={safeActiveTabIndex === index ? "active" : ""}>
                         {tab.label}
                     </button>

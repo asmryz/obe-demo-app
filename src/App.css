@@ -183,6 +183,7 @@
 
 .tabs {
 	width: 100%;
+	padding-top: 50px;
 }
 
 .tab-buttons {
@@ -191,6 +192,12 @@
 	gap: 10px;
 	border-bottom: 1px solid var(--accent-border);
 	/* padding-bottom: 8px; */
+	position: fixed;
+	left: 0;
+	width: 100%;
+	z-index: 1000;
+	background: var(--bg, #fff);
+    margin-bottom: 20px;
 }
 
 .tab-buttons button {
@@ -232,7 +239,7 @@
 }
 
 .tab-content {
-	margin-top: 20px;
+	margin-top: 60px;
 	padding: 16px;
 	/* border: 1px solid var(--border); */
 	border-radius: 10px;

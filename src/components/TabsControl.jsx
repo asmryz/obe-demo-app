@@ -49,7 +49,7 @@ function TabsControl() {
                 label: "OBE",
                 content: (
                     <div>
-                        <FileUpload />
+                        {/* <FileUpload /> */}
                         {sheetData ? (
                             <Suspense fallback={<p>Loading student marks...</p>}>
                                 <div style={{ textAlign: 'center', padding: '20px' }}>
