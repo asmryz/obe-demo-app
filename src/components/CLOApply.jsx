@@ -28,8 +28,8 @@ const formatRecapCell = (cell) => {
 
 
 export const CLOApply = ({ rid, closid = null, edit = false }) => {
-    const { getRecapResource } = useRecapStore()
-    const { getCLOSheet, cloSid, setWithdraws: setStoreWithdraws } = useSheetStore();
+    const { getRecapResource, updateRecapClosid } = useRecapStore()
+    const { getCLOSheet, cloSid, setWithdraws: setStoreWithdraws, setActiveTabIndex } = useSheetStore();
     const { recap, error } = use(getRecapResource(rid))
 
     const activeClosid = closid ?? cloSid;
@@ -95,8 +95,12 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
                 multiCLO,
                 withdraws,
                 cloSid
-            }).then((data) => {
+            }).then(({ data }) => {
                 console.log(data)
+                if (data?.closid != null) {
+                    updateRecapClosid(rid, data.closid);
+                    setActiveTabIndex(0)
+                }
                 alert('CLO Sheet saved successfully!');
             });
         } catch (err) {
@@ -277,6 +281,11 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
                                 .filter(Boolean);
                         }
                         arr = arr.map(v => (isNaN(Number(v)) ? v : Number(v).toFixed(2)));
+                        const exceeding = arr.find(a => Number(a) > Number(total));
+                        if (exceeding !== undefined) {
+                            alert(`Some marks exceed the total of ${total}. Please adjust before pasting.`);
+                            return;
+                        }
                         setClipboardArray(arr);
                         setClipboardCache(arr.map(a => Number(a)));
                         setClipboardActive(true);
@@ -485,50 +494,50 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
 
-            <table id="course">
-                <tbody>
-                    <tr>
-                        <th style={{ textAlign: 'right' }}>Batch :</th>
-                        <td style={{ width: '500px' }}>{recap.batch}</td>
-                    </tr>
-                    <tr>
-                        <th style={{ textAlign: 'right' }}>Fcuity :</th>
-                        <td>{recap.faculty}</td>
-                    </tr>
-                    <tr>
-                        <th style={{ textAlign: 'right' }}>Course :</th>
-                        <td>{recap.course}</td>
-                    </tr>
-                    <tr>
-                        <th style={{ textAlign: 'right' }}>Semester : </th>
-                        <td>{recap.semester} {recap.year}</td>
-                    </tr>
-                </tbody>
-            </table>
+                    <table id="course" style={{ border: '1px solid #c8d8e8' }}>
+                        <tbody>
+                            <tr>
+                                <th style={{ textAlign: 'right' }}>Batch :</th>
+                                <td style={{ width: '500px' }}>{recap.batch}</td>
+                            </tr>
+                            <tr>
+                                <th style={{ textAlign: 'right' }}>Fcuity :</th>
+                                <td>{recap.faculty}</td>
+                            </tr>
+                            <tr>
+                                <th style={{ textAlign: 'right' }}>Course :</th>
+                                <td>{recap.course}</td>
+                            </tr>
+                            <tr>
+                                <th style={{ textAlign: 'right' }}>Semester : </th>
+                                <td>{recap.semester} {recap.year}</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
                 <div>
-                {cloRows.length > 0 && (
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', margin: '12px 0' }}>
-                        {cloRows.map((cloRow, i) => (
-                            <div key={`clo-card-${i}`} style={{
-                                border: '1px solid #c8d8e8',
-                                borderRadius: '8px',
-                                padding: '10px 14px',
-                                width: '180px',
-                                // background: '#f0f6ff',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                gap: '4px',
-                                wordWrap: 'break-word',
-                            }}>
-                                {/* {JSON.stringify(cloRow)} */}
-                                <span style={{ fontWeight: 700, fontSize: '15px' }}>CLO {cloRow.clo}</span>
-                                {/* {cloRow.plo && <span style={{ fontSize: '12px', color: '#555' }}>PLO {cloRow.plo}</span>} */}
-                                {cloRow.statment && <span style={{ fontSize: '15px', color: '#666' }}>{cloRow.statment}</span>}
-                            </div>
-                        ))}
-                    </div>
-                )}
+                    {cloRows.length > 0 && (
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', margin: '12px 0' }}>
+                            {cloRows.map((cloRow, i) => (
+                                <div key={`clo-card-${i}`} style={{
+                                    border: '1px solid #c8d8e8',
+                                    borderRadius: '8px',
+                                    padding: '10px 14px',
+                                    width: '180px',
+                                    // background: '#f0f6ff',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    gap: '4px',
+                                    wordWrap: 'break-word',
+                                }}>
+                                    {/* {JSON.stringify(cloRow)} */}
+                                    <span style={{ fontWeight: 700, fontSize: '15px' }}>CLO {cloRow.clo}</span>
+                                    {/* {cloRow.plo && <span style={{ fontSize: '12px', color: '#555' }}>PLO {cloRow.plo}</span>} */}
+                                    {cloRow.statment && <span style={{ fontSize: '15px', color: '#666' }}>{cloRow.statment}</span>}
+                                </div>
+                            ))}
+                        </div>
+                    )}
 
                 </div>
             </div>

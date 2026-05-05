@@ -304,8 +304,8 @@ function CLOSheet({ closid, rid }) {
 
     return (
         <div className="marks-list">
-            rid = {rid} closid = {closid}
-            <h3>Grouped PLAN Totals by First Word</h3>
+            {/* rid = {rid} closid = {closid} */}
+            <h3>Grouped PLAN Totals pnm </h3>
             <table id="grouped-plan-totals">
                 <thead>
                     <tr>

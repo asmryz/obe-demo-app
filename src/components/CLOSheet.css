@@ -2,6 +2,6 @@
 .marks-list th,
 .marks-list tr,
 .marks-list td {
-  border: 1px solid #808080;
-  border-collapse: collapse;
+    border: 1px solid #aabed1;
+    border-collapse: collapse;
 }

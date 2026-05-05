@@ -66,5 +66,14 @@ export const useRecapStore = create((set, get) => ({
                 error: err?.message || 'Failed to load recap sheets.'
             })
         }
+    },
+    updateRecapClosid: (rid, closid) => {
+        set((state) => {
+            const updated = {}
+            for (const [query, list] of Object.entries(state.recapsByQuery)) {
+                updated[query] = list.map(r => r.rid === rid ? { ...r, closid } : r)
+            }
+            return { recapsByQuery: updated }
+        })
     }
 }))

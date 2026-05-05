@@ -54,6 +54,13 @@ body {
   margin: 0;
 }
 
+table, th, tr, td {
+   border: 1px solid #c8d8e8;
+  /* border-collapse: collapse;
+  padding: 8px; */
+}
+
+
 #root {
   /* width: 1126px; */
   max-width: 100%;
