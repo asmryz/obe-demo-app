@@ -6,8 +6,13 @@ import './RecapSheets.css';
 import { useRecapStore } from '../store/recapStore';
 import { useSheetStore } from '../store/sheetStore';
 import { CLOApply } from './CLOApply';
+import { NotifyForm } from './NotifyForm';
+import { useNotify } from '../store/notifyStore';
+
+const courseToastMessage = 'Engineering Mathematics – II: Linear Algebra & Ordinary Differential Equations'
 
 export const RecapSheets = () => {
+    const notify = useNotify()
     const { rid, setRID, setCLOSid, setRecap, setActiveTabIndex,  } = useSheetStore()
     // const [selectedRid, setSelectedRid] = useState(null);
     // const [cloSid, setCloSid] = useState(null);
@@ -61,8 +66,22 @@ export const RecapSheets = () => {
         return <CLOApply rid={rid} closid={null} edit={false}/>;
     }
 
+    const showCourseInfoToast = () => {
+        notify.warning({
+            message: courseToastMessage,
+            // duration: 3000,
+            position: 'top-center',
+            // ripple: true,
+            // dismissible: true,
+        })
+    }
+
     return (
         <>
+            {/* <NotifyForm /> */}
+            <button type="button" className="notyf-submit" onClick={showCourseInfoToast} style={{ marginBottom: '16px' }}>
+                Show Course Info
+            </button>
             <input type="text" name="search" id="" placeholder='Search course, faculty, semester or year' value={search} onChange={(e) => setSearch(e.target.value)} style={{
                 borderRadius: '6px',
                 padding: '6px',

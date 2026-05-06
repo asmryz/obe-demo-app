@@ -417,7 +417,7 @@ function CLOSheet({ closid, rid }) {
                                         const sum = row
                                             .slice(start, end)
                                             .reduce((total, mark) => total + (Number(mark) || 0), 0)
-                                        return <td key={`recap-${rowIndex}-${head}`} style={style}>{sum}</td>
+                                        return <td key={`recap-${rowIndex}-${head}`} style={style}>{sum.toString().length > 5 ? Number(sum.toFixed(2)) : sum}</td>
                                     })}
                                     <td style={style}>{row.slice(3).reduce((total, mark) => total + (Number(mark) || 0), 0).toFixed(2)}</td>
                                     <td style={style}>{Math.round(row.slice(3).reduce((total, mark) => total + (Number(mark) || 0), 0).toFixed(2))}</td>
@@ -445,6 +445,7 @@ function CLOSheet({ closid, rid }) {
                     style={{ width: '50px' }}
                 />
             </form>
+            <div style={{ overflowX: 'auto' }}>
             <table id="clo-head">
                 <thead>
                     <tr>
@@ -495,7 +496,7 @@ function CLOSheet({ closid, rid }) {
                             const backgroundColor = isWithdrawn ? 'transparent' : (parseFloat(achieved) < kpi ? '#dadada' : 'transparent')
                             return [
                                 ...items.map((item, index) => (
-                                    <td key={`cell-${rowIndex}-${cloKey}-${index}`}>
+                                    <td key={`cell-${rowIndex}-${cloKey}-${index}`} >
                                         {safeRow[item.sno + 2] == null ? '' : Number(safeRow[item.sno + 2]).toString()}
                                     </td>
                                 )),
@@ -514,7 +515,7 @@ function CLOSheet({ closid, rid }) {
                         return (
                             <tr key={`row-${rowIndex}`}>
                                 <td>{safeRow[0] ?? ''}</td>
-                                <td style={{ textAlign: 'left' }}>{safeRow[1] ?? ''}</td>
+                                <td style={{ textAlign: 'left', whiteSpace : 'nowrap' }}>{safeRow[1] ?? ''}</td>
                                 <td>{safeRow[2] ?? ''}</td>
                                 {cloCells}
                             </tr>
@@ -522,6 +523,7 @@ function CLOSheet({ closid, rid }) {
                     })}
                 </tbody>
             </table>
+            </div>
             <h2>CLO Achievement Summary</h2>
             <table id="clo-summary">
                 <thead>

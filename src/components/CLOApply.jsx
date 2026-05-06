@@ -6,6 +6,7 @@ import { api } from '../api/index.js'
 import { useRecapStore } from '../store/recapStore.js'
 import { ToggleButton } from './ToggleButton'
 import { useSheetStore } from '../store/sheetStore.js'
+import { useNotify } from '../store/notifyStore.js'
 
 // import { useSheetStore } from '../store/sheetStore.js'
 
@@ -29,6 +30,8 @@ const formatRecapCell = (cell) => {
 
 export const CLOApply = ({ rid, closid = null, edit = false }) => {
     const { getRecapResource, updateRecapClosid } = useRecapStore()
+    const notify = useNotify()
+
     const { getCLOSheet, cloSid, setWithdraws: setStoreWithdraws, setActiveTabIndex } = useSheetStore();
     const { recap, error } = use(getRecapResource(rid))
 
@@ -75,6 +78,12 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
     const syncingWithdrawsRef = useRef(false)
     const syncedWithdrawsKeyRef = useRef(loadedWithdrawsKey)
     const clipboardAvailable = typeof navigator !== 'undefined' && navigator.clipboard && typeof navigator.clipboard.read === 'function'
+    const [isWide, setIsWide] = useState(() => window.innerWidth > 1000)
+    useEffect(() => {
+        const handleResize = () => setIsWide(window.innerWidth > 1000)
+        window.addEventListener('resize', handleResize)
+        return () => window.removeEventListener('resize', handleResize)
+    }, [])
 
     // console.log(` >> ${JSON.stringify(recap)}`)
 
@@ -97,14 +106,15 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
                 cloSid
             }).then(({ data }) => {
                 console.log(data)
+                notify.success('CLO Sheet saved successfully!', 'Success', { position: 'top-center', dismissible: true });
                 if (data?.closid != null) {
                     updateRecapClosid(rid, data.closid);
                     setActiveTabIndex(0)
                 }
-                alert('CLO Sheet saved successfully!');
+                // alert('CLO Sheet saved successfully!');
             });
         } catch (err) {
-            alert('Failed to save CLO Sheet: ' + (err?.response?.data?.error || err.message));
+            notify.error('Failed to save CLO Sheet: ' + (err?.response?.data?.error || err.message), 'Error', { position: 'top-center', dismissible: true });
         }
     };
 
@@ -258,7 +268,8 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
     const readClipboardItems = async (e) => {
         e.preventDefault();
         if (!clipboardAvailable) {
-            alert('Clipboard API not available in this environment. Please ensure HTTPS is enabled.');
+            // alert('Clipboard API not available in this environment. Please ensure HTTPS is enabled.');
+            notify.error('Clipboard API not available in this environment. Please ensure HTTPS is enabled.', 'Error', { position: 'top-center', dismissible: true });
             return;
         }
         try {
@@ -283,7 +294,7 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
                         arr = arr.map(v => (isNaN(Number(v)) ? v : Number(v).toFixed(2)));
                         const exceeding = arr.find(a => Number(a) > Number(total));
                         if (exceeding !== undefined) {
-                            alert(`Some marks exceed the total of ${total}. Please adjust before pasting.`);
+                            notify.error(`Some marks exceed the total of ${total}. Please adjust before pasting.`, 'Error', { position: 'top-center', dismissible: true });
                             return;
                         }
                         setClipboardArray(arr);
@@ -293,7 +304,7 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
                 }
             }
         } catch (err) {
-            alert(`Failed to read clipboard: ${err.message}`);
+            notify.error(`Failed to read clipboard: ${err.message}`, 'Error', { position: 'top-center', dismissible: true });
         }
     };
 
@@ -312,7 +323,8 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
             msg += `Enter a numeric Total before saving.`;
         }
         if (msg.length > 0) {
-            alert(msg);
+            // alert(msg);
+            notify.error(msg, 'Validation Error', { position: 'top-center', dismissible: true });
             return;
         }
         let saveCache = clipboardCache;
@@ -491,8 +503,8 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
                 }}
             />
             {/* <h3>CLOApply {rid}</h3> */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', }}>
+                <div style={{ flex: '0 0 auto', }}>
 
                     <table id="course" style={{ border: '1px solid #c8d8e8' }}>
                         <tbody>
@@ -515,14 +527,20 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
                         </tbody>
                     </table>
                 </div>
-                <div>
+                <div style={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    maxWidth: '1150px',
+                    overflow: 'auto',
+                    alignItems: 'start'
+                }}>
                     {cloRows.length > 0 && (
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', margin: '12px 0' }}>
+                        <div style={{ display: 'flex', gap: '10px', margin: '12px 0' }}>
                             {cloRows.map((cloRow, i) => (
                                 <div key={`clo-card-${i}`} style={{
                                     border: '1px solid #c8d8e8',
                                     borderRadius: '8px',
-                                    padding: '10px 14px',
+                                    padding: '5px 7px',
                                     width: '180px',
                                     // background: '#f0f6ff',
                                     display: 'flex',
@@ -531,9 +549,9 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
                                     wordWrap: 'break-word',
                                 }}>
                                     {/* {JSON.stringify(cloRow)} */}
-                                    <span style={{ fontWeight: 700, fontSize: '15px' }}>CLO {cloRow.clo}</span>
+                                    <span style={{ fontWeight: 700, fontSize: '13px' }}>CLO {cloRow.clo}</span>
                                     {/* {cloRow.plo && <span style={{ fontSize: '12px', color: '#555' }}>PLO {cloRow.plo}</span>} */}
-                                    {cloRow.statment && <span style={{ fontSize: '15px', color: '#666' }}>{cloRow.statment}</span>}
+                                    {cloRow.statment && <span style={{ fontSize: '13px', color: '#666' }}>{cloRow.statment}</span>}
                                 </div>
                             ))}
                         </div>

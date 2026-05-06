@@ -27,9 +27,10 @@ function CRRComponent() {
     const cloRows = Array.isArray(recap?.clo) ? recap.clo : []
     const cloSummaryRows = cloSummary(calCLOs, cloRows.map(c => c.clo))
     const course = recap?.course ?? ''
+    console.log(course)
     const courseParts = course.split(' ')
     const courseCode = courseParts[0] ?? ''
-    const courseTitle = courseParts.slice(1, 3).join(' ')
+    const courseTitle = courseParts.slice(1, courseParts.length - 2).join(' ')
     const creditValue = getCreditValue(course)
     const contactHours = creditValue ? Number(creditValue) * 16 : ''
     const studentCount = Array.isArray(recap?.data) ? Math.max(recap.data.length - 2, 0) : ''
