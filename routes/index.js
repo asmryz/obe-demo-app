@@ -37,7 +37,7 @@ router.get("/recaps", async (req, res) => {
     const effectiveSearch = search.length >= 3 ? search : "";
       
         const query = `
-          SELECT voc.offid, voc.ccid, voc.batch, voc.title, voc."name", voc.semester, voc."year", cs.closid, voc.rid 
+          SELECT voc.offid, voc.ccid, voc.batch, voc.title, voc."name", voc.semester, voc."year", cs.closid, voc.rid ,cs.offid csoffid 
           FROM 
             (SELECT oc.offid, oc.ccid, oc.batch, c.title, f."name", oc.semester, oc."year", oc.rid
             FROM offered_courses oc

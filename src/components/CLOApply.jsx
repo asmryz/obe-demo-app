@@ -32,7 +32,7 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
     const { getRecapResource, updateRecapClosid } = useRecapStore()
     const notify = useNotify()
 
-    const { getCLOSheet, cloSid, setWithdraws: setStoreWithdraws, setActiveTabIndex } = useSheetStore();
+    const { getCLOSheet, cloSid, setWithdraws: setStoreWithdraws, setActiveTabIndex, csOffid: storeCsOffid, setCSOffid } = useSheetStore();
     const { recap, error } = use(getRecapResource(rid))
 
     const activeClosid = closid ?? cloSid;
@@ -98,6 +98,11 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
 
     // Save CLO Sheet to backend
     const saveCLOSheet = async () => {
+        if (!edit && storeCsOffid !== null && storeCsOffid !== undefined) {
+            notify.warning('CLOSheet has already been added', 'Warning', { position: 'top-center', dismissible: true });
+            return;
+        }
+        
         try {
             await api.post('/closheet', {
                 rid,
@@ -106,9 +111,13 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
                 cloSid
             }).then(({ data }) => {
                 console.log(data)
+                const closheetPayload = data?.closheet ?? data;
+                if (closheetPayload?.offid != null) {
+                    setCSOffid(closheetPayload.offid);
+                }
                 notify.success('CLO Sheet saved successfully!', 'Success', { position: 'top-center', dismissible: true });
-                if (data?.closid != null) {
-                    updateRecapClosid(rid, data.closid);
+                if (closheetPayload?.closid != null) {
+                    updateRecapClosid(rid, closheetPayload.closid);
                     setActiveTabIndex(0)
                 }
                 // alert('CLO Sheet saved successfully!');
@@ -117,8 +126,6 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
             notify.error('Failed to save CLO Sheet: ' + (err?.response?.data?.error || err.message), 'Error', { position: 'top-center', dismissible: true });
         }
     };
-
-
 
     function checkSaveStatus() {
         if (!Array.isArray(recapRows[0]) || firstEmptyCellIndex === -1) {
@@ -437,8 +444,6 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
         // setMultiCLO(newMultiCLO);            
     }
 
-
-
     // Utility function to print object properties on separate lines
     function printObject(obj, indent = 0) {
         const pad = ' '.repeat(indent);
@@ -461,7 +466,6 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
             return pad + JSON.stringify(obj);
         }
     }
-
 
     /**
      * Compare regardless of order (shallow)
@@ -502,7 +506,7 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
                     }
                 }}
             />
-            {/* <h3>CLOApply {rid}</h3> */}
+            <h3>CLOApply {`rid: ${rid}`} | {`Offid: ${storeCsOffid === undefined ? 'null' : storeCsOffid}`}</h3>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', }}>
                 <div style={{ flex: '0 0 auto', }}>
 

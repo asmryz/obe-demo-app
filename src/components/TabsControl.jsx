@@ -12,7 +12,7 @@ import { CLOApply } from './CLOApply';
 
 function TabsControl() {
     const ref = useRef();
-    const { cloSid, rid, setRID, setCLOSid, setRecap, setActiveTabIndex, report } = useSheetStore()
+    const { cloSid, rid, csOffid, setRID, setCLOSid, setCSOffid, setRecap, setActiveTabIndex, report } = useSheetStore()
     const sheetData = useSheetStore((state) => state.sheetData);
     const hasSelectedRecap = Boolean(rid);
     const handlePrint = useReactToPrint({
@@ -68,7 +68,7 @@ function TabsControl() {
             label: "CLO Sheet",
             content: (
                 <>
-                    <CLOApply rid={rid} closid={cloSid} edit={true}/>
+                    <CLOApply rid={rid} closid={cloSid} edit={true} csoffid={csOffid}/>
                 </>
             ),
         },
@@ -106,6 +106,7 @@ function TabsControl() {
         if (index === 0) {
             setRID(null);
             setCLOSid(null);
+            setCSOffid(null);
             setRecap(null);
             setActiveTabIndex(0);
         }

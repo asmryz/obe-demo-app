@@ -13,7 +13,7 @@ const courseToastMessage = 'Engineering Mathematics – II: Linear Algebra & Ord
 
 export const RecapSheets = () => {
     const notify = useNotify()
-    const { rid, setRID, setCLOSid, setRecap, setActiveTabIndex,  } = useSheetStore()
+    const { rid, setRID, setCLOSid, setCSOffid, setRecap, setActiveTabIndex, csOffid } = useSheetStore()
     // const [selectedRid, setSelectedRid] = useState(null);
     // const [cloSid, setCloSid] = useState(null);
     const recapsByQuery = useRecapStore((state) => state.recapsByQuery);
@@ -43,6 +43,7 @@ export const RecapSheets = () => {
         event.preventDefault();
         const rid = selectedRecap.rid;
         const closid = selectedRecap.closid;
+        const offid = selectedRecap.offid ?? null;
         setRecap({
             ...selectedRecap,
             course: selectedRecap.course ?? selectedRecap.title ?? '',
@@ -52,6 +53,7 @@ export const RecapSheets = () => {
         });
         setRID(rid);
         setCLOSid(closid);
+        setCSOffid(csOffid);
 
         getRecapResource(rid).then(({ recap }) => {
             if (recap) {
@@ -63,7 +65,7 @@ export const RecapSheets = () => {
     };
 
     if (rid !== null) {
-        return <CLOApply rid={rid} closid={null} edit={false}/>;
+        return <CLOApply rid={rid} closid={null} edit={false} csoffid={csOffid}/>;
     }
 
     const showCourseInfoToast = () => {
@@ -121,7 +123,7 @@ export const RecapSheets = () => {
                                     <td style={{ width: '200px' }}>{recap.name}</td>
                                     <td>{recap.semester}</td>
                                     <td>{recap.year}</td>
-                                    <td>{recap.closid} | {recap.rid}</td>
+                                    <td>{recap.closid} | {recap.rid} | {recap.offid}</td>
                                 </tr>
                             ))}
                         </tbody>

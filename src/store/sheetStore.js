@@ -197,8 +197,10 @@ export const useSheetStore = create((set, get) => {
     multiCLOData,
     cloSid: null,
     rid: null,
+    csOffid: null,
     setCLOSid: (cloSid) => set({ cloSid }),
     setRID: (rid) => set({ rid }),
+    setCSOffid: (csOffid) => set({ csOffid }),
     statusData: () => {
       let status = {};
       defaultSheetData[0]
