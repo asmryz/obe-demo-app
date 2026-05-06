@@ -52,6 +52,7 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
     const initialEditableIndex = edit ? 3 : -1
     const initialEditColumn = initialEditableIndex !== -1 ? getEditColumn(initialEditableIndex) : []
     const initialHeads = edit ? getHeadsFromMultiCLO(initialMultiCLO) : {}
+    const initialDel = edit ? getDeleteLocationsFromMultiCLO(initialMultiCLO) : {}
     const initialStatus = edit ? getStatusFromHeads(initialHeads) : {}
     const initialSave = edit && Object.keys(initialStatus).length > 0 && Object.values(initialStatus).every(Boolean)
     const loadedWithdraws = useMemo(
@@ -65,7 +66,7 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
     const [heads, setHeads] = useState(initialHeads)
     const [multiCLO, setMultiCLO] = useState(initialMultiCLO)
     const [editableIndex, setEditableIndex] = useState(initialEditableIndex)
-    const [del, setDel] = useState({})
+    const [del, setDel] = useState(initialDel)
     const [selCLO, setSelCLO] = useState(0)
     const [status, setStatus] = useState(initialStatus)
     const [editColumn, setEditColumn] = useState(initialEditColumn)
@@ -252,15 +253,40 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
             return {}
         }
 
+        let activeHead = null
+
         return rows[0].slice(3).reduce((acc, head, columnOffset) => {
-            if (head === null || head === undefined || head === '') {
-                return acc
+            if (head !== null && head !== undefined && head !== '') {
+                activeHead = head
             }
+
+            if (activeHead === null) return acc
 
             const columnIndex = columnOffset + 3
             const values = rows.map((row) => Array.isArray(row) ? row[columnIndex] : undefined)
-            const key = values[0]
-            acc[key] = [...(acc[key] || []), values]
+            values[0] = activeHead
+            acc[activeHead] = [...(acc[activeHead] || []), values]
+            return acc
+        }, {})
+    }
+
+    function getDeleteLocationsFromMultiCLO(rows) {
+        if (!Array.isArray(rows) || rows.length < 3 || !Array.isArray(rows[0])) {
+            return {}
+        }
+
+        let activeHead = null
+
+        return rows[0].slice(3).reduce((acc, head, columnOffset) => {
+            if (head !== null && head !== undefined && head !== '') {
+                activeHead = head
+            }
+
+            if (activeHead === null) return acc
+
+            const columnIndex = columnOffset + 3
+            const prevArr = acc[activeHead] || []
+            acc[activeHead] = [...prevArr, `${columnIndex}:${prevArr.length}`]
             return acc
         }, {})
     }
@@ -506,7 +532,7 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
                     }
                 }}
             />
-            <h3>CLOApply {`rid: ${rid}`} | {`Offid: ${storeCsOffid === undefined ? 'null' : storeCsOffid}`}</h3>
+            {/* <h3>CLOApply {`rid: ${rid}`} | {`Offid: ${storeCsOffid === undefined ? 'null' : storeCsOffid}`}</h3> */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', }}>
                 <div style={{ flex: '0 0 auto', }}>
 
@@ -602,7 +628,7 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
                             <span style={{ display: 'none' }} id="show-logs">
                                 <pre style={{ marginTop: '12px' }}>{JSON.stringify(recapRows.map((row) => row[editableIndex]))}</pre>
                                 <pre style={{ marginTop: '12px' }}>
-                                    {printObject({ withdraws, editableIndex, total, editColumn, clipboardArray, clipboardCache, selCLO, heads, status, save })}
+                                    {printObject({ del, withdraws, editableIndex, total, editColumn, clipboardArray, clipboardCache, selCLO, heads, status, save })}
                                     {/* {JSON.stringify({ total, editColumn, clipboardArray, clipboardCache, selCLO, heads })} */}
                                 </pre>
                             </span>
@@ -634,7 +660,7 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
                             {JSON.stringify(clipboardArray)}</pre>
                     )}
 
-                    <div style={{ display: 'flex', overflowX: 'auto', whiteSpace: 'pre' }}>
+                    <div style={{  }}>
                         <div>
                             <table style={{ marginTop: '12px' }} onPaste={readClipboardItems}>
                                 <tbody>
@@ -673,7 +699,7 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
                                                     return <td key={`cell-${rowIndex}-${cellIndex}`} style={{
                                                         color: cellIndex === 3 ? 'maroon' : 'inherit',
                                                         fontWeight: cellIndex === 3 ? 'bold' : 'normal',
-                                                        width: cellIndex === 3 ? '45px' : 'auto',
+                                                        width: cellIndex > 2 ? '50px' : 'auto',
                                                         position: (rowIndex === 1 && cellIndex > 3) || cellIndex === 3 ? 'relative' : undefined
                                                     }}>
                                                         {rowIndex === 1 && cellIndex === 1 ? 'CLO' : cellContent}
@@ -745,7 +771,7 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
                                 </tbody>
                             </table>
                         </div>
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', flex: '1', marginTop: '50px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'flex-start', flex: '1', marginTop: '50px' }}>
                             {multiCLO.length > 0 && (
                                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                                     <div style={{
@@ -823,7 +849,8 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
             {/* <pre>
                 {multiCLO && multiCLO.map((row) => JSON.stringify(row)).join(`,\n`)}
             </pre> */}
-            {cloRows.length > 0 && (
+
+            {/* {cloRows.length > 0 && (
                 <div style={{ overflowX: 'auto', marginTop: '16px' }}>
                     <h4>CLOs</h4>
                     <table>
@@ -845,7 +872,7 @@ export const CLOApply = ({ rid, closid = null, edit = false }) => {
                         </tbody>
                     </table>
                 </div>
-            )}
+            )} */}
         </section>
     )
 }
