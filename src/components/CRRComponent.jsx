@@ -148,7 +148,7 @@ function CRRComponent() {
     return (
         <section className={`crr-page inl-1 ${hasSavedReport ? 'report-readonly' : ''}`}>
             <div className="WordSection1">
-                {!hasSavedReport && <button onClick={handleSave}>Save</button>}
+                {!hasSavedReport && <button className='no-print' onClick={handleSave}>Save</button>}
                 <table
                     className="MsoNormalTable inl-2"
                     border="0"
@@ -178,7 +178,7 @@ function CRRComponent() {
                                 </p>
                             </td>
                         </tr>
-                        <tr className="inl-11">
+                        <tr className="inl-11" style={{borderTop: '1px solid black'}}>
                             <td width="23%" valign="top" className="inl-12">
                                 <p className="MsoNormal">
                                     <span lang="EN-US" className="inl-10">Department</span>
@@ -509,7 +509,7 @@ function CRRComponent() {
                                     </td>
                                     <td width="24%" valign="top" className="inl-114">
                                         <p className="MsoNormal inl-103">
-                                            <span lang="EN-US" className="inl-10">{remark} {achievedPct > KPI ? `aattained` : `not attained`}</span>
+                                            <span lang="EN-US" className="inl-10">{remark} {achievedPct > KPI ? `attained` : `not attained`}</span>
                                         </p>
                                     </td>
                                 </tr>

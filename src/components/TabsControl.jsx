@@ -79,7 +79,7 @@ function TabsControl() {
                 content: (
                     <>
                         {Object.keys(report || {}).length > 0 && (
-                        <button onClick={handlePrint}>Print</button>
+                        <button className="no-print" onClick={handlePrint}>Print</button>
                         )}
                         <div ref={ref}>
                             <CRRComponent />

@@ -835,6 +835,10 @@ textarea {
 }
 /* Print: show plain text instead of textarea boundaries */
 @media print {
+	.no-print {
+		display: none !important;
+	}
+
 	.inl-93 textarea,
 	.inl-58 textarea,
 	input.comment-textarea,
