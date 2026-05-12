@@ -4,6 +4,7 @@ import {
     Menu, ChevronDown, ChevronRight, Play, LayoutGrid, LayoutDashboard,
     BookOpen, Search, Sparkles, Key, Settings, Zap, User
 } from 'lucide-react';
+import { store } from '../store';
 
 const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
     const [expandedMenus, setExpandedMenus] = useState({
@@ -117,7 +118,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
                     </div>
                 ))}
             </div>
-
+            <pre style={{ fontSize: "12px", }}>{JSON.stringify(store.getState(), null, 2)}</pre>
             {/* Bottom Section */}
             <div className="p-2 space-y-1 border-t border-gray-200">
                 {!isCollapsed && (

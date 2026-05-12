@@ -4,6 +4,7 @@ import Layout from './components/Layout';
 import Home from './pages/Home';
 import Apps from './pages/Apps';
 import RecapSheets from './pages/RecapSheets';
+import { store } from "./store";
 
 const ErrorPage = () => {
     const error = useRouteError();

@@ -4,6 +4,7 @@ import ModelCards from '../components/ModelCards';
 import AgentModal from '../components/AgentModal';
 import Table from '../components/Table';
 import { MoreVertical, Settings2, Settings, HelpCircle, MessageSquare, Trash2, Share2, Download } from 'lucide-react';
+import { store } from '../store';
 
 function Home() {
     const [isAgentModalOpen, setIsAgentModalOpen] = useState(false);
@@ -11,6 +12,9 @@ function Home() {
     const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
     const [isVisible, setIsVisible] = useState(false);
     const moreMenuRef = useRef(null);
+    const { initialized } = store.getState();
+    store.setState({ initialized: true });
+
 
     useEffect(() => {
         setIsVisible(true);
@@ -160,6 +164,7 @@ function Home() {
             {isAgentModalOpen && (
                 <AgentModal onClose={() => setIsAgentModalOpen(false)} />
             )}
+            <pre style={{ fontSize: "14px", position: "absolute", bottom: 0, left: 0, background: "white", zIndex: 9999 }}>{JSON.stringify(store.getState())}</pre>
         </div>
     );
 }
