@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import data from "../RecapSheets.json";
 import { ListFilter, HelpCircle, ArrowDown, ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
 
-const Table = () => {
+const Table = ({ data = [] }) => {
     const renderBatchTag = (batch) => {
         if (batch.includes("Elective")) {
             return <span className="px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 text-xs font-semibold border border-indigo-100">Elective</span>;
@@ -56,18 +55,22 @@ const Table = () => {
                 <table className="w-full text-left border-collapse table-fixed">
                     <thead>
                         <tr className="bg-gray-100 border-b border-gray-200">
-                            <th className="py-2 px-4 font-semibold text-sm text-gray-800 w-12">ID</th>
-                            <th className="py-2 px-4 font-semibold text-sm text-gray-800 w-20">Batch</th>
-                            <th className="py-2 px-4 font-semibold text-sm text-gray-800 w-1/2">Course Title</th>
-                            <th className="py-2 px-4 font-semibold text-sm text-gray-800 w-1/4">Instructor</th>
-                            <th className="py-2 px-4 font-semibold text-sm text-gray-800 w-24">Semester</th>
-                            <th className="py-2 px-4 font-semibold text-sm text-gray-800 w-16">Year</th>
+                            <th className="py-2 px-4 font-semibold text-sm text-gray-800 w-14">ID</th>
+                            <th className="py-2 px-4 font-semibold text-sm text-gray-800 w-24">Code</th>
+                            <th className="py-2 px-4 font-semibold text-sm text-gray-800 w-32">Batch</th>
+                            <th className="py-2 px-4 font-semibold text-sm text-gray-800 w-[40%]">Course Title</th>
+                            <th className="py-2 px-4 font-semibold text-sm text-gray-800 w-[20%]">Instructor</th>
+                            <th className="py-2 px-4 font-semibold text-sm text-gray-800 w-28">Semester</th>
+                            <th className="py-2 px-4 font-semibold text-sm text-gray-800 w-20">Year</th>
                         </tr>
                     </thead>
                     <tbody>
                         {paginatedData.map((row, idx) => (
                             <tr key={idx} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                                <td className="py-2.5 px-4 text-sm text-gray-600 font-medium">#{row.offid}</td>
+                                <td className="py-2.5 px-4 text-sm text-gray-600 font-medium">#{(currentPage - 1) * rowsPerPage + idx + 1}</td>
+                                <td className="py-2.5 px-4 text-sm font-mono text-gray-500">
+                                    {row.code}
+                                </td>
                                 <td className="py-2.5 px-4 text-sm">
                                     {renderBatchTag(row.batch)}
                                 </td>
@@ -128,6 +131,9 @@ const Table = () => {
                     </button>
                 </div>
             </div>
+            {/* <pre>
+                {JSON.stringify(data, null, 2)}
+            </pre> */}
         </div>
     );
 };

@@ -51,10 +51,10 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
     ];
 
     const bottomLinks = [
-        { name: 'Search', icon: <Search size={20} />, path: '/search' },
-        { name: 'What\'s new', icon: <Sparkles size={20} />, path: '/news' },
-        { name: 'Get API key', icon: <Key size={20} />, path: '/api-key' },
-        { name: 'Settings', icon: <Settings size={20} />, path: '/settings' }
+        // { name: 'Search', icon: <Search size={20} />, path: '/search' },
+        // { name: 'What\'s new', icon: <Sparkles size={20} />, path: '/news' },
+        // { name: 'Get API key', icon: <Key size={20} />, path: '/api-key' },
+        // { name: 'Settings', icon: <Settings size={20} />, path: '/settings' }
     ];
 
     return (
@@ -118,7 +118,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
                     </div>
                 ))}
             </div>
-            <pre style={{ fontSize: "12px", }}>{JSON.stringify(store.getState(), null, 2)}</pre>
+            <pre style={{ fontSize: "12px", height: "200px", overflowY: "auto" }}>{JSON.stringify(store.getState(), null, 2)}</pre>
             {/* Bottom Section */}
             <div className="p-2 space-y-1 border-t border-gray-200">
                 {!isCollapsed && (

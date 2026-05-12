@@ -17,9 +17,9 @@ const ErrorPage = () => {
                     <span className="text-3xl font-bold">!</span>
                 </div>
                 <h1 className="text-4xl font-extrabold text-gray-900 mb-2">Oops!</h1>
-                <p className="text-xl text-gray-600 mb-8">
+                <pre className="text-xl text-gray-600 mb-8">
                     {error.statusText || error.message || "An unexpected error has occurred."}
-                </p>
+                </pre>
                 <Link
                     to="/"
                     className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-xl shadow-sm text-white bg-blue-600 hover:bg-blue-700 transition-all active:scale-95"

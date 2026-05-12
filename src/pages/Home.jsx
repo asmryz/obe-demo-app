@@ -12,11 +12,11 @@ function Home() {
     const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
     const [isVisible, setIsVisible] = useState(false);
     const moreMenuRef = useRef(null);
-    const { initialized } = store.getState();
-    store.setState({ initialized: true });
-
-
     useEffect(() => {
+        const { initialized, } = store.getState();
+        if (!initialized) {
+            store.setState({ initialized: true });
+        }
         setIsVisible(true);
     }, []);
 
@@ -164,7 +164,6 @@ function Home() {
             {isAgentModalOpen && (
                 <AgentModal onClose={() => setIsAgentModalOpen(false)} />
             )}
-            <pre style={{ fontSize: "14px", position: "absolute", bottom: 0, left: 0, background: "white", zIndex: 9999 }}>{JSON.stringify(store.getState())}</pre>
         </div>
     );
 }
