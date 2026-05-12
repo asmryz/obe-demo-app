@@ -1,200 +1,65 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import Sidebar from './components/Sidebar';
-import RightSettingsPanel from './components/RightSettingsPanel';
-import ModelCards from './components/ModelCards';
-import PromptComposer from './components/PromptComposer';
-import AgentModal from './components/AgentModal';
-import RegionTable from './components/RegionTable';
-import { Menu, MoreVertical, Settings2, Settings, FileCode, HelpCircle, MessageSquare, Trash2, Share2, Download, ChevronLeft, ChevronRight } from 'lucide-react';
+import React from 'react';
+import { createBrowserRouter, RouterProvider, useRouteError, Link } from 'react-router-dom';
 import Layout from './components/Layout';
+import Home from './pages/Home';
+import Apps from './pages/Apps';
+import RecapSheets from './pages/RecapSheets';
 
-function Home() {
-    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-    const [isRightPanelOpen, setIsRightPanelOpen] = useState(false);
-    const [isAgentModalOpen, setIsAgentModalOpen] = useState(false);
-    const [activeTab, setActiveTab] = useState('Models');
-    const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
-    const moreMenuRef = useRef(null);
-
-    // Close menu when clicking outside
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (moreMenuRef.current && !moreMenuRef.current.contains(event.target)) {
-                setIsMoreMenuOpen(false);
-            }
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
+const ErrorPage = () => {
+    const error = useRouteError();
+    console.error(error);
 
     return (
-        <div className="flex flex-1 overflow-hidden relative h-full">
-            <Sidebar isCollapsed={isSidebarCollapsed} setIsCollapsed={setIsSidebarCollapsed} />
-
-            <div className="flex-1 flex flex-col relative overflow-hidden">
-                {/* Hamburger Button - Now in front of sidebar, below the main header */}
-                <div className="absolute top-2 left-2 z-20">
-                    <button
-                        onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-                        className="p-1 rounded-md hover:bg-gray-100 text-gray-600 transition-colors bg-white/50 backdrop-blur-sm border border-gray-100 shadow-sm"
-                        title={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-                    >
-                        <Menu size={20} />
-                    </button>
+        <div className="h-screen w-full flex flex-col items-center justify-center bg-gray-50 px-6">
+            <div className="max-w-md w-full text-center">
+                <div className="mb-6 inline-flex items-center justify-center w-20 h-20 rounded-full bg-red-100 text-red-600">
+                    <span className="text-3xl font-bold">!</span>
                 </div>
-
-                {/* Scrollable Center Content */}
-                <main className="flex-1 overflow-y-auto px-16 py-6 custom-scrollbar flex flex-col">
-                    <div className="max-w-5xl mx-auto w-full flex-1 flex flex-col">
-                        <h2 className="text-3xl font-normal text-gray-900 mb-8">Explore AI models</h2>
-
-                        <div className="flex items-center justify-between mb-6">
-                            <div className="flex bg-gray-100/80 p-1 rounded-lg relative min-w-[200px]">
-                                {/* Sliding Indicator */}
-                                <div
-                                    className="absolute h-[calc(100%-8px)] top-1 bg-white shadow-sm rounded-md transition-all duration-300 ease-out"
-                                    style={{
-                                        left: activeTab === 'Models' ? '4px' : 'calc(50% + 2px)',
-                                        width: 'calc(50% - 6px)'
-                                    }}
-                                />
-                                <button
-                                    onClick={() => setActiveTab('Models')}
-                                    className={`relative z-10 flex-1 px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${activeTab === 'Models' ? 'text-gray-900' : 'text-gray-500 hover:text-gray-700'
-                                        }`}
-                                >
-                                    Models
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        setActiveTab('Agents');
-                                        // setIsAgentModalOpen(true); // Removed automatic modal on tab switch for better UX
-                                    }}
-                                    className={`relative z-10 flex-1 px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${activeTab === 'Agents' ? 'text-gray-900' : 'text-gray-500 hover:text-gray-700'
-                                        }`}
-                                >
-                                    Agents
-                                </button>
-                            </div>
-
-                            <div className="flex items-center gap-4">
-                                <button className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors">
-                                    Start building &rarr;
-                                </button>
-                                <div className="relative" ref={moreMenuRef}>
-                                    <button
-                                        onClick={() => setIsMoreMenuOpen(!isMoreMenuOpen)}
-                                        className={`p-1.5 rounded-full transition-all duration-200 ${isMoreMenuOpen ? 'bg-gray-100 text-gray-900 shadow-inner' : 'hover:bg-gray-100 text-gray-500'
-                                            }`}
-                                    >
-                                        <MoreVertical size={20} />
-                                    </button>
-
-                                    {isMoreMenuOpen && (
-                                        <div className="absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded-xl shadow-md z-50 py-2 animate-in fade-in zoom-in duration-200 origin-top-right">
-                                            <div className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                                                Playground Actions
-                                            </div>
-                                            <button className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors">
-                                                <Settings size={18} className="text-gray-400" />
-                                                <span>View settings</span>
-                                            </button>
-                                            <button className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors">
-                                                <Share2 size={18} className="text-gray-400" />
-                                                <span>Share playground</span>
-                                            </button>
-                                            <button className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors">
-                                                <Download size={18} className="text-gray-400" />
-                                                <span>Export configuration</span>
-                                            </button>
-
-                                            <div className="h-px bg-gray-100 my-2" />
-
-                                            <div className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                                                Support
-                                            </div>
-                                            <button className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors">
-                                                <HelpCircle size={18} className="text-gray-400" />
-                                                <span>Help & documentation</span>
-                                            </button>
-                                            <button className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors">
-                                                <MessageSquare size={18} className="text-gray-400" />
-                                                <span>Send feedback</span>
-                                            </button>
-
-                                            <div className="h-px bg-gray-100 my-2" />
-
-                                            <button className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors">
-                                                <Trash2 size={18} className="text-red-400" />
-                                                <span>Reset to default</span>
-                                            </button>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="relative flex-1">
-                            {/* Models Content */}
-                            <div
-                                className={`transition-all duration-500 ease-in-out ${activeTab === 'Models'
-                                    ? 'translate-x-0 opacity-100'
-                                    : '-translate-x-8 opacity-0 pointer-events-none absolute inset-0'
-                                    }`}
-                            >
-                                <ModelCards />
-                                <RegionTable />
-                            </div>
-
-                            {/* Agents Content */}
-                            <div
-                                className={`transition-all duration-500 ease-in-out ${activeTab === 'Agents'
-                                    ? 'translate-x-0 opacity-100'
-                                    : 'translate-x-8 opacity-0 pointer-events-none absolute inset-0'
-                                    }`}
-                            >
-                                <div className="bg-gray-50/50 border border-dashed border-gray-300 rounded-2xl p-16 text-center flex flex-col items-center justify-center">
-                                    <div className="w-20 h-20 bg-white shadow-sm border border-gray-100 rounded-2xl flex items-center justify-center mb-6">
-                                        <Settings2 className="text-blue-600" size={32} />
-                                    </div>
-                                    <h3 className="text-2xl font-medium text-gray-900 mb-3">Custom AI Agents</h3>
-                                    <p className="text-gray-600 max-w-sm mb-8 leading-relaxed">
-                                        Build and deploy specialized agents that can use tools, search the web, and execute code to solve complex problems.
-                                    </p>
-                                    <button
-                                        onClick={() => setIsAgentModalOpen(true)}
-                                        className="px-8 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all font-medium active:scale-95"
-                                    >
-                                        Create New Agent
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="flex-1"></div>
-                    </div>
-                </main>
+                <h1 className="text-4xl font-extrabold text-gray-900 mb-2">Oops!</h1>
+                <p className="text-xl text-gray-600 mb-8">
+                    {error.statusText || error.message || "An unexpected error has occurred."}
+                </p>
+                <Link
+                    to="/"
+                    className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-xl shadow-sm text-white bg-blue-600 hover:bg-blue-700 transition-all active:scale-95"
+                >
+                    Return to Dashboard
+                </Link>
             </div>
-
-            <RightSettingsPanel isOpen={isRightPanelOpen} onToggle={() => setIsRightPanelOpen(!isRightPanelOpen)} />
-
-            {isAgentModalOpen && (
-                <AgentModal onClose={() => setIsAgentModalOpen(false)} />
-            )}
         </div>
     );
-}
+};
+
+const Placeholder = ({ title }) => (
+    <div className="h-full flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+            <h1 className="text-4xl font-bold text-gray-300 mb-2">{title}</h1>
+            <p className="text-gray-500">This page is under development.</p>
+        </div>
+    </div>
+);
 
 const router = createBrowserRouter([
     {
         path: "/",
         element: <Layout />,
+        errorElement: <ErrorPage />,
         children: [
-            {
-                index: true,
-                element: <Home />,
-            },
+            { index: true, element: <Home /> },
+            { path: "apps", element: <Apps /> },
+            { path: "recap-sheets", element: <RecapSheets /> },
+            { path: "gallery", element: <Placeholder title="Gallery" /> },
+            { path: "templates", element: <Placeholder title="Templates" /> },
+            { path: "overview", element: <Placeholder title="Overview" /> },
+            { path: "usage", element: <Placeholder title="Usage" /> },
+            { path: "billing", element: <Placeholder title="Billing" /> },
+            { path: "quickstart", element: <Placeholder title="Quick Start" /> },
+            { path: "api-reference", element: <Placeholder title="API Reference" /> },
+            { path: "guides", element: <Placeholder title="Guides" /> },
+            { path: "search", element: <Placeholder title="Search" /> },
+            { path: "news", element: <Placeholder title="What's New" /> },
+            { path: "api-key", element: <Placeholder title="API Key" /> },
+            { path: "settings", element: <Placeholder title="Settings" /> },
         ],
     },
 ]);

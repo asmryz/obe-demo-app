@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import data from "../RecapSheets.json";
 import { ListFilter, HelpCircle, ArrowDown, ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
 
-const RegionTable = () => {
+const Table = () => {
     const renderBatchTag = (batch) => {
         if (batch.includes("Elective")) {
             return <span className="px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 text-xs font-semibold border border-indigo-100">Elective</span>;
@@ -132,4 +132,4 @@ const RegionTable = () => {
     );
 };
 
-export default RegionTable;
+export default Table;

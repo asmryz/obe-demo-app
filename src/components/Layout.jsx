@@ -1,7 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
+import Sidebar from './Sidebar';
+import RightSettingsPanel from './RightSettingsPanel';
+import { Menu } from 'lucide-react';
 
 function Layout() {
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+    const [isRightPanelOpen, setIsRightPanelOpen] = useState(false);
+
     return (
         <div className="flex flex-col h-screen overflow-hidden bg-white">
             {/* Header */}
@@ -15,10 +21,30 @@ function Layout() {
                 </div>
             </header>
 
-            {/* Main Content */}
-            <main className="flex-1 overflow-hidden">
-                <Outlet />
-            </main>
+            {/* Main Wrapper */}
+            <div className="flex flex-1 overflow-hidden relative">
+                <Sidebar isCollapsed={isSidebarCollapsed} setIsCollapsed={setIsSidebarCollapsed} />
+
+                <div className="flex-1 flex flex-col relative overflow-hidden">
+                    {/* Hamburger Button - Toggles Sidebar */}
+                    <div className="absolute top-2 left-2 z-20">
+                        <button
+                            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+                            className="p-1 rounded-md hover:bg-gray-100 text-gray-600 transition-colors bg-white/50 backdrop-blur-sm border border-gray-100 shadow-sm"
+                            title={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+                        >
+                            <Menu size={20} />
+                        </button>
+                    </div>
+
+                    {/* Scrollable Content Area */}
+                    <main className="flex-1 overflow-hidden">
+                        <Outlet context={{ isSidebarCollapsed, isRightPanelOpen, setIsRightPanelOpen }} />
+                    </main>
+                </div>
+
+                <RightSettingsPanel isOpen={isRightPanelOpen} onToggle={() => setIsRightPanelOpen(!isRightPanelOpen)} />
+            </div>
         </div>
     );
 }

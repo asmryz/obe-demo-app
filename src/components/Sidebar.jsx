@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { NavLink } from 'react-router-dom';
 import {
     Menu, ChevronDown, ChevronRight, Play, LayoutGrid, LayoutDashboard,
     BookOpen, Search, Sparkles, Key, Settings, Zap, User
@@ -8,6 +9,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
     const [expandedMenus, setExpandedMenus] = useState({
         Build: false,
         Dashboard: false,
+        Analytics: false,
         Documentation: false
     });
 
@@ -16,29 +18,42 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
     };
 
     const menuItems = [
-        { name: 'Playground', icon: <Play size={20} />, active: true },
+        { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/' },
         {
             name: 'Build',
             icon: <LayoutGrid size={20} />,
-            children: ['Apps', 'Gallery', 'Templates']
+            children: [
+                { name: 'Recap Sheets', path: '/recap-sheets' },
+                { name: 'Apps', path: '/apps' },
+                { name: 'Gallery', path: '/gallery' },
+                { name: 'Templates', path: '/templates' }
+            ]
         },
         {
-            name: 'Dashboard',
+            name: 'Analytics',
             icon: <LayoutDashboard size={20} />,
-            children: ['Overview', 'Usage', 'Billing']
+            children: [
+                { name: 'Overview', path: '/overview' },
+                { name: 'Usage', path: '/usage' },
+                { name: 'Billing', path: '/billing' }
+            ]
         },
         {
             name: 'Documentation',
             icon: <BookOpen size={20} />,
-            children: ['Quick Start', 'API Reference', 'Guides']
+            children: [
+                { name: 'Quick Start', path: '/quickstart' },
+                { name: 'API Reference', path: '/api-reference' },
+                { name: 'Guides', path: '/guides' }
+            ]
         }
     ];
 
     const bottomLinks = [
-        { name: 'Search', icon: <Search size={20} /> },
-        { name: 'What\'s new', icon: <Sparkles size={20} /> },
-        { name: 'Get API key', icon: <Key size={20} /> },
-        { name: 'Settings', icon: <Settings size={20} /> }
+        { name: 'Search', icon: <Search size={20} />, path: '/search' },
+        { name: 'What\'s new', icon: <Sparkles size={20} />, path: '/news' },
+        { name: 'Get API key', icon: <Key size={20} />, path: '/api-key' },
+        { name: 'Settings', icon: <Settings size={20} />, path: '/settings' }
     ];
 
     return (
@@ -52,32 +67,50 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
             <div className="flex-1 overflow-y-auto py-4 px-2 space-y-1 custom-scrollbar">
                 {menuItems.map((item) => (
                     <div key={item.name}>
-                        <div
-                            onClick={() => item.children ? toggleMenu(item.name) : null}
-                            className={`flex items-center p-2 rounded-lg cursor-pointer ${item.active ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-200 text-gray-700'
-                                }`}
-                            title={isCollapsed ? item.name : ''}
-                        >
-                            <div className={`flex items-center justify-center ${isCollapsed ? 'mx-auto' : 'mr-3'}`}>
-                                {item.icon}
+                        {item.path ? (
+                            <NavLink
+                                to={item.path}
+                                className={({ isActive }) =>
+                                    `flex items-center p-2 rounded-lg cursor-pointer transition-colors ${isActive ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-200 text-gray-700'}`
+                                }
+                                title={isCollapsed ? item.name : ''}
+                            >
+                                <div className={`flex items-center justify-center ${isCollapsed ? 'mx-auto' : 'mr-3'}`}>
+                                    {item.icon}
+                                </div>
+                                {!isCollapsed && <span className="flex-1 text-sm font-medium">{item.name}</span>}
+                            </NavLink>
+                        ) : (
+                            <div
+                                onClick={() => toggleMenu(item.name)}
+                                className={`flex items-center p-2 rounded-lg cursor-pointer hover:bg-gray-200 text-gray-700`}
+                                title={isCollapsed ? item.name : ''}
+                            >
+                                <div className={`flex items-center justify-center ${isCollapsed ? 'mx-auto' : 'mr-3'}`}>
+                                    {item.icon}
+                                </div>
+                                {!isCollapsed && (
+                                    <>
+                                        <span className="flex-1 text-sm font-medium">{item.name}</span>
+                                        {expandedMenus[item.name] ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                                    </>
+                                )}
                             </div>
-                            {!isCollapsed && (
-                                <>
-                                    <span className="flex-1 text-sm font-medium">{item.name}</span>
-                                    {item.children && (
-                                        expandedMenus[item.name] ? <ChevronDown size={16} /> : <ChevronRight size={16} />
-                                    )}
-                                </>
-                            )}
-                        </div>
+                        )}
 
                         {/* Child items */}
                         {!isCollapsed && item.children && expandedMenus[item.name] && (
                             <div className="ml-9 mt-1 space-y-1">
                                 {item.children.map(child => (
-                                    <div key={child} className="p-1.5 text-sm text-gray-600 hover:text-blue-600 cursor-pointer rounded hover:bg-blue-50">
-                                        {child}
-                                    </div>
+                                    <NavLink
+                                        key={child.name}
+                                        to={child.path}
+                                        className={({ isActive }) =>
+                                            `block p-1.5 text-sm rounded transition-colors ${isActive ? 'text-blue-700 bg-blue-50' : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'}`
+                                        }
+                                    >
+                                        {child.name}
+                                    </NavLink>
                                 ))}
                             </div>
                         )}
@@ -97,27 +130,36 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
                 )}
 
                 {bottomLinks.map((link) => (
-                    <div key={link.name} className="flex items-center p-2 rounded-lg cursor-pointer hover:bg-gray-200 text-gray-700" title={isCollapsed ? link.name : ''}>
+                    <NavLink
+                        key={link.name}
+                        to={link.path}
+                        className={({ isActive }) =>
+                            `flex items-center p-2 rounded-lg cursor-pointer transition-colors ${isActive ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-200 text-gray-700'}`
+                        }
+                        title={isCollapsed ? link.name : ''}
+                    >
                         <div className={`flex items-center justify-center ${isCollapsed ? 'mx-auto' : 'mr-3'}`}>
                             {link.icon}
                         </div>
                         {!isCollapsed && <span className="text-sm font-medium">{link.name}</span>}
-                    </div>
+                    </NavLink>
                 ))}
 
-                {/* User Profile */}
-                <div className="mt-2 pt-2 border-t border-gray-200">
-                    <div className="flex items-center p-2 rounded-lg cursor-pointer hover:bg-gray-200">
-                        <div className={`w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold text-sm ${isCollapsed ? 'mx-auto' : 'mr-3'}`}>
-                            A
+                <div className="flex items-center p-2 rounded-lg cursor-pointer hover:bg-gray-200 text-gray-700" title={isCollapsed ? 'Profile' : ''}>
+                    <div className={`flex items-center justify-center ${isCollapsed ? 'mx-auto' : 'mr-3'}`}>
+                        <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold shadow-sm">
+                            JD
                         </div>
-                        {!isCollapsed && (
-                            <div className="overflow-hidden">
-                                <p className="text-sm font-medium text-gray-900 truncate">Alex Developer</p>
-                                <p className="text-xs text-gray-500 truncate">alex@example.com</p>
-                            </div>
-                        )}
                     </div>
+                    {!isCollapsed && (
+                        <div className="flex-1 flex items-center justify-between overflow-hidden">
+                            <div className="truncate mr-2">
+                                <p className="text-xs font-bold text-gray-800 truncate">John Doe</p>
+                                <p className="text-[10px] text-gray-500 truncate">Pro Plan</p>
+                            </div>
+                            <ChevronRight size={14} className="text-gray-400" />
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
