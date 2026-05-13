@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ListFilter, HelpCircle, ArrowDown, ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
+import Dropdown from './Dropdown';
 
 const Table = ({ data = [] }) => {
     const renderBatchTag = (batch) => {
@@ -18,14 +19,23 @@ const Table = ({ data = [] }) => {
 
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [currentPage, setCurrentPage] = useState(1);
+    const [selectedSemester, setSelectedSemester] = useState('All');
+    const [selectedYear, setSelectedYear] = useState('All');
 
+    const uniqueSemesters = ['All', ...new Set(data.map(item => item.semester))];
+    const uniqueYears = ['All', ...new Set(data.map(item => item.year.toString()))].sort((a, b) => b === 'All' ? -1 : a.localeCompare(b));
 
+    const filteredData = data.filter(item => {
+        const semesterMatch = selectedSemester === 'All' || item.semester === selectedSemester;
+        const yearMatch = selectedYear === 'All' || item.year.toString() === selectedYear;
+        return semesterMatch && yearMatch;
+    });
 
-    const totalRows = data.length;
+    const totalRows = filteredData.length;
     const totalPages = Math.ceil(totalRows / rowsPerPage);
     const startIndex = (currentPage - 1) * rowsPerPage;
     const endIndex = Math.min(startIndex + rowsPerPage, totalRows);
-    const paginatedData = data.slice(startIndex, endIndex);
+    const paginatedData = filteredData.slice(startIndex, endIndex);
 
     const handleRowsPerPageChange = (e) => {
         setRowsPerPage(parseInt(e.target.value, 10));
@@ -35,7 +45,7 @@ const Table = ({ data = [] }) => {
     return (
         <div className="mt-12 bg-white">
             {/* Filter Bar */}
-            <div className="flex items-center justify-between p-3 border-t border-gray-200">
+            <div className="flex items-center justify-between p-1 border-t border-gray-200">
                 <div className="flex items-center gap-3">
                     <div className="flex items-center gap-2 cursor-pointer">
                         <ListFilter size={18} className="text-gray-800" />
@@ -47,7 +57,36 @@ const Table = ({ data = [] }) => {
                         className="text-sm text-gray-600 bg-transparent outline-none w-64 placeholder-gray-500"
                     />
                 </div>
-                <HelpCircle size={18} className="text-gray-600 cursor-pointer" />
+
+                <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
+                        <span className="text-xs font-semibold text-gray-900 uppercase tracking-wider">Semester:</span>
+                        <Dropdown
+                            options={uniqueSemesters}
+                            value={selectedSemester}
+                            onChange={(val) => {
+                                setSelectedSemester(val);
+                                setCurrentPage(1);
+                            }}
+                            showRoundedOutline={false}
+                            className="min-w-[80px]"
+                        />
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <span className="text-xs font-semibold text-gray-900 uppercase tracking-wider">Year:</span>
+                        <Dropdown
+                            options={uniqueYears}
+                            value={selectedYear}
+                            onChange={(val) => {
+                                setSelectedYear(val);
+                                setCurrentPage(1);
+                            }}
+                            showRoundedOutline={false}
+                            className="min-w-[60px]"
+                        />
+                    </div>
+                    <HelpCircle size={18} className="text-gray-600 cursor-pointer" />
+                </div>
             </div>
 
             {/* Table */}
@@ -56,8 +95,8 @@ const Table = ({ data = [] }) => {
                     <thead>
                         <tr className="bg-gray-100 border-b border-gray-200">
                             <th className="py-2 px-4 font-semibold text-sm text-gray-800 w-14">ID</th>
+                            <th className="py-2 px-4 font-semibold text-sm text-gray-800 w-24">Batch</th>
                             <th className="py-2 px-4 font-semibold text-sm text-gray-800 w-24">Code</th>
-                            <th className="py-2 px-4 font-semibold text-sm text-gray-800 w-32">Batch</th>
                             <th className="py-2 px-4 font-semibold text-sm text-gray-800 w-[40%]">Course Title</th>
                             <th className="py-2 px-4 font-semibold text-sm text-gray-800 w-[20%]">Instructor</th>
                             <th className="py-2 px-4 font-semibold text-sm text-gray-800 w-28">Semester</th>
@@ -68,11 +107,11 @@ const Table = ({ data = [] }) => {
                         {paginatedData.map((row, idx) => (
                             <tr key={idx} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
                                 <td className="py-2.5 px-4 text-sm text-gray-600 font-medium">#{(currentPage - 1) * rowsPerPage + idx + 1}</td>
-                                <td className="py-2.5 px-4 text-sm font-mono text-gray-500">
-                                    {row.code}
-                                </td>
                                 <td className="py-2.5 px-4 text-sm">
                                     {renderBatchTag(row.batch)}
+                                </td>
+                                <td className={`py-2.5 px-4 text-sm font-semibold truncate ${row.ccid === null ? "text-gray-400 italic" : row.closid !== null ? "text-green-600" : "text-amber-600"}`} title={row.title}>
+                                    {row.code}
                                 </td>
                                 <td className={`py-2.5 px-4 text-sm font-semibold truncate ${row.ccid === null ? "text-gray-400 italic" : row.closid !== null ? "text-green-600" : "text-amber-600"}`} title={row.title}>
                                     {row.title}

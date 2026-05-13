@@ -31,14 +31,21 @@ const ErrorPage = () => {
     );
 };
 
-const Placeholder = ({ title }) => (
-    <div className="h-full flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-            <h1 className="text-4xl font-bold text-gray-300 mb-2">{title}</h1>
-            <p className="text-gray-500">This page is under development.</p>
+const Placeholder = ({ title }) => {
+    const [isVisible, setIsVisible] = React.useState(false);
+    React.useEffect(() => {
+        setIsVisible(true);
+    }, []);
+
+    return (
+        <div className={`h-full flex items-center justify-center bg-gray-50 transition-all duration-300 ease-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+            <div className="text-center">
+                <h1 className="text-4xl font-bold text-gray-300 mb-2">{title}</h1>
+                <p className="text-gray-500">This page is under development.</p>
+            </div>
         </div>
-    </div>
-);
+    );
+};
 
 const router = createBrowserRouter([
     {

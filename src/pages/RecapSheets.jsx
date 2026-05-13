@@ -4,7 +4,7 @@ import { store, useStore } from '../store';
 
 function RecapSheets() {
     const { recaps, getRecaps } = useStore();
-    console.log(recaps);
+    // console.log(recaps);
     const [isVisible, setIsVisible] = useState(false);
 
     useEffect(() => {

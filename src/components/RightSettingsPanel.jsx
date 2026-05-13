@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, Code, PlaySquare, Settings2, Info, ChevronDown, ChevronRight, ChevronLeft, Edit2 } from 'lucide-react';
+import Dropdown from './Dropdown';
 
 const RightSettingsPanel = ({ isOpen, onToggle }) => {
     const [sections, setSections] = useState({
@@ -23,6 +24,19 @@ const RightSettingsPanel = ({ isOpen, onToggle }) => {
         topP: 0.95,
         outputLength: 2048
     });
+
+    const [selectedModel, setSelectedModel] = useState('Default (Gemini 3 Flash Preview)');
+    const [selectedThinkingLevel, setSelectedThinkingLevel] = useState('Standard');
+
+    const models = [
+        'Default (Gemini 3 Flash Preview)',
+        'Gemini 3.1 Flash Lite',
+        'Gemini 3 Flash Preview',
+        'Gemini 3.1 Pro Preview',
+        'Gemini Pro Latest',
+        'Gemini Flash Latest',
+        'Gemini Flash-Lite Latest'
+    ];
 
     const toggleSection = (section) => {
         setSections(prev => ({ ...prev, [section]: !prev[section] }));
@@ -57,15 +71,16 @@ const RightSettingsPanel = ({ isOpen, onToggle }) => {
                 </div>
 
                 <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
-                    {/* Model Info Section */}
-                    <div className="mb-6 bg-gray-50 rounded-xl p-3 border border-gray-100">
-                        <div className="flex justify-between items-center mb-1">
-                            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Model</span>
-                            <Info size={14} className="text-gray-400" />
-                        </div>
-                        <div className="font-medium text-gray-800">Gemini 1.5 Pro</div>
-                        <div className="text-xs text-gray-500 mt-1">Multi-modal, reasoning, code</div>
-                    </div>
+                    {/* Custom Model Dropdown */}
+                    <Dropdown 
+                        label="Model"
+                        options={models}
+                        value={selectedModel}
+                        onChange={setSelectedModel}
+                        icon={Info}
+                        description="Multi-modal, reasoning, and high-performance code generation"
+                        className="mb-6"
+                    />
 
                     {/* System Instructions */}
                     <div className="mb-6">
@@ -102,13 +117,12 @@ const RightSettingsPanel = ({ isOpen, onToggle }) => {
                             />
                         </div>
 
-                        <div>
-                            <label className="text-sm font-medium text-gray-800 block mb-2">Thinking Level</label>
-                            <select className="w-full border border-gray-300 rounded-lg p-2 text-sm bg-white outline-none focus:border-blue-500">
-                                <option>Standard</option>
-                                <option>Deep</option>
-                            </select>
-                        </div>
+                        <Dropdown 
+                            label="Thinking Level"
+                            options={['Standard', 'Deep']}
+                            value={selectedThinkingLevel}
+                            onChange={setSelectedThinkingLevel}
+                        />
                     </div>
 
                     <hr className="my-5 border-gray-200" />
