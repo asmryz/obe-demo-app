@@ -5,6 +5,7 @@ import Home from './pages/Home';
 import Apps from './pages/Apps';
 import RecapSheets from './pages/RecapSheets';
 import { store } from "./store";
+import CLOSheet from './pages/CLOSheet';
 
 const ErrorPage = () => {
     const error = useRouteError();
@@ -56,6 +57,7 @@ const router = createBrowserRouter([
             { index: true, element: <Home /> },
             { path: "apps", element: <Apps /> },
             { path: "recap-sheets", element: <RecapSheets /> },
+            { path: "closheet/:closid", element: <CLOSheet /> },
             { path: "gallery", element: <Placeholder title="Gallery" /> },
             { path: "templates", element: <Placeholder title="Templates" /> },
             { path: "overview", element: <Placeholder title="Overview" /> },

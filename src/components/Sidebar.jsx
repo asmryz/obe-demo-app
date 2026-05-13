@@ -51,10 +51,10 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
     ];
 
     const bottomLinks = [
-        // { name: 'Search', icon: <Search size={20} />, path: '/search' },
-        // { name: 'What\'s new', icon: <Sparkles size={20} />, path: '/news' },
-        // { name: 'Get API key', icon: <Key size={20} />, path: '/api-key' },
-        // { name: 'Settings', icon: <Settings size={20} />, path: '/settings' }
+        { name: 'Search', icon: <Search size={20} />, path: '/search' },
+        { name: 'What\'s new', icon: <Sparkles size={20} />, path: '/news' },
+        { name: 'Get API key', icon: <Key size={20} />, path: '/api-key' },
+        { name: 'Settings', icon: <Settings size={20} />, path: '/settings' }
     ];
 
     return (

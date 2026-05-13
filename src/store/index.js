@@ -11,16 +11,31 @@ export const store = createStore()(
         (set) => ({
             initialized: false,
             signedIn: false,
+            recap:null,
+            closheet:null,
             recaps: [],
+            recapPgNo: { currentPage: 1, recapsPerPage: 10, selectedSemester: 'All', selectedYear: 'All', searchQuery: '' },
+            
             signIn: () => set({ signedIn: true }),
             signOut: () => set({ signedIn: false }),
             setRecaps: (recaps) => set({ recaps }),
-            getRecaps: () => {
-                return api.get("/recaps").then(res => {
+            setRecap: (recap) => set({ recap }),
+            setClosheet: (closheet) => set({ closheet }),
+            setRecapPgNo: (recapPgNoUpdate) => set((state) => ({ 
+                recapPgNo: { ...(state.recapPgNo || { currentPage: 1, recapsPerPage: 10, selectedSemester: 'All', selectedYear: 'All', searchQuery: '' }), ...recapPgNoUpdate } 
+            })),
+            getRecaps: (query = "") => {
+                return api.get(`/recaps?q=${encodeURIComponent(query)}`).then(res => {
                     set({ recaps: res.data });
                     return res.data;
                 });
             },
+            getCLOSheet: (closid) => {
+                return api.get(`/closheet/${closid}`).then(res => {
+                    set({ closheet: res.data });
+                    return res.data;
+                });
+            }
         }),
         {
             name: "app-storage",
