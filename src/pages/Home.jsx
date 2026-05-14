@@ -4,6 +4,7 @@ import AgentCards from '../components/AgentCards';
 // import PromptComposer from '../components/PromptComposer';
 import AgentModal from '../components/AgentModal';
 import Table from '../components/Table';
+import Tabs from '../components/Tabs';
 import { MoreVertical, Settings2, Settings, HelpCircle, MessageSquare, Trash2, Share2, Download } from 'lucide-react';
 import { store } from '../store';
 
@@ -38,33 +39,12 @@ function Home() {
                 <h2 className="text-3xl font-normal text-gray-900 mb-8">Dash Board</h2>
 
                 <div className="flex items-center justify-between mb-6">
-                    <div className="flex bg-gray-100/80 p-1 rounded-lg relative min-w-[200px]">
-                        {/* Sliding Indicator */}
-                        <div
-                            className="absolute h-[calc(100%-8px)] top-1 bg-white shadow-sm rounded-md transition-all duration-300 ease-out"
-                            style={{
-                                left: activeTab === 'Models' ? '4px' : 'calc(50% + 2px)',
-                                width: 'calc(50% - 6px)'
-                            }}
-                        />
-                        <button
-                            onClick={() => setActiveTab('Models')}
-                            className={`relative z-10 flex-1 px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${activeTab === 'Models' ? 'text-gray-900' : 'text-gray-500 hover:text-gray-700'
-                                }`}
-                        >
-                            Models
-                        </button>
-                        <button
-                            onClick={() => {
-                                setActiveTab('Agents');
-                            }}
-                            className={`relative z-10 flex-1 px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${activeTab === 'Agents' ? 'text-gray-900' : 'text-gray-500 hover:text-gray-700'
-                                }`}
-                        >
-                            Agents
-                        </button>
-                    </div>
 
+                    <Tabs
+                        tabs={['Models', 'Agents']}
+                        activeTab={activeTab}
+                        onTabChange={setActiveTab}
+                    />
                     <div className="flex items-center gap-4">
                         <button className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors">
                             Start building &rarr;
