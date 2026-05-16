@@ -14,7 +14,7 @@ const Tabs = ({ tabs, activeTab, onTabChange, className = '' }) => {
   const tabCount = tabs.length;
 
   return (
-    <div className={`flex bg-gray-100/80 p-1 rounded-lg relative min-w-[200px] ${className}`}>
+    <div className={`flex bg-gray-100/80 p-1 rounded-lg relative min-w-[280px] ${className}`}>
       {/* Sliding Indicator */}
       {activeIndex !== -1 && (
         <div
@@ -30,7 +30,7 @@ const Tabs = ({ tabs, activeTab, onTabChange, className = '' }) => {
         <button
           key={tab}
           onClick={() => onTabChange(tab)}
-          className={`relative z-10 flex-1 px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${
+          className={`relative z-10 flex-1 px-8 py-1.5 text-sm font-medium rounded-md transition-colors ${
             activeTab === tab ? 'text-gray-900' : 'text-gray-500 hover:text-gray-700'
           }`}
         >

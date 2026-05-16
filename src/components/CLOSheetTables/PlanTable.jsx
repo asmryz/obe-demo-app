@@ -42,7 +42,7 @@ export default function PlanTable({ closid }) {
             <div className="w-fit overflow-x-auto pr-8">
                 <table className="w-auto text-left border-collapse min-w-max">
                     <caption className="caption-top text-left pb-4 px-1">
-                        <h2 className="text-2xl font-normal text-gray-900">PLAN</h2>
+                        <h2 className="text-2xl font-normal text-gray-900">Plan</h2>
                         <p className="text-sm text-gray-500 mt-1">Detailed breakdown of marks mapped between assessment heads and course learning outcomes.</p>
                     </caption>
                     <thead>

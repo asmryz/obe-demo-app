@@ -118,7 +118,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
                     </div>
                 ))}
             </div>
-            <pre style={{ fontSize: "12px", height: "200px", overflowY: "auto" }}>{JSON.stringify(store.getState(), null, 2)}</pre>
+            {/* <pre style={{ fontSize: "12px", height: "200px", overflowY: "auto" }}>{JSON.stringify(store.getState(), null, 2)}</pre> */}
             {/* Bottom Section */}
             <div className="p-2 space-y-1 border-t border-gray-200">
                 {!isCollapsed && (
