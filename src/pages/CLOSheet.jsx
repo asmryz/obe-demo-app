@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { CloHeadTable, CloSummaryTable, PlanTable } from "../components/CLOSheetTables";
+import { CloAchievementCharts, CloHeadTable, CloSummaryTable, PlanTable } from "../components/CLOSheetTables";
 import { getArr, getClo, getHeadsCleaned, getPlan, ENUMS } from "../components/CLOSheetTables/CLOSheetHelpers";
 import Tabs from "../components/Tabs";
 import { useStore } from "../store";
@@ -172,9 +172,13 @@ export default function CLOSheet() {
                             : 'translate-x-8 opacity-0 pointer-events-none absolute inset-0'
                             }`}
                     >
-                        <div className="flex justify-center flex-col">
+                        <div className="flex justify-center flex-col ">
                             <CloHeadTable data={data} cloHdr={cloHdr} withdraws={withdraws} kpi={kpi} setKpi={setKpi} />
-                            <CloSummaryTable cloSummaryRows={cloSummaryRows} />
+
+                            <div className="flex flex-col gap-12 bg-gray-50/30 ">
+                                <CloSummaryTable cloSummaryRows={cloSummaryRows} />
+                                <CloAchievementCharts cloSummaryRows={cloSummaryRows} />
+                            </div>
                         </div>
                         {/* <AgentCards onOpenModal={() => setIsAgentModalOpen(true)} /> */}
                     </div>

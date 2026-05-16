@@ -60,10 +60,10 @@ export default function CloHeadTable({ data, cloHdr, withdraws, kpi, setKpi }) {
                                     {items.map((item, index) => (
                                         <th className="py-2 px-4 font-bold text-md text-blue-500 text-center bg-white" key={`clo-${cloKey}-item-${index}`}>{item.total}</th>
                                     ))}
-                                    <th className="py-2 px-4 font-semibold text-sm text-amber-600 bg-gray-50 text-center" key={`clo-${cloKey}-total-blank`}>
+                                    <th className="py-2 px-4 font-semibold text-md text-amber-500 bg-gray-50 text-center" key={`clo-${cloKey}-total-blank`}>
                                         {items.reduce((sum, item) => sum + (Number(item.total) || 0), 0)}
                                     </th>
-                                    <th className="py-2 px-4 font-semibold text-sm text-amber-600 border-r border-gray-200 bg-gray-50 text-center" key={`clo-${cloKey}-achieved-blank`}>{kpi}</th>
+                                    <th className="py-2 px-4 font-semibold text-md text-amber-500 border-r border-gray-200 bg-gray-50 text-center" key={`clo-${cloKey}-achieved-blank`}>{kpi}</th>
                                 </Fragment>
                             ))}
                         </tr>
@@ -85,7 +85,7 @@ export default function CloHeadTable({ data, cloHdr, withdraws, kpi, setKpi }) {
 
                                 let barBg = 'bg-gray-200';
                                 let barColor = 'bg-red-500';
-                                if (achievedPct >= kpi) {
+                                if (achievedPct >= 50) {
                                     if (achievedPct < 70) {
                                         barBg = 'bg-gray-100';
                                         barColor = 'bg-green-400';
