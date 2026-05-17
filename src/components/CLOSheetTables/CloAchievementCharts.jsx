@@ -43,7 +43,8 @@ export default function CloAchievementCharts({ cloSummaryRows }) {
                 backgroundColor: "#52ed69",
                 borderRadius: 4,
                 barPercentage: 0.8,
-                categoryPercentage: 0.6,
+                categoryPercentage: 0.7,
+                maxBarThickness: 60,
             },
             {
                 label: '% Not Achieved',
@@ -51,7 +52,8 @@ export default function CloAchievementCharts({ cloSummaryRows }) {
                 backgroundColor: "#149fef",
                 borderRadius: 4,
                 barPercentage: 0.8,
-                categoryPercentage: 0.6,
+                categoryPercentage: 0.7,
+                maxBarThickness: 60,
             }
         ],
     };
@@ -71,7 +73,7 @@ export default function CloAchievementCharts({ cloSummaryRows }) {
                 }
             },
             title: {
-                display: true,
+                display: false,
                 text: 'Visual Summary',
                 font: { size: 18, weight: "bold", family: "'Inter', sans-serif" },
                 color: '#111827',
@@ -86,10 +88,17 @@ export default function CloAchievementCharts({ cloSummaryRows }) {
                 offset: -2
             },
             tooltip: {
-                backgroundColor: '#bfcfe5ff',
-                padding: 12,
-                titleFont: { size: 14 },
-                bodyFont: { size: 13 },
+                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                titleColor: '#111827',
+                bodyColor: '#4b5563',
+                borderColor: '#e5e7eb',
+                borderWidth: 1,
+                padding: 16,
+                cornerRadius: 8,
+                boxPadding: 6,
+                usePointStyle: true,
+                titleFont: { size: 14, weight: 'bold', family: "'Inter', sans-serif" },
+                bodyFont: { size: 13, family: "'Inter', sans-serif" },
             }
         },
         scales: {
@@ -110,10 +119,17 @@ export default function CloAchievementCharts({ cloSummaryRows }) {
         },
     };
 
+    const chartWidth = Math.max(400, cloSummaryRows.length * 150);
+
     return (
-        <div className="bg-white p-8 shadow-sm">
-            <div className="h-[450px] w-full">
-                <Bar data={data} options={options} />
+        <div className="bg-white p-8 shadow-sm h-full flex flex-col">
+            {/* <div className="mb-6">
+                <h2 className="text-2xl font-normal text-gray-900">Visual Summary</h2>
+            </div> */}
+            <div className="w-full overflow-x-auto custom-scrollbar flex-1">
+                <div className="h-[450px] mx-auto" style={{ width: `${chartWidth}px` }}>
+                    <Bar data={data} options={options} />
+                </div>
             </div>
             <div className="mt-6 text-center border-t border-gray-50 pt-4">
                 <p className="text-sm text-gray-500 italic">Comparative analysis of student success rates across all Course Learning Outcomes</p>

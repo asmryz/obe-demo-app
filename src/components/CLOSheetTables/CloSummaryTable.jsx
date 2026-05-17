@@ -10,7 +10,7 @@ export default function CloSummaryTable({ cloSummaryRows }) {
                 </div>
             </div> */}
 
-            <div className="overflow-x-auto w-1/4">
+            <div className="overflow-x-auto w-3/4">
                 <table id="clo-summary" className="w-full text-left border-separate border-spacing-0 relative [&_th]:border-b [&_th]:border-gray-200 [&_td]:border-b [&_td]:border-gray-200">
                     <caption className="caption-top text-left pb-4 px-1">
                         <h2 className="text-2xl font-normal text-gray-900">CLO Achievement Summary</h2>

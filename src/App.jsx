@@ -32,7 +32,7 @@ const ErrorPage = () => {
     );
 };
 
-const Placeholder = ({ title }) => {
+export const Placeholder = ({ title }) => {
     const [isVisible, setIsVisible] = React.useState(false);
     React.useEffect(() => {
         setIsVisible(true);

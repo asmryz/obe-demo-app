@@ -175,9 +175,13 @@ export default function CLOSheet() {
                         <div className="flex justify-center flex-col ">
                             <CloHeadTable data={data} cloHdr={cloHdr} withdraws={withdraws} kpi={kpi} setKpi={setKpi} />
 
-                            <div className="flex flex-col gap-12 bg-gray-50/30 ">
-                                <CloSummaryTable cloSummaryRows={cloSummaryRows} />
-                                <CloAchievementCharts cloSummaryRows={cloSummaryRows} />
+                            <div className="flex flex-col 2xl:flex-row gap-12 items-stretch">
+                                <div className="w-full 2xl:w-1/3">
+                                    <CloSummaryTable cloSummaryRows={cloSummaryRows} />
+                                </div>
+                                <div className="w-full 2xl:w-2/3">
+                                    <CloAchievementCharts cloSummaryRows={cloSummaryRows} />
+                                </div>
                             </div>
                         </div>
                         {/* <AgentCards onOpenModal={() => setIsAgentModalOpen(true)} /> */}
