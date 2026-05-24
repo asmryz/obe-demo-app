@@ -66,3 +66,35 @@ export function getPlan(headsCleaned, data) {
         }
     })
 }
+
+export function getHdr(data) {
+    if (!data || !data[ENUMS.HEADS]) return [];
+    const hdrObj = data[ENUMS.HEADS].reduce((acc, item) => {
+        let cleanItem = (typeof item === 'string') ? item.replace(/\s*Paper\s*1/g, '') : item;
+        if (cleanItem !== null) {
+            acc.lastKey = cleanItem
+            acc.result[cleanItem] = { head: cleanItem, span: 1 }
+        } else if (acc.lastKey) {
+            acc.result[acc.lastKey].span += 1
+        }
+        return acc
+    }, { lastKey: '', result: {} })
+    return Object.values(hdrObj.result)
+}
+
+export function getRecapHeads(hdr) {
+    return hdr.slice(3)
+}
+
+export function getRecapHeadRanges(recapHeads) {
+    return recapHeads.reduce((acc, head) => {
+        const lastEnd = acc.length ? acc[acc.length - 1].end : 3
+        acc.push({
+            head: typeof head.head === 'string' ? head.head.replace(/\s*Paper\s*1/g, '') : head.head,
+            start: lastEnd,
+            end: lastEnd + head.span
+        })
+        return acc
+    }, [])
+}
+

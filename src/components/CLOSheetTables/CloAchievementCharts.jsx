@@ -104,7 +104,7 @@ export default function CloAchievementCharts({ cloSummaryRows }) {
         scales: {
             y: {
                 beginAtZero: true,
-                max: 120,
+                max: 110,
                 grid: { color: '#f3f4f6' },
                 ticks: {
                     stepSize: 10,

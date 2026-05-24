@@ -6,4 +6,6 @@ export { default as CloHeadTable } from './CloHeadTable';
 export { default as CloSummaryTable } from './CloSummaryTable';
 export { default as CloAchievementCharts } from './CloAchievementCharts';
 export { default as CohortPloAchievementTable } from './CohortPloAchievementTable';
+export { GradeSummaryTable, GradeDistributionChart } from './GradeSummary';
 export * from './CLOSheetHelpers';
+

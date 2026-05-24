@@ -1,7 +1,114 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { CloAchievementCharts, CloHeadTable, CloSummaryTable, PlanTable } from "../components/CLOSheetTables";
-import { getArr, getClo, getHeadsCleaned, getPlan, ENUMS } from "../components/CLOSheetTables/CLOSheetHelpers";
+import { CloAchievementCharts, CloHeadTable, CloSummaryTable, PlanTable, RecapSheetTable, GradeSummaryTable, GradeDistributionChart, HeadCloTable } from "../components/CLOSheetTables";
+import { getArr, getClo, getHeadsCleaned, getPlan, ENUMS, getHdr, getRecapHeads, getRecapHeadRanges, grades } from "../components/CLOSheetTables/CLOSheetHelpers";
+
+if (typeof window !== 'undefined' && !window.customElements.get('leo-navdots')) {
+    window.customElements.define('leo-navdots', class extends HTMLElement {
+        static get observedAttributes() { return ['activedot', 'dotcount']; }
+        constructor() {
+            super();
+            this.attachShadow({ mode: 'open', delegatesFocus: true });
+        }
+        attributeChangedCallback() {
+            this.render();
+        }
+        connectedCallback() {
+            this.render();
+        }
+        render() {
+            const activeDot = parseInt(this.getAttribute('activedot') || '1', 10);
+            const dotCount = parseInt(this.getAttribute('dotcount') || '2', 10);
+            const currentDotIndex = activeDot - 1;
+
+            const dotsHtml = Array.from({ length: dotCount }, (_, i) => {
+                const isActive = i === currentDotIndex;
+                return `<li class="svelte-1i791e4">
+                    <button class="dot svelte-1i791e4 ${isActive ? 'active' : ''}" aria-current="${isActive ? 'true' : 'false'}" aria-label="Page ${i + 1}" data-index="${i}"></button>
+                </li>`;
+            }).join('');
+
+            this.shadowRoot.innerHTML = `
+                <style>
+                    :root{--leo-direction:1}:root[dir=rtl]{--leo-direction:-1}:host{display:block}
+                    .leo-navdots.svelte-1i791e4{
+                        --dot-size: var(--leo-navdots-size, 8px);
+                        --expanded-dot-size: var(--leo-navdots-expanded-size, calc(var(--dot-size) + var(--dot-spacing)));
+                        --dot-spacing: var(--leo-navdots-spacing, 10px);
+                        --dot-vertical-margin: var(--leo-navdots-vertical-margin, 1px);
+                        --transition-duration: var(--leo-navdots-transition-duration, 0.2s);
+                        --transition-easing: var(--leo-navdots-easing, ease-in-out);
+                        --active-dot-color: var(--leo-navdots-active-color, #4f46e5);
+                        --active-dot-color-hover: var(--leo-navdots-active-color-hover, #4338ca);
+                        --dot-color: var(--leo-navdots-color, #e2e8f0);
+                        --dot-color-hover: var(--leo-navdots-color-hover, #cbd5e1);
+                        --current-dot: ${currentDotIndex};
+                        display: flex;
+                        flex-direction: row;
+                        justify-content: center;
+                    }
+                    .leo-navdots.svelte-1i791e4 .dot-container.svelte-1i791e4{
+                        display: flex;
+                        flex-direction: row;
+                        gap: var(--dot-spacing);
+                        position: relative;
+                        padding: 0 calc(var(--dot-spacing) / 2);
+                        margin: 0;
+                        list-style: none;
+                    }
+                    .leo-navdots.svelte-1i791e4 .dot-container.svelte-1i791e4>li.svelte-1i791e4{
+                        display: flex;
+                    }
+                    .leo-navdots.svelte-1i791e4 .dot.svelte-1i791e4{
+                        all: unset;
+                        cursor: pointer;
+                        -webkit-tap-highlight-color: transparent;
+                        margin: var(--dot-vertical-margin) 0;
+                        width: var(--dot-size);
+                        height: var(--dot-size);
+                        border-radius: var(--dot-size);
+                        background: var(--dot-color);
+                        transition: background-color var(--transition-duration) var(--transition-easing), box-shadow var(--transition-duration) var(--transition-easing);
+                    }
+                    .leo-navdots.svelte-1i791e4 .dot.svelte-1i791e4:hover{
+                        background-color: var(--dot-color-hover);
+                    }
+                    .leo-navdots.svelte-1i791e4 .active-dot.svelte-1i791e4{
+                        cursor: pointer;
+                        position: absolute;
+                        transition: transform var(--transition-duration) var(--transition-easing), box-shadow var(--transition-duration) var(--transition-easing);
+                        transform: translate(calc(((var(--dot-size) + var(--dot-spacing)) * var(--current-dot) - var(--dot-spacing) / 2) * var(--leo-direction, 1)), 0);
+                        width: calc(var(--dot-size) + var(--dot-spacing));
+                        height: calc(var(--dot-size) + var(--dot-vertical-margin) * 2);
+                        border-radius: var(--dot-size);
+                        background: var(--active-dot-color);
+                    }
+                    .leo-navdots.svelte-1i791e4 .active-dot.svelte-1i791e4:hover{
+                        background: var(--active-dot-color-hover);
+                    }
+                </style>
+                <nav class="leo-navdots svelte-1i791e4" aria-label="Pagination">
+                    <ol class="dot-container svelte-1i791e4" style="--current-dot: ${currentDotIndex}">
+                        ${dotsHtml}
+                        <li aria-hidden="true" class="active-dot svelte-1i791e4"></li>
+                    </ol>
+                </nav>
+            `;
+
+            this.shadowRoot.querySelectorAll('.dot').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const idx = parseInt(button.getAttribute('data-index'), 10);
+                    this.setAttribute('activedot', String(idx + 1));
+                    this.dispatchEvent(new CustomEvent('dotchange', {
+                        detail: { activeDot: idx + 1 },
+                        bubbles: true,
+                        composed: true
+                    }));
+                });
+            });
+        }
+    });
+}
 import Tabs from "../components/Tabs";
 import { useStore } from "../store";
 import { useRef } from "react";
@@ -11,19 +118,31 @@ import { MessageSquare } from "lucide-react";
 import { HelpCircle } from "lucide-react";
 import { Download } from "lucide-react";
 import { Share2 } from "lucide-react";
-import { Settings } from "lucide-react";
-import { useMemo } from "react";
+import { Settings, BookOpen, GraduationCap, User } from "lucide-react";
+import { useMemo, useCallback } from "react";
 
 export default function CLOSheet() {
     const { closid } = useParams();
     const [isVisible, setIsVisible] = useState(false);
     const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
     const moreMenuRef = useRef(null);
-    const tabs = ['Plan', 'CLO Sheet']
+    const tabs = ['Plan', 'CLO Sheet', 'Recap Sheet']
     const [activeTab, setActiveTab] = useState(tabs[0]);
     const [kpi, setKpi] = useState(50);
+    const [activeDot, setActiveDot] = useState(1);
 
-    const { closheet, getCLOSheet } = useStore();
+    const navdotsRef = useCallback((node) => {
+        if (node) {
+            const handleDotChange = (e) => {
+                setActiveDot(e.detail.activeDot);
+            };
+            node.addEventListener('dotchange', handleDotChange);
+            // Store the listener on the node to allow clean up
+            node._handleDotChange = handleDotChange;
+        }
+    }, []);
+
+    const { closheet, getCLOSheet, recap, recaps, getRecaps } = useStore();
 
     useEffect(() => {
         if (closid) {
@@ -31,6 +150,19 @@ export default function CLOSheet() {
         }
         setIsVisible(true);
     }, [closid, getCLOSheet]);
+
+    useEffect(() => {
+        if (!recaps || recaps.length === 0) {
+            getRecaps();
+        }
+    }, [recaps, getRecaps]);
+
+    const currentRecap = useMemo(() => {
+        if (recap && String(recap.closid) === String(closid)) {
+            return recap;
+        }
+        return recaps.find(r => String(r.closid) === String(closid));
+    }, [recap, recaps, closid]);
 
     // Close menu when clicking outside
     useEffect(() => {
@@ -55,6 +187,33 @@ export default function CLOSheet() {
     const headsCleaned = getHeadsCleaned(data);
     const PLAN = getPlan(headsCleaned, data);
     const cloHdr = Object.entries(Object.groupBy(PLAN, ({ clo }) => clo));
+    const hdr = getHdr(data);
+    const recapHeads = getRecapHeads(hdr);
+    const recapHeadRanges = getRecapHeadRanges(recapHeads);
+
+    const gradeSummaryData = useMemo(() => {
+        if (!hasSheetData || !data || data.length <= 3) return { chartData: {}, totalStudents: 0 };
+
+        const chartData = Object.fromEntries(grades.map((g) => [g.grade, 0]));
+        chartData['W'] = 0; // Support withdrawn students
+
+        let totalStudents = 0;
+
+        data.slice(3).forEach((row) => {
+            if (!row || row.length < 3) return;
+            totalStudents++;
+            const isWithdrawn = withdraws.includes(row[2]) || withdraws.includes(String(row[2]));
+            const totalScore = Math.round(row.slice(3).reduce((total, mark) => total + (Number(mark) || 0), 0).toFixed(2));
+            const gradeObj = grades.find(({ start, end }) => totalScore >= start && totalScore <= end);
+            const gradeName = gradeObj?.grade;
+            const finalGrade = isWithdrawn && gradeName === 'F' ? 'W' : gradeName;
+            if (finalGrade) {
+                chartData[finalGrade] = (chartData[finalGrade] || 0) + 1;
+            }
+        });
+
+        return { chartData, totalStudents };
+    }, [data, hasSheetData, withdraws]);
 
     const cloSummaryRows = useMemo(() => {
         if (!cloHdr.length || !data.length) return [];
@@ -85,20 +244,59 @@ export default function CLOSheet() {
         <div className={`h-full overflow-y-auto px-16 py-6 custom-scrollbar flex flex-col transition-all duration-300 ease-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
             <div className="max-w-full w-full flex-1 flex flex-col">
                 <h2 className="text-3xl font-normal text-gray-900 mb-8">OBE</h2>
-                {/* Apps content goes here */}
-                {closid}
 
-                <div className="flex items-center justify-between mb-6">
+                <div className="flex items-start justify-between align-top mb-6">
 
-                    <Tabs
-                        tabs={tabs}
-                        activeTab={activeTab}
-                        onTabChange={setActiveTab}
-                    />
+                    {/* Card and Tabs on Left */}
+                    <div className="flex items-start gap-8">
+                        {currentRecap ? (
+                            <div className="flex flex-col justify-center bg-gradient-to-r from-slate-50 to-indigo-50/20 border border-slate-200/60 rounded-2xl px-6 min-h-24 py-4 shadow-sm transition-all duration-200 hover:shadow-md hover:border-slate-300 min-w-[460px]">
+                                {/* Row 1: Code & Title on left, Semester on right */}
+                                <div className="flex items-start justify-between gap-8">
+                                    <div className="flex items-start gap-3">
+                                        <span className="px-2.5 py-1 rounded-lg bg-indigo-600 text-white font-mono text-xs font-bold tracking-wide shadow-sm shadow-indigo-100 flex-shrink-0">
+                                            {currentRecap.code}
+                                        </span>
+                                        <span className="font-extrabold text-slate-800 text-base inline-block max-w-[280px] whitespace-normal leading-snug" title={currentRecap.title}>
+                                            {currentRecap.title}
+                                        </span>
+                                    </div>
+                                    <span className="text-sm font-bold text-indigo-600 whitespace-nowrap bg-indigo-50 px-3 py-1 rounded-lg border border-indigo-100/50 flex-shrink-0">
+                                        {currentRecap.semester} {currentRecap.year}
+                                    </span>
+                                </div>
+
+                                {/* Row 2: Instructor on left (below Title), Batch on right (below Semester) */}
+                                <div className="flex items-center justify-between gap-8 mt-3">
+                                    {currentRecap.name ? (
+                                        <span className="text-sm text-slate-600 font-semibold truncate max-w-[280px]" title={currentRecap.name}>
+                                            {currentRecap.name}
+                                        </span>
+                                    ) : (
+                                        <span />
+                                    )}
+                                    {currentRecap.batch ? (
+                                        <span className="px-2.5 py-1 bg-slate-100 text-slate-500 rounded-lg text-xs font-bold border border-slate-200/50 whitespace-nowrap flex-shrink-0">
+                                            {currentRecap.batch}
+                                        </span>
+                                    ) : (
+                                        <span />
+                                    )}
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="h-24 w-[460px] bg-slate-100 border border-slate-200/60 rounded-2xl animate-pulse" />
+                        )}
+
+                        <Tabs
+                            tabs={tabs}
+                            activeTab={activeTab}
+                            onTabChange={setActiveTab}
+                        />
+                    </div>
+
+                    {/* More Menu on Right */}
                     <div className="flex items-center gap-4">
-                        <button className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors">
-                            Start building &rarr;
-                        </button>
                         <div className="relative" ref={moreMenuRef}>
                             <button
                                 onClick={() => setIsMoreMenuOpen(!isMoreMenuOpen)}
@@ -153,11 +351,11 @@ export default function CLOSheet() {
                 </div>
 
                 <div className="relative flex-1">
-                    {/* Models Content */}
+                    {/* Plan Content */}
                     <div
                         className={`transition-all duration-500 ease-in-out ${activeTab === tabs[0]
                             ? 'translate-x-0 opacity-100'
-                            : '-translate-x-8 opacity-0 pointer-events-none absolute inset-0'
+                            : '-translate-x-8 opacity-0 pointer-events-none absolute inset-0 invisible h-0 overflow-hidden'
                             }`}
                     >
                         <div className="flex justify-center"><PlanTable closid={closid} /></div>
@@ -165,11 +363,11 @@ export default function CLOSheet() {
                         {/* <Table /> */}
                     </div>
 
-                    {/* Agents Content */}
+                    {/* CLO Sheet Content */}
                     <div
                         className={`transition-all duration-500 ease-in-out ${activeTab === tabs[1]
                             ? 'translate-x-0 opacity-100'
-                            : 'translate-x-8 opacity-0 pointer-events-none absolute inset-0'
+                            : 'translate-x-8 opacity-0 pointer-events-none absolute inset-0 invisible h-0 overflow-hidden'
                             }`}
                     >
                         <div className="flex justify-center flex-col ">
@@ -185,6 +383,79 @@ export default function CLOSheet() {
                             </div>
                         </div>
                         {/* <AgentCards onOpenModal={() => setIsAgentModalOpen(true)} /> */}
+                    </div>
+                    {/* Recap Content */}
+                    <div
+                        className={`transition-all duration-500 ease-in-out ${activeTab === tabs[2]
+                            ? 'translate-x-0 opacity-100'
+                            : 'translate-x-8 opacity-0 pointer-events-none absolute inset-0 invisible h-0 overflow-hidden'
+                            }`}
+                    >
+                        <style>{`
+                            .carousel-viewport {
+                                width: 100%;
+                                overflow: hidden;
+                                position: relative;
+                            }
+                            .carousel-track {
+                                display: flex;
+                                width: 200%;
+                                transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+                            }
+                            .carousel-slide {
+                                width: 50%;
+                                flex-shrink: 0;
+                                transition: opacity 0.4s ease-in-out;
+                            }
+                        `}</style>
+                        <div className="flex justify-center flex-col ">
+                            {/* recap navigation dots */}
+                            <div className="flex justify-center my-2">
+                                <leo-navdots
+                                    ref={navdotsRef}
+                                    dotcount="2"
+                                    activedot={activeDot}
+                                    style={{
+                                        '--leo-navdots-active-color': '#4f46e5',
+                                        '--leo-navdots-active-color-hover': '#4338ca',
+                                        '--leo-navdots-color': '#e2e8f0',
+                                        '--leo-navdots-color-hover': '#cbd5e1'
+                                    }}
+                                />
+                            </div>
+
+                            <div className="carousel-viewport">
+                                <div
+                                    className="carousel-track"
+                                    style={{ transform: `translate3d(${activeDot === 1 ? '0%' : '-50%'}, 0, 0)` }}
+                                >
+                                    {/* Slide 1: Recap Sheet */}
+                                    <div
+                                        className="carousel-slide px-1"
+                                        style={{ opacity: activeDot === 1 ? 1 : 0, pointerEvents: activeDot === 1 ? 'auto' : 'none' }}
+                                    >
+                                        <RecapSheetTable data={data} recapHeads={recapHeads} recapHeadRanges={recapHeadRanges} withdraws={withdraws} />
+
+                                        <div className="flex flex-col 2xl:flex-row gap-12 items-stretch mt-6">
+                                            <div className="w-full 2xl:w-1/3">
+                                                <GradeSummaryTable chartData={gradeSummaryData.chartData} totalStudents={gradeSummaryData.totalStudents} />
+                                            </div>
+                                            <div className="w-full 2xl:w-2/3">
+                                                <GradeDistributionChart chartData={gradeSummaryData.chartData} />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Slide 2: CLOwise Heads */}
+                                    <div
+                                        className="carousel-slide px-1"
+                                        style={{ opacity: activeDot === 2 ? 1 : 0, pointerEvents: activeDot === 2 ? 'auto' : 'none' }}
+                                    >
+                                        <HeadCloTable data={data} hdr={hdr} />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 

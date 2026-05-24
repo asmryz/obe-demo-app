@@ -14,14 +14,14 @@ const Tabs = ({ tabs, activeTab, onTabChange, className = '' }) => {
   const tabCount = tabs.length;
 
   return (
-    <div className={`flex bg-gray-100/80 p-1 rounded-lg relative min-w-[280px] ${className}`}>
+    <div className={`grid grid-flow-col auto-cols-fr bg-gray-100/80 p-1 rounded-lg relative min-w-[280px] ${className}`}>
       {/* Sliding Indicator */}
       {activeIndex !== -1 && (
         <div
           className="absolute h-[calc(100%-8px)] top-1 bg-white shadow-sm rounded-md transition-all duration-300 ease-out"
           style={{
-            width: `calc((100% - ${(tabCount + 1) * 4}px) / ${tabCount})`,
-            left: `calc(4px + ${activeIndex} * (100% - 4px) / ${tabCount})`,
+            width: `calc((100% - 8px) / ${tabCount})`,
+            left: `calc(4px + ${activeIndex} * (100% - 8px) / ${tabCount})`,
           }}
         />
       )}
@@ -30,7 +30,7 @@ const Tabs = ({ tabs, activeTab, onTabChange, className = '' }) => {
         <button
           key={tab}
           onClick={() => onTabChange(tab)}
-          className={`relative z-10 flex-1 px-8 py-1.5 text-sm font-medium rounded-md transition-colors ${
+          className={`relative z-10 w-full px-4 py-1.5 text-sm font-medium rounded-md transition-colors whitespace-nowrap text-center flex items-center justify-center ${
             activeTab === tab ? 'text-gray-900' : 'text-gray-500 hover:text-gray-700'
           }`}
         >

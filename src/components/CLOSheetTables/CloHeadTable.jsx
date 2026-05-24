@@ -27,8 +27,7 @@ export default function CloHeadTable({ data, cloHdr, withdraws, kpi, setKpi }) {
             </div>
 
             <div
-                className="w-full overflow-y-auto overflow-x-auto border-t border-gray-200 custom-scrollbar"
-                style={{ height: '500px' }}
+                className="w-full max-h-[600px] overflow-y-auto overflow-x-auto border-t border-gray-200 custom-scrollbar"
             >
                 <table id="clo-head" className="w-full text-left border-separate border-spacing-0 relative [&_th]:border-b [&_th]:border-gray-200 [&_td]:border-b [&_td]:border-gray-200">
 

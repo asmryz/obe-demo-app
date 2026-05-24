@@ -5,7 +5,7 @@ import { Search } from 'lucide-react';
 import { store, useStore } from '../store';
 import { useNavigate } from 'react-router-dom';
 
-const Table = ({ data = [], onSearch }) => {
+const Table = ({ data = [], onSearch, getRecapSheet }) => {
     const navigate = useNavigate();
     // console.log(data);
     const renderBatchTag = (batch) => {
@@ -68,6 +68,7 @@ const Table = ({ data = [], onSearch }) => {
 
     const handleSelectCourse = (recap) => {
         console.log(recap);
+        getRecapSheet(recap);
         store.getState().setRecap(recap);
         if (recap.closid) {
             navigate(`/closheet/${recap.closid}`);
