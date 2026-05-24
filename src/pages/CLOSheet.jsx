@@ -1,7 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useParams } from "react-router-dom";
-import { CloAchievementCharts, CloHeadTable, CloSummaryTable, PlanTable, RecapSheetTable, GradeSummaryTable, GradeDistributionChart, HeadCloTable } from "../components/CLOSheetTables";
-import { getArr, getClo, getHeadsCleaned, getPlan, ENUMS, getHdr, getRecapHeads, getRecapHeadRanges, grades } from "../components/CLOSheetTables/CLOSheetHelpers";
+import { CloAchievementCharts, CloHeadTable, CloSummaryTable, PlanTable, RecapSheetTable, GradeSummaryTable, GradeDistributionChart, HeadCloTable, CohortPloAchievementTable } from "../components/CLOSheetTables";
+import { getArr, getClo, getHeadsCleaned, getPlan, ENUMS, getHdr, getRecapHeads, getRecapHeadRanges, grades, groupPlanByFirstWord } from "../components/CLOSheetTables/CLOSheetHelpers";
+import Tabs from "../components/Tabs";
+import { useStore } from "../store";
+import { useRef } from "react";
+import { MoreVertical, Trash2, MessageSquare, HelpCircle, Download, Share2, Settings, Printer } from "lucide-react";
+import CRRReport from "../components/CLOSheetTables/CRRReport";
+import { useReactToPrint } from 'react-to-print';
+
 
 if (typeof window !== 'undefined' && !window.customElements.get('leo-navdots')) {
     window.customElements.define('leo-navdots', class extends HTMLElement {
@@ -109,27 +116,22 @@ if (typeof window !== 'undefined' && !window.customElements.get('leo-navdots')) 
         }
     });
 }
-import Tabs from "../components/Tabs";
-import { useStore } from "../store";
-import { useRef } from "react";
-import { MoreVertical } from "lucide-react";
-import { Trash2 } from "lucide-react";
-import { MessageSquare } from "lucide-react";
-import { HelpCircle } from "lucide-react";
-import { Download } from "lucide-react";
-import { Share2 } from "lucide-react";
-import { Settings, BookOpen, GraduationCap, User } from "lucide-react";
-import { useMemo, useCallback } from "react";
 
 export default function CLOSheet() {
     const { closid } = useParams();
     const [isVisible, setIsVisible] = useState(false);
     const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
     const moreMenuRef = useRef(null);
-    const tabs = ['Plan', 'CLO Sheet', 'Recap Sheet']
+    const tabs = ['Plan', 'CLO Sheet', 'Recap Sheet', 'PLO (Cohort)', 'CRR Report']
     const [activeTab, setActiveTab] = useState(tabs[0]);
     const [kpi, setKpi] = useState(50);
     const [activeDot, setActiveDot] = useState(1);
+    const printRef = useRef();
+    const handlePrint = useReactToPrint({
+        contentRef: printRef,
+        // documentTitle: "My Document",
+    });
+
 
     const navdotsRef = useCallback((node) => {
         if (node) {
@@ -142,7 +144,43 @@ export default function CLOSheet() {
         }
     }, []);
 
-    const { closheet, getCLOSheet, recap, recaps, getRecaps } = useStore();
+    const {
+        closheet,
+        getCLOSheet,
+        recap,
+        recaps,
+        getRecaps,
+        setGradeChart,
+        setRecap,
+        setGroupedPlanTotals,
+        setCalCLOs,
+        setAggPLOs,
+        setCLOSid,
+        setWithdraws,
+        gradeChart: globalGradeChart,
+        recap: globalRecap,
+        groupedPlanTotals: globalGroupedPlanTotals,
+        calCLOs: globalCalCLOs,
+        aggPLOs: globalAggPLOs,
+        cloSid: globalCloSid,
+        withdraws: globalWithdraws
+    } = useStore();
+
+    useEffect(() => {
+        const handlePrintShortcut = (event) => {
+            if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'p') {
+                event.preventDefault()
+                handlePrint()
+            }
+        }
+
+        window.addEventListener('keydown', handlePrintShortcut)
+
+        return () => {
+            window.removeEventListener('keydown', handlePrintShortcut)
+        }
+    }, [handlePrint])
+
 
     useEffect(() => {
         if (closid) {
@@ -157,13 +195,6 @@ export default function CLOSheet() {
         }
     }, [recaps, getRecaps]);
 
-    const currentRecap = useMemo(() => {
-        if (recap && String(recap.closid) === String(closid)) {
-            return recap;
-        }
-        return recaps.find(r => String(r.closid) === String(closid));
-    }, [recap, recaps, closid]);
-
     // Close menu when clicking outside
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -175,7 +206,23 @@ export default function CLOSheet() {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const { data: rawData, withdraws = [] } = closheet ?? {};
+    const { data: rawData, withdraws = [], clo: sheetClo = [] } = closheet ?? {};
+
+    const currentRecap = useMemo(() => {
+        let r = null;
+        if (recap && String(recap.closid) === String(closid)) {
+            r = recap;
+        } else {
+            r = recaps.find(r => String(r.closid) === String(closid));
+        }
+        if (r) {
+            return {
+                ...r,
+                clo: sheetClo && sheetClo.length > 0 ? sheetClo : (r.clo ?? [])
+            };
+        }
+        return null;
+    }, [recap, recaps, closid, sheetClo]);
     const hasSheetData = Array.isArray(rawData)
         && Array.isArray(rawData[ENUMS.HEADS])
         && Array.isArray(rawData[ENUMS.CLO])
@@ -190,6 +237,108 @@ export default function CLOSheet() {
     const hdr = getHdr(data);
     const recapHeads = getRecapHeads(hdr);
     const recapHeadRanges = getRecapHeadRanges(recapHeads);
+
+    const groupedPlanTotals = useMemo(() => {
+        return groupPlanByFirstWord(PLAN);
+    }, [PLAN]);
+
+    const calCLOs = useMemo(() => {
+        if (!hasSheetData || !data || data.length <= 3) return [];
+        return data.slice(3).map((row) => {
+            const studentCLOs = {
+                regno: row[2]?.toString() ?? '',
+                name: row[1]
+            };
+
+            cloHdr.forEach(([cloKey, items]) => {
+                const isWithdrawn = withdraws.includes(row[2])
+                    || withdraws.includes(String(row[2]));
+                const stdTotal = items.reduce((sum, item) => sum + (Number(row[item.sno + 2]) || 0), 0);
+                const cloTotal = items.reduce((sum, item) => sum + (Number(item.total) || 0), 0);
+                const achieved = cloTotal ? (stdTotal / cloTotal * 100) : 0;
+                studentCLOs[`CLO${cloKey}`] = isWithdrawn ? 0 : achieved < kpi ? 0 : 1;
+            });
+
+            return studentCLOs;
+        });
+    }, [hasSheetData, data, cloHdr, withdraws, kpi]);
+
+    const cohortData = useMemo(() => {
+        if (!hasSheetData || !data || data.length <= 3) {
+            return { cohort: [], cohortPloColumns: [], totals: {} };
+        }
+
+        const cloList = sheetClo && sheetClo.length > 0 ? sheetClo : (currentRecap?.clo ?? []);
+        const ploMap = cloList.reduce((acc, cloRow) => {
+            const cloNo = Number(cloRow.clo);
+            const ploNo = Number(cloRow.plo);
+            if (!Number.isNaN(cloNo) && !Number.isNaN(ploNo)) {
+                acc[cloNo] = ploNo;
+            }
+            return acc;
+        }, {});
+
+        const totals = {};
+        const cohort = data.slice(3).map((row) => {
+            const stdPLOs = {
+                regno: row[2]?.toString() ?? '',
+                name: row[1]
+            };
+            const cohortItem = { ...stdPLOs };
+
+            cloHdr.forEach(([cloKey, items]) => {
+                const stdTotal = items.reduce((sum, item) => sum + (Number(row[item.sno + 2]) || 0), 0);
+                const cloTotal = items.reduce((sum, item) => sum + (Number(item.total) || 0), 0);
+                const ploKey = ploMap[cloKey];
+                if (!ploKey) {
+                    return;
+                }
+
+                stdPLOs[`PLO${ploKey}`] = stdPLOs[`PLO${ploKey}`] || [0, 0];
+                stdPLOs[`PLO${ploKey}`][0] += stdTotal;
+                stdPLOs[`PLO${ploKey}`][1] += cloTotal;
+                cohortItem[`PLO${ploKey}`] = stdPLOs[`PLO${ploKey}`][0];
+                totals[`PLO${ploKey}`] = stdPLOs[`PLO${ploKey}`][1];
+            });
+            return cohortItem;
+        });
+
+        const cohortPloColumns = Array.from(
+            new Set(cohort.flatMap((student) => Object.keys(student).filter((key) => key.startsWith('PLO'))))
+        ).sort((a, b) => Number(a.replace('PLO', '')) - Number(b.replace('PLO', '')));
+
+        return { cohort, cohortPloColumns, totals };
+    }, [hasSheetData, data, sheetClo, currentRecap, cloHdr]);
+
+    const aggPLOs = useMemo(() => {
+        const { cohort, cohortPloColumns, totals } = cohortData;
+        if (!cohort || cohort.length === 0) return {};
+
+        return cohort.reduce((acc, student) => {
+            const { regno, name, ...stdPLOTotal } = student;
+            const stdTotal = Math.round(Object.values(stdPLOTotal).reduce((sum, val) => sum + (Number(val) || 0), 0));
+            const grade = grades.find(({ start, end }) => stdTotal >= start && stdTotal <= end)?.grade ?? '';
+
+            cohortPloColumns.forEach((ploKey) => {
+                const studentPlo = Number(student[ploKey]) || 0;
+                const ploTotal = Number(totals[ploKey]) || 0;
+                const achieved = ploTotal ? (studentPlo / ploTotal * 100) : 0;
+                const achievedFlag = grade === 'F' ? 0 : achieved < kpi ? 0 : 1;
+
+                acc[ploKey] = acc[ploKey] || { achieved: 0, notAchieved: 0, students: [] };
+                acc[ploKey].achieved += achievedFlag;
+                acc[ploKey].notAchieved += grade !== 'F' && achievedFlag === 0 ? 1 : 0;
+                if (grade !== 'F' && achievedFlag === 0) {
+                    acc[ploKey].students.push({
+                        regno: student.regno,
+                        name: student.name,
+                    });
+                }
+            });
+
+            return acc;
+        }, {});
+    }, [cohortData, kpi]);
 
     const gradeSummaryData = useMemo(() => {
         if (!hasSheetData || !data || data.length <= 3) return { chartData: {}, totalStudents: 0 };
@@ -240,6 +389,64 @@ export default function CLOSheet() {
             return [cloKey, [achievedCount, notAchievedCount]];
         });
     }, [cloHdr, data, withdraws, kpi]);
+
+    // Sync calculated local states to zustand store so they are available globally (e.g. for CRR Report)
+    useEffect(() => {
+        if (!hasSheetData) return;
+
+        const calculatedGradeChart = gradeSummaryData.chartData;
+
+        if (JSON.stringify(calculatedGradeChart) !== JSON.stringify(globalGradeChart)) {
+            setGradeChart(calculatedGradeChart);
+        }
+
+        if (currentRecap && JSON.stringify(currentRecap) !== JSON.stringify(globalRecap)) {
+            setRecap(currentRecap);
+        }
+
+        if (JSON.stringify(groupedPlanTotals) !== JSON.stringify(globalGroupedPlanTotals)) {
+            setGroupedPlanTotals(groupedPlanTotals);
+        }
+
+        if (JSON.stringify(calCLOs) !== JSON.stringify(globalCalCLOs)) {
+            setCalCLOs(calCLOs);
+        }
+
+        if (JSON.stringify(aggPLOs) !== JSON.stringify(globalAggPLOs)) {
+            setAggPLOs(aggPLOs);
+        }
+
+        if (closid && closid !== globalCloSid) {
+            setCLOSid(closid);
+        }
+
+        if (JSON.stringify(withdraws) !== JSON.stringify(globalWithdraws)) {
+            setWithdraws(withdraws);
+        }
+    }, [
+        hasSheetData,
+        gradeSummaryData.chartData,
+        globalGradeChart,
+        setGradeChart,
+        currentRecap,
+        globalRecap,
+        setRecap,
+        groupedPlanTotals,
+        globalGroupedPlanTotals,
+        setGroupedPlanTotals,
+        calCLOs,
+        globalCalCLOs,
+        setCalCLOs,
+        aggPLOs,
+        globalAggPLOs,
+        setAggPLOs,
+        closid,
+        globalCloSid,
+        setCLOSid,
+        withdraws,
+        globalWithdraws,
+        setWithdraws
+    ]);
     return (
         <div className={`h-full overflow-y-auto px-16 py-6 custom-scrollbar flex flex-col transition-all duration-300 ease-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
             <div className="max-w-full w-full flex-1 flex flex-col">
@@ -308,42 +515,60 @@ export default function CLOSheet() {
 
                             {isMoreMenuOpen && (
                                 <div className="absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded-xl shadow-md z-50 py-2 animate-in fade-in zoom-in duration-200 origin-top-right">
-                                    <div className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                                        Playground Actions
-                                    </div>
-                                    <button className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors">
-                                        <Settings size={18} className="text-gray-400" />
-                                        <span>View settings</span>
-                                    </button>
-                                    <button className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors">
-                                        <Share2 size={18} className="text-gray-400" />
-                                        <span>Share playground</span>
-                                    </button>
-                                    <button className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors">
-                                        <Download size={18} className="text-gray-400" />
-                                        <span>Export configuration</span>
-                                    </button>
 
-                                    <div className="h-px bg-gray-100 my-2" />
+                                    {activeTab === tabs[4] && (
+                                        <>
+                                            <div className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                                                Options
+                                            </div>
+                                            <button onClick={() => { handlePrint(); setIsMoreMenuOpen(false); }} className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors">
+                                                <Printer size={18} className="text-gray-400" />
+                                                <span>Print Report</span>
+                                            </button>
 
-                                    <div className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                                        Support
-                                    </div>
-                                    <button className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors">
-                                        <HelpCircle size={18} className="text-gray-400" />
-                                        <span>Help & documentation</span>
-                                    </button>
-                                    <button className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors">
-                                        <MessageSquare size={18} className="text-gray-400" />
-                                        <span>Send feedback</span>
-                                    </button>
+                                        </>
+                                    )}
 
-                                    <div className="h-px bg-gray-100 my-2" />
+                                    {activeTab !== tabs[4] && (
+                                        <>
+                                            <div className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                                                Playground Actions
+                                            </div>
+                                            <button className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors">
+                                                <Settings size={18} className="text-gray-400" />
+                                                <span>View settings</span>
+                                            </button>
+                                            <button className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors">
+                                                <Share2 size={18} className="text-gray-400" />
+                                                <span>Share playground</span>
+                                            </button>
+                                            <button className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors">
+                                                <Download size={18} className="text-gray-400" />
+                                                <span>Export configuration</span>
+                                            </button>
 
-                                    <button className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors">
-                                        <Trash2 size={18} className="text-red-400" />
-                                        <span>Reset to default</span>
-                                    </button>
+                                            <div className="h-px bg-gray-100 my-2" />
+
+                                            <div className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                                                Support
+                                            </div>
+                                            <button className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors">
+                                                <HelpCircle size={18} className="text-gray-400" />
+                                                <span>Help & documentation</span>
+                                            </button>
+                                            <button className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors">
+                                                <MessageSquare size={18} className="text-gray-400" />
+                                                <span>Send feedback</span>
+                                            </button>
+
+                                            <div className="h-px bg-gray-100 my-2" />
+
+                                            <button className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors">
+                                                <Trash2 size={18} className="text-red-400" />
+                                                <span>Reset to default</span>
+                                            </button>
+                                        </>
+                                    )}
                                 </div>
                             )}
                         </div>
@@ -455,6 +680,43 @@ export default function CLOSheet() {
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+
+                    {/* PLO (Cohort) Content */}
+                    <div
+                        className={`transition-all duration-500 ease-in-out ${activeTab === tabs[3]
+                            ? 'translate-x-0 opacity-100'
+                            : 'translate-x-8 opacity-0 pointer-events-none absolute inset-0 invisible h-0 overflow-hidden'
+                            }`}
+                    >
+                        <div className="flex justify-center flex-col">
+                            <CohortPloAchievementTable
+                                cohort={cohortData.cohort}
+                                cohortPloColumns={cohortData.cohortPloColumns}
+                                totals={cohortData.totals}
+                                kpi={kpi}
+                                withdraws={withdraws}
+                            />
+                        </div>
+                    </div>
+
+
+                    {/* CRR Report Content */}
+                    <div
+                        className={`transition-all duration-500 ease-in-out ${activeTab === tabs[4]
+                            ? 'translate-x-0 opacity-100'
+                            : 'translate-x-8 opacity-0 pointer-events-none absolute inset-0 invisible h-0 overflow-hidden'
+                            }`}
+                    >
+                        <div className="flex justify-center flex-col" ref={printRef}>
+                            {/* <Printer
+                                size={20}
+                                onClick={handlePrint}
+                                className="no-print cursor-pointer "
+                                title="Print Report"
+                            /> */}
+                            <CRRReport />
                         </div>
                     </div>
                 </div>

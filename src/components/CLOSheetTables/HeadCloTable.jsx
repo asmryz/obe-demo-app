@@ -70,16 +70,21 @@ export default function HeadCloTable({ data, hdr }) {
                             >
                                 {row.map((cell, cellIndex) => {
                                     const bgClass = getColumnBg(cellIndex);
+                                    const isFirstRow = rowIndex === 0;
                                     const isSecondRow = rowIndex === 1;
-                                    const textColorClass = isSecondRow ? 'text-blue-600 font-bold text-md' : 'text-gray-600 text-sm';
+                                    const textColorClass = isFirstRow
+                                        ? 'text-amber-600 font-bold text-md'
+                                        : isSecondRow
+                                            ? 'text-blue-600 font-bold text-md'
+                                            : 'text-gray-600 text-sm';
                                     return (
                                         <td
                                             key={`cell-${rowIndex + 1}-${cellIndex}`}
                                             className={`py-1.5 px-3 ${textColorClass} ${bgClass}`}
                                             style={{
                                                 textAlign: cellIndex === 1 ? 'left' : 'center',
-                                                fontWeight: isSecondRow ? '700' : (cellIndex === 1 ? '600' : 'normal'),
-                                                color: isSecondRow ? '#2563eb' : (cellIndex === 1 ? '#111827' : '#4b5563')
+                                                fontWeight: isFirstRow || isSecondRow ? '700' : (cellIndex === 1 ? '600' : 'normal'),
+                                                color: isFirstRow ? '#fe9a00' : isSecondRow ? '#2563eb' : (cellIndex === 1 ? '#111827' : '#4b5563')
                                             }}
                                         >
                                             {cellIndex > 2 ? Number(cell).toString() : cell ?? ''}

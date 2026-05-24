@@ -6,21 +6,81 @@ import { api } from "../api";
 const createUseStore = (store) => (selector, equals) =>
     useZustandStore(store, selector, equals);
 
+const parseWithdraws = (value) => {
+  if (Array.isArray(value)) return value;
+
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+
+  return [];
+};
+
 export const store = createStore()(
     persist(
-        (set) => ({
+        (set, get) => ({
             initialized: false,
             signedIn: false,
-            recap:null,
-            closheet:null,
+            recap: null,
+            closheet: null,
             recaps: [],
             recapPgNo: { currentPage: 1, recapsPerPage: 10, selectedSemester: 'All', selectedYear: 'All', searchQuery: '' },
             
+            // CLO Sheet, PLO, and Report states
+            cloSid: null,
+            gradeChart: {},
+            groupedPlanTotals: {},
+            calCLOs: [],
+            aggPLOs: {},
+            withdraws: [],
+            report: {},
+
             signIn: () => set({ signedIn: true }),
             signOut: () => set({ signedIn: false }),
             setRecaps: (recaps) => set({ recaps }),
             setRecap: (recap) => set({ recap }),
             setClosheet: (closheet) => set({ closheet }),
+            
+            // Setters for sheet states
+            setCLOSid: (cloSid) => set({ cloSid }),
+            setGradeChart: (gradeChart) => set({ gradeChart }),
+            setGroupedPlanTotals: (groupedPlanTotals) => set({ groupedPlanTotals }),
+            setCalCLOs: (calCLOs) => set({ calCLOs }),
+            setAggPLOs: (aggPLOs) => set({ aggPLOs }),
+            setWithdraws: (withdraws) => set({ withdraws: parseWithdraws(withdraws) }),
+            setReport: (report) => set({ report: report ?? {} }),
+
+            // CLO Summary calculation helper using withdraws
+            cloSummary: (localCalCLOs = [], cloNumbers = []) => {
+                const withdrawsList = get().withdraws || [];
+                const withdrawsCount = withdrawsList.length;
+
+                return Object.entries(
+                    localCalCLOs.reduce((acc, cloObj) => {
+                        cloNumbers.forEach((cloNo) => {
+                            const cloKey = `CLO${cloNo}`;
+                            if (!acc[cloKey]) {
+                                acc[cloKey] = [0, 0];
+                            }
+                            if (cloObj[cloKey] === 1) {
+                                acc[cloKey][0] += 1;
+                            } else if (cloObj[cloKey] === 0) {
+                                acc[cloKey][1] += 1;
+                            }
+                        });
+                        return acc;
+                    }, {})
+                ).map(([cloKey, acc]) => [
+                    cloKey,
+                    [acc[0], Math.max(acc[1] - withdrawsCount, 0)],
+                ]);
+            },
+
             setRecapPgNo: (recapPgNoUpdate) => set((state) => ({ 
                 recapPgNo: { ...(state.recapPgNo || { currentPage: 1, recapsPerPage: 10, selectedSemester: 'All', selectedYear: 'All', searchQuery: '' }), ...recapPgNoUpdate } 
             })),
@@ -32,8 +92,16 @@ export const store = createStore()(
             },
             getCLOSheet: (closid) => {
                 return api.get(`/closheet/${closid}`).then(res => {
-                    set({ closheet: res.data });
-                    return res.data;
+                    const data = res.data;
+                    const parsedWithdraws = parseWithdraws(data?.withdraws);
+                    const reportData = data?.report ?? {};
+                    set({ 
+                        closheet: data,
+                        withdraws: parsedWithdraws,
+                        report: reportData,
+                        cloSid: closid
+                    });
+                    return data;
                 });
             }
         }),

@@ -1,0 +1,1079 @@
+/* eslint-disable no-unused-vars */
+import './CRRReport.css'
+import logo from '../../assets/logo.jpg'
+import { useStore } from '../../store/index.js'
+import { useEffect, useState } from 'react'
+import { api } from '../../api/index.js'
+
+
+
+function CRRReport() {
+    const { cloSid, gradeChart, recap, groupedPlanTotals, cloSummary, calCLOs, aggPLOs, withdraws, report, setReport } = useStore()
+    const cloRows = Array.isArray(recap?.clo) ? recap.clo : []
+    const ploList = [...new Set(cloRows.map(c => c.plo).sort((a, b) => a - b))]
+    const cloSummaryRows = cloSummary(calCLOs, cloRows.map(c => c.clo))
+
+    const [comments, setComments] = useState({
+        reason: '',
+        PLO: Array.from({ length: ploList.length }, () => ''),
+        evaluation: '',
+        suggestions: '',
+        moderators: '',
+        curriculum: '',
+        assessment: '',
+        enhancements: '',
+        outline: '',
+        cloComments: '',
+        ploComments: '',
+    })
+    const [KPI, setKPI] = useState(50)
+    const course = recap?.course ?? ''
+    const courseParts = course.split(' ')
+    const courseCode = recap?.code || (courseParts[0] ?? '')
+
+    let parsedTitle = '';
+    if (recap?.title) {
+        parsedTitle = recap.title;
+    } else if (courseParts.length > 1) {
+        const titleParts = [];
+        for (let i = 1; i < courseParts.length; i++) {
+            if (courseParts[i].includes('(') || /^(Fall|Spring|Summer|\d{4})/i.test(courseParts[i])) {
+                break;
+            }
+            titleParts.push(courseParts[i]);
+        }
+        parsedTitle = titleParts.join(' ');
+        if (!parsedTitle) {
+            parsedTitle = courseParts.slice(1, courseParts.length - 2).join(' ') || courseParts.slice(1).join(' ');
+        }
+    }
+    const courseTitle = parsedTitle;
+    const instructorName = recap?.faculty || recap?.name || '';
+
+    const creditValue = getCreditValue(course)
+    const contactHours = creditValue ? Number(creditValue) * 16 : ''
+    const studentCount = Array.isArray(recap?.data) ? Math.max(recap.data.length - 2, 0) : ''
+    const hasSavedReport = report
+        && typeof report === 'object'
+        && !Array.isArray(report)
+        && Object.keys(report).length > 0
+
+    useEffect(() => {
+        console.log('useEffect triggered in CRRReport, cloSid is:', cloSid);
+        if (cloSid === null || cloSid === undefined) {
+            return
+        }
+
+        api.get(`/closheet/${cloSid}/report`)
+            .then(({ data }) => {
+                const loadedReport = data?.report ?? {}
+                setReport(loadedReport)
+                console.log(loadedReport)
+
+                if (
+                    loadedReport
+                    && typeof loadedReport === 'object'
+                    && !Array.isArray(loadedReport)
+                    && Object.keys(loadedReport).length > 0
+                ) {
+                    setComments((prev) => ({
+                        ...prev,
+                        ...loadedReport,
+                        PLO: Array.isArray(loadedReport.PLO) ? loadedReport.PLO : prev.PLO,
+                    }))
+                }
+            })
+            .catch((err) => {
+                console.error('Failed to load report:', err?.response?.data?.error || err.message)
+            })
+    }, [cloSid, setReport, ploList.length])
+
+    function getCreditValue(course = '') {
+        const plusCredit = course.match(/\((\d+)\s*\+\s*(\d+)\)/)
+
+        if (plusCredit) {
+            return String(Number(plusCredit[1]) + Number(plusCredit[2]))
+        }
+
+        const commaCredit = course.match(/\((\d+)\s*,\s*(\d+)\)/)
+
+        if (commaCredit) {
+            return String(Number(commaCredit[1]) + Number(commaCredit[2]))
+        }
+
+        return ''
+    }
+    if (!recap) {
+        return (
+            <section className="crr-page inl-1">
+                <p>Select a recap sheet first to view the Course Review Report.</p>
+            </section>
+        )
+    }
+
+
+    // Pluralize a word, excluding certain exceptions
+    function toPlural(word) {
+        if (!word) return '';
+        const exceptions = ['Final', 'Mid Term', 'Project'];
+        if (exceptions.includes(word)) return word;
+        // Basic rules for English plurals
+        if (word.endsWith('y') && !/[aeiou]y$/i.test(word)) {
+            return word.slice(0, -1) + 'ies';
+        }
+        if (word.endsWith('s') || word.endsWith('x') || word.endsWith('z') || word.endsWith('ch') || word.endsWith('sh')) {
+            return word + 'es';
+        }
+        return word + 's';
+    }
+    async function handleSave() {
+        const commentLabels = {
+            reason: 'Reason',
+            evaluation: 'Student Evaluation',
+            suggestions: 'Suggestions',
+            moderators: 'Moderators',
+            curriculum: 'Curriculum',
+            assessment: 'Assessment',
+            enhancements: 'Enhancements',
+            outline: 'Outline',
+            cloComments: 'CLO Instructor Comments',
+            ploComments: 'PLO Instructor Comments',
+        }
+        const emptyCommentKeys = Object.entries(comments)
+            .filter(([key, value]) => key !== 'PLO' && String(value ?? '').trim().length === 0)
+            .map(([key]) => commentLabels[key] ?? key)
+        const emptyPLOIndexes = comments.PLO
+            .map((value, index) => String(value ?? '').trim().length === 0 ? `PLO ${index + 1}` : '')
+            .filter(Boolean)
+
+        if (emptyCommentKeys.length > 0 || emptyPLOIndexes.length > 0) {
+            alert(`Please fill these fields before saving:\n${[...emptyCommentKeys, ...emptyPLOIndexes].join('\n')}`)
+            return
+        }
+
+        if (cloSid === null || cloSid === undefined) {
+            alert('CLO Sheet id is missing.')
+            return
+        }
+
+        try {
+            const { data } = await api.post(`/closheet/${cloSid}/report`, {
+                report: comments,
+            })
+            setReport(data?.closheet?.report ?? comments)
+            alert('Report saved successfully.')
+        } catch (err) {
+            alert('Failed to save report: ' + (err?.response?.data?.error || err.message))
+        }
+    }
+    return (
+        <section className={`crr-page inl-1 ${hasSavedReport ? 'report-readonly' : ''}`}>
+            <div className="WordSection1">
+                {/* {!hasSavedReport && <button className='no-print' onClick={handleSave}>Save</button>} */}
+                <table
+                    className="MsoNormalTable inl-2"
+                    border="0"
+                    cellSpacing="0"
+                    cellPadding="0"
+                    width="100%">
+                    <tbody>
+                        <tr className="inl-3">
+                            <td width="100%" colSpan="6" valign="top" className="inl-4"
+                                style={{ borderTopColor: 'white', borderLeftColor: 'white', borderRightColor: 'white', }}>
+                                <img
+                                    width="635"
+                                    height="95"
+                                    id="Picture 4"
+                                    src={logo}
+                                    alt="Description: SZABIST Logo"
+                                    className="inl-5" /><br />
+                                <p className="MsoNormal inl-6" align="center">
+                                    <b className="inl-7"><span lang="EN-US" className="inl-8">Faculty Course Review Report</span></b>
+                                </p>
+                                <p className="MsoNormal inl-6" align="center">
+                                    <b className="inl-7"><span lang="EN-US" className="inl-9">(To be filled by each faculty at the time of Course
+                                        Completion)</span></b>
+                                </p>
+                                <p className="MsoNormal inl-6" align="center">
+                                    <span lang="EN-US" className="inl-10">&nbsp;</span>
+                                </p>
+                            </td>
+                        </tr>
+                        <tr className="inl-11" style={{ borderTop: '1px solid black' }}>
+                            <td width="23%" valign="top" className="inl-12">
+                                <p className="MsoNormal">
+                                    <span lang="EN-US" className="inl-10">Department</span>
+                                </p>
+                            </td>
+                            <td width="33%" colSpan="2" valign="top" className="inl-13">
+                                <p className="MsoNormal">
+                                    <span lang="EN-US" className="inl-10">Mechatronics</span>
+                                </p>
+                            </td>
+                            <td width="11%" valign="top" className="inl-14">
+                                <p className="MsoNormal">
+                                    <span lang="EN-US" className="inl-10">Faculty</span>
+                                </p>
+                            </td>
+                            <td width="31%" colSpan="2" valign="top" className="inl-15">
+                                <p className="MsoNormal">
+                                    <span lang="EN-US" className="inl-10">Computing &amp; Engineering Sciences</span>
+                                </p>
+                            </td>
+                        </tr>
+                        <tr className="inl-16">
+                            <td width="23%" valign="top" className="inl-17">
+                                <p className="MsoNormal">
+                                    <span lang="EN-US" className="inl-10">Course Code</span>
+                                </p>
+                            </td>
+                            <td width="14%" valign="top" className="inl-18">
+                                <p className="MsoNormal">
+                                    <span lang="EN-US" className="inl-10">{courseCode}</span>
+                                </p>
+                            </td>
+                            <td width="18%" valign="top" className="inl-19">
+                                <p className="MsoNormal">
+                                    <span lang="EN-US" className="inl-10">Title</span>
+                                </p>
+                            </td>
+                            <td width="43%" colSpan="3" valign="top" className="inl-20">
+                                <p className="MsoNormal">
+                                    <span lang="EN-US" className="inl-10">{courseTitle}</span>
+                                </p>
+                            </td>
+                        </tr>
+                        <tr className="inl-21">
+                            <td width="23%" valign="top" className="inl-22">
+                                <p className="MsoNormal">
+                                    <span lang="EN-US" className="inl-10">Session</span>
+                                </p>
+                            </td>
+                            <td width="14%" valign="top" className="inl-23">
+                                <p className="MsoNormal">
+                                    <span lang="EN-US" className="inl-10">{recap.year}</span>
+                                </p>
+                            </td>
+                            <td width="18%" valign="top" className="inl-24">
+                                <p className="MsoNormal">
+                                    <span lang="EN-US" className="inl-10">Semester</span>
+                                </p>
+                            </td>
+                            {["Fall", "Spring", "Summer"].map((sem, index) => (
+                                <td key={index} width="11%" valign="top" className="inl-25">
+                                    <p className="MsoNormal" style={{ paddingTop: '5px' }}>
+                                        <span lang="EN-US" className="inl-10">{sem}</span>
+                                        {recap.semester === sem && (
+                                            <span lang="EN-US" className="inl-26" style={{ Top: '45px', fontSize: '18pt' }}>&#10003;</span>
+                                        )}
+                                    </p>
+                                </td>
+                            ))}
+                            {/* <td width="15%" valign="top" className="inl-28">
+                                <p className="MsoNormal" style={{ paddingTop: '5px' }}>
+                                    <span lang="EN-US" className="inl-10">Spring</span>
+                                </p>
+                            </td>
+                            <td width="16%" valign="top" className="inl-29">
+                                <p className="MsoNormal" style={{ paddingTop: '5px' }}>
+                                    <span lang="EN-US" className="inl-10">Summer</span>
+                                </p>
+                            </td>*/}
+                        </tr>
+                        <tr className="inl-30">
+                            <td width="23%" valign="top" className="inl-31">
+                                <p className="MsoNormal">
+                                    <span lang="EN-US" className="inl-10">Credit Value</span>
+                                </p>
+                            </td>
+                            <td width="14%" valign="top" className="inl-32">
+                                <p className="MsoNormal"><span lang="EN-US" className="inl-10">{creditValue}</span></p>
+                            </td>
+                            <td width="18%" valign="top" className="inl-33">
+                                <p className="MsoNormal">
+                                    <span lang="EN-US" className="inl-10">Level</span>
+                                </p>
+                            </td>
+                            <td width="11%" valign="top" className="inl-34">
+                                <p className="MsoNormal">
+                                    <span lang="EN-US" className="inl-10"><br className="inl-35" />
+                                        <br className="inl-27" />
+                                    </span>
+                                </p>
+                            </td>
+                            <td width="15%" valign="top" className="inl-36">
+                                <p className="MsoNormal">
+                                    <span lang="EN-US" className="inl-10">Prerequisites</span>
+                                </p>
+                            </td>
+                            <td width="16%" valign="top" className="inl-37">
+                                <p className="MsoNormal">
+                                    <span lang="EN-US" className="inl-10" style={{ color: 'red' }}>ME1203-T Engineering Physics</span>
+                                </p>
+                            </td>
+                        </tr>
+                        <tr className="inl-38">
+                            <td width="23%" rowSpan="2" valign="top" className="inl-39">
+                                <p className="MsoNormal">
+                                    <span lang="EN-US" className="inl-10">Name of Course Instructor</span>
+                                </p>
+                            </td>
+                            <td width="14%" rowSpan="2" valign="top" className="inl-40">
+                                <p className="MsoNormal">
+                                    <span lang="EN-US" className="inl-10">{instructorName}</span>
+                                </p>
+                            </td>
+                            <td width="18%" valign="top" className="inl-41">
+                                <p className="MsoNormal">
+                                    <span lang="EN-US" className="inl-10">No. of Students </span>
+                                </p>
+                            </td>
+                            <td width="43%" colSpan="3" valign="top" className="inl-42">
+                                <p className="MsoNormal"><span lang="EN-US" className="inl-10">{studentCount}</span></p>
+                            </td>
+                        </tr>
+                        <tr className="inl-43">
+                            <td width="18%" valign="top" className="inl-44">
+                                <p className="MsoNormal">
+                                    <span lang="EN-US" className="inl-10">Total Number of Contact Hours</span>
+                                </p>
+                            </td>
+                            <td width="43%" colSpan="3" valign="top" className="inl-45">
+                                <p className="MsoNormal"><span lang="EN-US" className="inl-10">{contactHours}</span></p>
+                            </td>
+                        </tr>
+                        <tr className="inl-46">
+                            <td width="38%" colSpan="2" valign="top" className="inl-47">
+                                <p className="MsoNormal">
+                                    <span lang="EN-US" className="inl-10">Assessment Methods:<br /> </span><span lang="EN-US" className="inl-48">give precise details (no &amp; length of assignments, exams,
+                                        weightings etc.)</span><span lang="EN-US" className="inl-10"></span>
+                                </p>
+                                <p className="MsoNormal">
+                                    <span lang="EN-US" className="inl-10">&nbsp;</span>
+                                </p>
+                            </td>
+                            <td width="61%" colSpan="4" valign="top" className="inl-49">
+                                {groupedPlanTotals &&
+                                    Object.entries(groupedPlanTotals).sort((a, b) => b[1] - a[1])
+                                        .map(([key, value], index) => (
+                                            <p className="MsoNormal" key={index}>
+                                                <span lang="EN-US" className="inl-10">{toPlural(key)} {value}%</span>
+                                            </p>
+                                        ))}
+
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p className="MsoNormal inl-50">
+                    <br clear="ALL" className="inl-52" />
+                    <b className="inl-7"><span lang="EN-US" style={{ color: 'black' }}>Course Result</span></b><span lang="EN-US" className="inl-54"></span>
+                </p>
+                <table
+                    className="MsoNormalTable inl-55"
+                    border="1"
+                    cellSpacing="0"
+                    cellPadding="0"
+                    width="100%">
+                    <tbody>
+                        <tr className="inl-56">
+                            <td width="20%" className="inl-57">
+                                <p className="MsoNormal inl-6" align="center">
+                                    <span lang="EN-US" className="inl-58">&nbsp;</span>
+                                </p>
+                            </td>
+                            {gradeChart && Object.entries(gradeChart).map(([key], index) => (
+                                <td key={index} width="5%" className="inl-59">
+                                    <p className="MsoNormal inl-6" align="center">
+                                        <span lang="EN-US" className="inl-58">{key}</span>
+                                    </p>
+                                </td>
+                            ))}
+                            <td width="7%" className="inl-71">
+                                <p className="MsoNormal inl-72" align="center">
+                                    <span lang="EN-US" className="inl-58">W</span><span lang="EN-US" className="inl-10">*</span><span lang="EN-US" className="inl-73"></span>
+                                </p>
+                            </td>
+                            <td width="7%" className="inl-74">
+                                <p className="MsoNormal inl-6" align="center">
+                                    <span lang="EN-US" className="inl-58">Total</span>
+                                </p>
+                            </td>
+                        </tr>
+                        <tr className="inl-75">
+                            <td width="20%" className="inl-76">
+                                <p className="MsoNormal">
+                                    <span lang="EN-US" className="inl-77">Number of Students</span>
+                                </p>
+                            </td>
+                            {gradeChart && Object.entries(gradeChart).map(([, value], index) => (
+                                <td key={index} width="5%" className="inl-59">
+                                    <p className="MsoNormal inl-6" align="center">
+                                        <span lang="EN-US" className="inl-58">{value !== 0 && index === Object.keys(gradeChart).length - 1 ? value - withdraws.length : value}</span>
+                                    </p>
+                                </td>
+                            ))}
+                            <td width="7%" className="inl-89">
+                                <p className="MsoNormal inl-6" align="center">
+                                    <span lang="EN-US" className="inl-58">{withdraws.length}</span>
+                                </p>
+                            </td>
+                            <td width="7%" className="inl-90">
+                                <p className="MsoNormal inl-6" align="center">
+                                    <span lang="EN-US" className="inl-58">{studentCount}</span>
+                                </p>
+                            </td>
+                        </tr>
+                        <tr className="inl-91">
+                            <td width="20%" className="inl-92">
+                                <p className="MsoNormal" valign="top">
+                                    <span lang="EN-US" className="inl-77">Reason(s) if F's percentage is more than 25</span>
+                                </p>
+                            </td>
+                            <td width="79%" colSpan="15" valign="top" className="inl-93">
+                                {/* <p className="MsoNormal inl-94" align="center"> */}
+                                {/* <span lang="EN-US" className="inl-58"> */}
+                                {/* editable on screen */}
+                                <textarea className="comment-textarea" name="reason" value={comments.reason} onChange={e => setComments({ ...comments, reason: e.target.value })} style={{ fontSize: '14.6px' }} />
+                                {/* visible only when printing */}
+                                <span className="print-text" style={{ fontSize: '14.6px' }}>{comments.reason}</span>
+                                {/* </span> */}
+                                {/* </p> */}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p className="MsoNormal inl-95">
+                    <span lang="EN-US" className="inl-10">
+                        * Either withdrew from course or didn't appear in Final Exam
+                    </span>
+                </p>
+                <p className="MsoNormal inl-96">
+                    <b className="inl-97">
+                        <span lang="EN-US" className="inl-54">&nbsp;</span>
+                    </b>
+                </p>
+
+                {/* <p className="MsoNormal inl-99">
+                    <span lang="EN-US" className="inl-10">&nbsp;</span>
+                    </p> */}
+                <p className="MsoNormal inl-96">
+                    <b className="inl-97">
+                        <u><span lang="EN-US" className="inl-54">CLO Attainment</span></u>
+                    </b>
+                </p>
+                {/* Page break for printing */}
+                {/* <div style={{ pageBreakAfter: 'always' }} /> */}
+
+                <table
+                    className="MsoNormalTable inl-100"
+                    border="1"
+                    cellSpacing="0"
+                    cellPadding="0"
+                    width="100%">
+                    <tbody>
+                        <tr className="inl-101">
+                            <td width="32%" valign="top" className="inl-102">
+                                <p className="MsoNormal inl-103">
+                                    <b className="inl-7">
+                                        <span lang="EN-US" className="inl-10">
+                                            Course Learning Outcome: Learning Domain - Level
+                                        </span>
+                                    </b>
+                                </p>
+                            </td>
+                            <td width="29%" valign="top" className="inl-104">
+                                <p className="MsoNormal inl-105" align="center">
+                                    <b className="inl-106"><span lang="EN-US" className="inl-10">Percentage of students attained CLO</span></b>
+                                </p>
+                            </td>
+                            <td width="13%" valign="top" className="inl-107">
+                                <p className="MsoNormal inl-108" align="center">
+                                    <b className="inl-106"><span lang="EN-US" className="inl-10">KPI</span></b>
+                                </p>
+                            </td>
+                            <td width="24%" valign="top" className="inl-109">
+                                <p className="MsoNormal inl-108" align="center">
+                                    <b className="inl-106"><span lang="EN-US" className="inl-10">Remarks</span></b>
+                                </p>
+                            </td>
+                        </tr>
+                        {cloSummaryRows.map((clo) => {
+                            const cloLabel = clo[0].replace(/^CLO/, 'CLO ')
+                            const cloNumber = Number(clo[0].replace(/^CLO/, ''))
+                            const matchedCLO = cloRows.find((c) => c.clo === cloNumber)
+                            const cloDetails = matchedCLO ? `${matchedCLO.domain.slice(0, 1)} - ${matchedCLO.taxonomy}` : ''
+                            const achievedCount = clo[1][0]
+                            const notAchievedCount = clo[1][1]
+                            const totalCount = achievedCount + notAchievedCount
+                            let achievedPct = totalCount ? (achievedCount / totalCount) * 100 : 0
+                            const remark = `${cloLabel} `
+
+                            // achievedPct = achievedPct - 50
+
+                            return (
+                                <tr key={clo[0]} className="inl-110">
+                                    <td width="32%" valign="top" className="inl-111">
+                                        <p className="MsoNormal inl-105" align="center">
+                                            <span lang="EN-US" className="inl-10">{cloLabel} : {cloDetails}</span>
+                                        </p>
+                                    </td>
+                                    <td width="29%" valign="top" className="inl-112">
+                                        <p className="MsoNormal inl-105" align="center">
+                                            <span lang="EN-US" className="inl-10">{Number(achievedPct.toFixed(2))}%</span>
+                                        </p>
+                                    </td>
+                                    <td width="13%" valign="top" className="inl-113">
+                                        <p className="MsoNormal inl-105" align="center">
+                                            <span lang="EN-US" className="inl-10">60</span>
+                                        </p>
+                                    </td>
+                                    <td width="24%" valign="top" className="inl-114">
+                                        <p className="MsoNormal inl-103">
+                                            <span lang="EN-US" className="inl-10">{remark} {achievedPct > KPI ? `attained` : `not attained`}</span>
+                                        </p>
+                                    </td>
+                                </tr>
+                            )
+                        })}
+                    </tbody>
+                </table>
+                <div className="MsoNormal inl-133" style={{ marginTop: '10px', marginBottom: '10px' }}>
+                    <span lang="EN-US" className="inl-10" style={{ fontWeight: 'bold' }}>Comments:</span>
+                    <span className="print-text" >{comments.cloComments}</span>
+                    <div>
+                        <textarea className="comment-textarea" value={comments.cloComments}
+                            onChange={e => setComments({ ...comments, cloComments: e.target.value })}
+                            style={{ width: '100%', inset: 0, boxSizing: 'border-box', }}
+                        />
+                    </div>
+                </div>
+                <div className="MsoNormal">&nbsp;</div>
+                <p className="MsoNormal inl-50">
+                    <b className="inl-7"><u><span lang="EN-US" className="inl-54">PLO Attainment</span></u></b>
+                </p>
+                <table
+                    className="MsoNormalTable inl-55"
+                    border="1"
+                    cellSpacing="0"
+                    cellPadding="0"
+                    width="100%">
+                    <tbody>
+                        <tr className="inl-117">
+                            <td width="26%" className="inl-118">
+                                <p className="MsoNormal inl-6" align="center">
+                                    <b className="inl-7"><span lang="EN-US" className="inl-119">Number of PLOs offered</span></b>
+                                </p>
+                            </td>
+                            <td width="10%" className="inl-120">
+                                <p className="MsoNormal inl-6" align="center">
+                                    <span lang="EN-US" className="inl-58">{new Set(cloRows.map(row => row.plo)).size}</span>
+                                </p>
+                            </td>
+                            <td width="27%" className="inl-121">
+                                <p className="MsoNormal inl-6" align="center">
+                                    <b className="inl-7"><span lang="EN-US" className="inl-119">PLOs which are being offered</span></b>
+                                </p>
+                            </td>
+                            <td width="34%" className="inl-122">
+                                <p className="MsoNormal">
+                                    <span lang="EN-US" className="inl-77">
+                                        {[...new Set(cloRows.map(c => c.plo).sort((a, b) => a - b))].map((plo, index, plos) => (
+                                            <span key={index} className="inl-10" style={{ display: 'inline-block' }}>
+                                                PLO {plo} ({cloRows.find(c => c.plo === plo)?.title ?? ''})
+                                                {index < plos.length - 1 && <>,&nbsp;<wbr /> </>}
+                                            </span>
+                                        ))}
+                                    </span>
+                                </p>
+                            </td>
+                        </tr>
+                        {[...new Set(cloRows.map(c => c.plo).sort((a, b) => a - b))].map((plo, index) => {
+                            const ploClos = cloRows.filter((c) => c.plo === plo)
+                            const cloLabels = cloRows
+                                .filter((c) => c.plo === plo)
+                                .map((c) => `CLO ${c.clo}`)
+                                .join(' & ')
+                            const notAchievedCount = calCLOs.filter((studentCLOs) =>
+                                ploClos.some((clo) => studentCLOs[`CLO${clo.clo}`] === 0)
+                            ).length
+                            const ploStudentCount = calCLOs.length || studentCount
+
+                            const ploData = aggPLOs[`PLO${plo}`];
+                            const notAchievedPercentage = ploData ? (ploData.notAchieved / (ploData.achieved + ploData.notAchieved) * 100) : 0;
+                            //console.log( notAchievedPercentage, plo)
+                            // console.log(recap, cloSid, comments, report)
+                            return (
+                                <tr key={`plo-not-achieved-${plo}`} className="inl-123">
+                                    <td width="26%" className="inl-124">
+                                        <p className="MsoNormal inl-6" align="center">
+                                            <span lang="EN-US" className="inl-58">
+                                                Percentage of students who have not achieved<br />PLO {plo} ({cloLabels})
+                                            </span>
+                                        </p>
+                                    </td>
+                                    <td width="10%" className="inl-125">
+                                        <p className="MsoNormal inl-6" align="center">
+                                            <span lang="EN-US" className="inl-58">{notAchievedPercentage.toFixed(2)}%</span>
+                                        </p>
+                                    </td>
+                                    <td width="27%" className="inl-126">
+                                        <p className="MsoNormal inl-6" align="center">
+                                            <span lang="EN-US" className="inl-58">&nbsp;</span>
+                                        </p>
+                                        <p className="MsoNormal inl-6" align="center">
+                                            <span lang="EN-US" className="inl-58">Reason(s) if this percentage is more than 50<br />(if applicable)
+                                            </span>
+                                        </p>
+                                        <p className="MsoNormal inl-6" align="center">
+                                            <span lang="EN-US" className="inl-58">&nbsp;</span>
+                                        </p>
+                                    </td>
+                                    <td width="34%" className="inl-127" style={{ position: 'relative', verticalAlign: 'middle' }}>
+
+                                        <span lang="EN-US" className="inl-58">
+                                            {/* editable on screen */}
+                                            <textarea
+                                                className="comment-textarea"
+                                                value={comments.PLO[index]}
+                                                style={{
+                                                    position: 'absolute',
+                                                    inset: 0,
+                                                    width: '100%',
+                                                    height: '100%',
+                                                    boxSizing: 'border-box',
+                                                    display: 'block',
+                                                    border: 0,
+                                                    outline: 0,
+                                                    resize: 'none',
+
+                                                }}
+                                                onChange={e => {
+                                                    const newPLO = [...comments.PLO];
+                                                    newPLO[index] = e.target.value;
+                                                    setComments({ ...comments, PLO: newPLO });
+                                                }}
+                                            />
+                                            {/* visible only when printing */}
+                                            <span
+                                                className="print-text"
+                                                style={{
+                                                    display: 'block',
+                                                    width: '100%',
+                                                    boxSizing: 'border-box',
+                                                    fontFamily: 'inherit',
+                                                    marginTop: 0,
+                                                    textAlign: 'left',
+                                                    verticalAlign: 'top',
+                                                    whiteSpace: 'pre-wrap',
+                                                }}>
+                                                {comments.PLO[index]}
+                                            </span>
+                                        </span>
+
+                                    </td>
+                                </tr>
+                            )
+                        })}
+
+                    </tbody>
+                </table>
+                <div className="MsoNormal inl-133" style={{ marginTop: '10px', marginBottom: '10px' }}>
+                    <span lang="EN-US" className="inl-10" style={{ fontWeight: 'bold' }}>Comments:</span>
+                    <span className="print-text" >{comments.ploComments}</span>
+                    <div>
+                        <textarea className="comment-textarea" value={comments.ploComments}
+                            onChange={e => setComments({ ...comments, ploComments: e.target.value })}
+                            style={{ width: '100%', inset: 0, boxSizing: 'border-box', }}
+                        />
+                    </div>
+                </div>
+                <table
+                    className="MsoNormalTable inl-100"
+                    border="1"
+                    cellSpacing="0"
+                    cellPadding="0"
+                    width="100%">
+                    <tbody>
+                        <tr className="inl-101">
+                            <td width="10%" valign="top" className="inl-134">
+                                <p className="MsoNormal inl-6" align="center">
+                                    <b className="inl-7"><span lang="EN-US" className="inl-10">S. No.</span></b>
+                                </p>
+                            </td>
+                            <td width="34%" valign="top" className="inl-135">
+                                <p className="MsoNormal inl-6" align="center">
+                                    <b className="inl-7"><span lang="EN-US" className="inl-10">Name</span></b>
+                                </p>
+                            </td>
+                            <td width="29%" valign="top" className="inl-136">
+                                <p className="MsoNormal inl-6" align="center">
+                                    <b className="inl-7"><span lang="EN-US" className="inl-10">Registration Number</span></b>
+                                </p>
+                            </td>
+                            <td width="25%" valign="top" className="inl-137">
+                                <p className="MsoNormal inl-6" align="center">
+                                    <b className="inl-7"><span lang="EN-US" className="inl-10">PLO not attained</span></b>
+                                </p>
+                            </td>
+                        </tr>
+                        {(() => {
+                            let sno = 1;
+                            return [...new Set(cloRows.map(c => c.plo).sort((a, b) => a - b))].flatMap((plo, index) =>
+                                (aggPLOs[`PLO${plo}`]?.students || []).map(s => (
+                                    <tr className="inl-110" key={`plo-student-${plo}-${s.regno}`}>
+                                        <td width="10%" valign="top" className="inl-138">
+                                            <p className="MsoNormal inl-6" align="center">
+                                                <span lang="EN-US" className="inl-10">{sno++}</span>
+                                            </p>
+                                        </td>
+                                        <td width="34%" valign="top" className="inl-139">
+                                            <p className="MsoNormal">
+                                                <span lang="EN-US">{s.name}</span>
+                                            </p>
+                                        </td>
+                                        <td width="29%" valign="top" className="inl-140">
+                                            <p className="MsoNormal inl-6" align="center">
+                                                <span lang="EN-US">{s.regno}</span>
+                                            </p>
+                                        </td>
+                                        <td width="25%" valign="top" className="inl-141">
+                                            <p className="MsoNormal inl-6" align="center">
+                                                <span lang="EN-US" className="inl-10">PLO {plo}</span>
+                                            </p>
+                                        </td>
+                                    </tr>
+                                ))
+                            );
+                        })()}
+
+                    </tbody>
+                </table>
+                <p className="MsoNormal">
+                    <b className="inl-7"><span lang="EN-US">&nbsp;</span></b>
+                </p>
+                <p className="MsoNormal">
+                    <b className="inl-7"><span lang="EN-US" className="inl-10">Overview/Evaluation (Course Co-Coordinator's Comments)</span></b>
+                </p>
+                <p className="MsoNormal">
+                    <span lang="EN-US" className="inl-10">Feedback: first summarize, then comment on feedback received
+                        from:</span>
+                </p>
+                <p className="MsoNormal"><span lang="EN-US" className="inl-10">&nbsp;</span></p>
+                <table
+                    className="MsoNormalTable inl-55"
+                    border="1"
+                    cellSpacing="0"
+                    cellPadding="0"
+                    width="100%">
+                    <tbody>
+                        <tr className="inl-101">
+                            <td width="100%" valign="top" className="inl-147">
+                                <p className="MsoNormal">
+                                    <span lang="EN-US" className="inl-10" style={{ fontWeight: 'bold' }}>1. Student (Course Evaluation) Questionnaires</span>
+                                </p>
+                                <p className="MsoNormal inl-148">
+                                    <span lang="EN-US" className="inl-10">Course evaluation's score by the students:</span>
+                                    <span>
+                                        <input type="text"
+                                            className='comment-textarea'
+                                            value={comments.evaluation}
+                                            onChange={e => setComments({ ...comments, evaluation: e.target.value })}
+                                            style={{ border: 0, outline: 0, width: '50px' }} />
+
+                                    </span>
+                                    <span className="print-text">{comments.evaluation}%</span>
+                                </p>
+                                <div className="MsoNormal">
+                                    <span lang="EN-US" className="inl-10" style={{ fontWeight: 'bold' }}>Suggestions:</span>
+                                    <span className="print-text" >{comments.suggestions}</span>
+                                    <div>
+                                        <textarea className="comment-textarea" value={comments.suggestions}
+                                            onChange={e => setComments({ ...comments, suggestions: e.target.value })}
+                                            style={{ width: '100%', inset: 0, boxSizing: 'border-box', }}
+                                        />
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p className="MsoNormal"><span lang="EN-US" className="inl-10">&nbsp;</span></p>
+                <table
+                    className="MsoNormalTable inl-55"
+                    border="1"
+                    cellSpacing="0"
+                    cellPadding="0"
+                    width="100%">
+                    <tbody>
+                        <tr className="inl-101" style={{ border: '1px solid black' }}>
+                            <td width="100%" valign="top" className="inl-150">
+                                <div className="MsoNormal">
+                                    <span lang="EN-US" className="inl-10" style={{ fontWeight: 'bold' }}>2. Moderators (if any): </span>
+                                    <span className="print-text" >{comments.moderators}</span>
+                                    <div>
+                                        <textarea className="comment-textarea" value={comments.moderators}
+                                            onChange={e => setComments({ ...comments, moderators: e.target.value })}
+                                            style={{ width: '100%', inset: 0, boxSizing: 'border-box', }}
+                                        />
+                                        {/* visible only when printing */}
+                                    </div>
+                                </div>
+
+
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p className="MsoNormal"><span lang="EN-US" className="inl-10">&nbsp;</span></p>
+                <table
+                    className="MsoNormalTable inl-55"
+                    border="1"
+                    cellSpacing="0"
+                    cellPadding="0"
+                    width="100%">
+                    <tbody>
+                        <tr className="inl-152">
+                            <td width="100%" valign="top" className="inl-153">
+                                <div className="MsoNormal">
+                                    <span lang="EN-US" className="inl-10" style={{ display: 'block', marginBottom: '5px' }}><span style={{ fontWeight: 'bold' }}>3. Curriculum: </span>comment on the
+                                        continuing appropriateness of the Course curriculum in relation
+                                        to the intended learning outcomes (Course objectives) and its
+                                        compliance with the HEC Approved / Revised National Curriculum
+                                        Guidelines</span>
+                                    <div className="print-text" >{comments.curriculum}</div>
+                                    <div>
+                                        <textarea className="comment-textarea" rows={4} value={comments.curriculum}
+                                            onChange={e => setComments({ ...comments, curriculum: e.target.value })}
+                                            style={{ width: '100%', height: '100%', inset: 0, boxSizing: 'border-box', }}
+                                        />
+                                        {/* visible only when printing */}
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p className="MsoNormal"><span lang="EN-US" className="inl-10">&nbsp;</span></p>
+                {/* <div style={{ pageBreakAfter: 'always' }} /> */}
+                <table
+                    className="MsoNormalTable inl-55"
+                    border="1"
+                    cellSpacing="0"
+                    cellPadding="0"
+                    width="100%">
+                    <tbody>
+                        <tr className="inl-154">
+                            <td width="100%" valign="top" className="inl-155">
+                                <div className="MsoNormal">
+                                    <span lang="EN-US" className="inl-10" style={{ display: 'block', marginBottom: '5px' }}><span style={{ fontWeight: 'bold' }}>4. Assessment:</span> comment on the continuing effectiveness of
+                                        method(s) of assessment in relation to the intended learning
+                                        outcomes (Course objectives)</span>
+                                    <div className="print-text" >{comments.assessment}</div>
+                                    <div>
+                                        <textarea className="comment-textarea" rows={4} value={comments.assessment}
+                                            onChange={e => setComments({ ...comments, assessment: e.target.value })}
+                                            style={{ width: '100%', height: '100%', inset: 0, boxSizing: 'border-box', }}
+                                        />
+                                        {/* visible only when printing */}
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p className="MsoNormal"><span lang="EN-US" className="inl-10">&nbsp;</span></p>
+                <table
+                    className="MsoNormalTable inl-55"
+                    border="1"
+                    cellSpacing="0"
+                    cellPadding="0"
+                    width="100%">
+                    <tbody>
+                        <tr className="inl-156">
+                            <td width="100%" valign="top" className="inl-147">
+                                <p className="MsoNormal">
+                                    <span lang="EN-US" className="inl-10" ><span style={{ fontWeight: 'bold' }}>5. Enhancement:</span> comment on the
+                                        implementation of changes proposed in earlier
+                                    </span>
+
+                                </p>
+                                <div className="MsoNormal">
+                                    <span lang="EN-US" className="inl-10" style={{ display: 'block', marginBottom: '5px' }}>Faculty Course Review Reports (if any)</span>
+                                    <div className="print-text" >{comments.enhancements}</div>
+                                    <div>
+                                        <textarea className="comment-textarea" rows={4} value={comments.enhancements}
+                                            onChange={e => setComments({ ...comments, enhancements: e.target.value })}
+                                            style={{ width: '100%', height: '100%', inset: 0, boxSizing: 'border-box', }}
+                                        />
+                                        {/* visible only when printing */}
+                                    </div>
+                                </div>
+
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p className="MsoNormal"><span lang="EN-US" className="inl-10">&nbsp;</span></p>
+                <table
+                    className="MsoNormalTable inl-55"
+                    border="1"
+                    cellSpacing="0"
+                    cellPadding="0"
+                    width="100%">
+                    <tbody>
+                        <tr className="inl-156">
+                            <td width="100%" valign="top" className="inl-147">
+                                <div className="MsoNormal">
+                                    <span lang="EN-US" className="inl-10" style={{ display: 'block', marginBottom: '5px' }}><span style={{ fontWeight: 'bold' }}>6. Outline:</span> any changes in the
+                                        future delivery or structure of the Course that this
+                                        semester/term's experience may prompt to improve student's performance</span>
+                                    <div className="print-text" >{comments.outline}</div>
+                                    <div>
+                                        <textarea className="comment-textarea" rows={2} value={comments.outline}
+                                            onChange={e => setComments({ ...comments, outline: e.target.value })}
+                                            style={{ width: '100%', height: '100%', inset: 0, boxSizing: 'border-box', }}
+                                        />
+                                        {/* visible only when printing */}
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p className="MsoNormal"><span lang="EN-US" className="inl-10">&nbsp;</span></p>
+                <table
+                    className="MsoNormalTable inl-55"
+                    border="1"
+                    cellSpacing="0"
+                    cellPadding="0"
+                    width="100%">
+                    <tbody>
+                        <tr className="inl-156">
+                            <td width="100%" valign="top" className="inl-147">
+                                <p className="MsoNormal">
+                                    <span lang="EN-US" className="inl-10">&nbsp;</span>
+                                </p>
+                                <table
+                                    className="MsoTableGrid inl-157"
+                                    width="100%"
+                                    cellSpacing="0"
+                                    cellPadding="0"
+                                    style={{ border: '0px solid while' }}
+                                >
+                                    <tbody>
+                                        <tr className="inl-101" style={{ borderTop: 0, borderLeft: 0, borderRight: 0, borderBottom: '0px solid black' }}>
+                                            <td width="57" valign="top" className="inl-158">
+                                                <p className="MsoNormal" style={{ textAlign: 'right' }}>
+                                                    <span lang="EN-US" className="inl-10">Name:</span>
+                                                </p>
+                                            </td>
+                                            <td width="350" valign="top" className="inl-159">
+                                                <p className="MsoNormal" style={{ textAlign: 'center' }}>
+                                                    <span lang="EN-US" className="inl-10" >{instructorName}</span>
+                                                </p>
+                                            </td>
+                                            <td width="51" valign="top" className="inl-160" >
+                                                <p className="MsoNormal" style={{ textAlign: 'right' }}>
+                                                    <span lang="EN-US" className="inl-10">Date:</span>
+                                                </p>
+                                            </td>
+                                            <td width="150" valign="top" className="inl-161">
+                                                <p className="MsoNormal">
+                                                    <span lang="EN-US" className="inl-10">&nbsp;</span>
+                                                </p>
+                                            </td>
+                                        </tr>
+                                        <tr className="inl-149" style={{ borderTop: 0, borderLeft: 0, borderRight: 0, borderBottom: '0px solid black' }}>
+                                            <td width="57" valign="top" className="inl-158">
+                                                <p className="MsoNormal">
+                                                    <span lang="EN-US" className="inl-10">&nbsp;</span>
+                                                </p>
+                                            </td>
+                                            <td width="350" valign="top" className="inl-162">
+                                                <p className="MsoNormal inl-6" align="center">
+                                                    <i className="inl-163"><span lang="EN-US" className="inl-10">(Course Instructor)</span></i><span lang="EN-US" className="inl-10"></span>
+                                                </p>
+                                            </td>
+                                            <td width="51" valign="top" className="inl-160">
+                                                <p className="MsoNormal">
+                                                    <span lang="EN-US" className="inl-10">&nbsp;</span>
+                                                </p>
+                                            </td>
+                                            <td width="150" valign="top" className="inl-164">
+                                                <p className="MsoNormal">
+                                                    <span lang="EN-US" className="inl-10">&nbsp;</span>
+                                                </p>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <p className="MsoNormal">
+                                    <span lang="EN-US" className="inl-10">&nbsp;</span>
+                                </p>
+                                <table
+                                    className="MsoTableGrid inl-157"
+                                    width="100%"
+                                    cellSpacing="0"
+                                    cellPadding="0">
+                                    <tbody>
+                                        <tr className="inl-101" style={{ borderTop: 0, borderLeft: 0, borderRight: 0, borderBottom: '0px solid black' }}>
+                                            <td width="57" valign="top" className="inl-158">
+                                                <p className="MsoNormal" style={{ textAlign: 'right' }}>
+                                                    <span lang="EN-US" className="inl-10">Name:</span>
+                                                </p>
+                                            </td>
+                                            <td width="350" valign="top" className="inl-159">
+                                                <p className="MsoNormal" style={{ textAlign: 'center' }}>
+                                                    <span lang="EN-US" className="inl-10">Dr. Muhammad Umar Siddiqui</span>
+                                                </p>
+                                            </td>
+                                            <td width="51" valign="top" className="inl-160">
+                                                <p className="MsoNormal" style={{ textAlign: 'right' }}>
+                                                    <span lang="EN-US" className="inl-10">Date:</span>
+                                                </p>
+                                            </td>
+                                            <td width="150" valign="top" className="inl-161">
+                                                <p className="MsoNormal">
+                                                    <span lang="EN-US" className="inl-10">&nbsp;</span>
+                                                </p>
+                                            </td>
+                                        </tr>
+                                        <tr className="inl-149" style={{ borderTop: 0, borderLeft: 0, borderRight: 0, borderBottom: '0px solid black' }}>
+                                            <td width="57" valign="top" className="inl-158">
+                                                <p className="MsoNormal">
+                                                    <span lang="EN-US" className="inl-10">&nbsp;</span>
+                                                </p>
+                                            </td>
+                                            <td width="350" valign="top" className="inl-162">
+                                                <p className="MsoNormal inl-6" align="center">
+                                                    <i className="inl-163"><span lang="EN-US" className="inl-10">(Head of Department)</span></i><span lang="EN-US" className="inl-10"></span>
+                                                </p>
+                                            </td>
+                                            <td width="51" valign="top" className="inl-160">
+                                                <p className="MsoNormal">
+                                                    <span lang="EN-US" className="inl-10">&nbsp;</span>
+                                                </p>
+                                            </td>
+                                            <td width="150" valign="top" className="inl-164">
+                                                <p className="MsoNormal">
+                                                    <span lang="EN-US" className="inl-10">&nbsp;</span>
+                                                </p>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <p className="MsoNormal">
+                                    <span lang="EN-US" className="inl-10">&nbsp;</span>
+                                </p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p className="MsoNormal"><span lang="EN-US">&nbsp;</span></p>
+            </div>
+        </section>
+    )
+}
+
+export default CRRReport

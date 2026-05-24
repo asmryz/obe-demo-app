@@ -16,17 +16,44 @@ export default function RecapSheetTable({ data, recapHeads, recapHeadRanges, wit
                     <tbody>
                         {data.map((row, rowIndex) => (
                             rowIndex === 1 || rowIndex === 2 ? null : rowIndex === 0 ? (
-                                <tr key={`row-${rowIndex}`} className="bg-gray-100 border-b border-gray-200">
-                                    <th className="py-2 px-4 font-semibold text-sm text-gray-800 text-center">SNo</th>
-                                    <th className="py-2 px-4 font-semibold text-sm text-gray-800 text-left">Name</th>
-                                    <th className="py-2 px-4 font-semibold text-sm text-gray-800 text-center">Reg.No</th>
-                                    {recapHeads.map((h, index) => (
-                                        <th className="py-2 px-4 font-semibold text-sm text-gray-800 text-center" key={`cell-${rowIndex}-${index}`}>{h.head}</th>
-                                    ))}
-                                    <th className="py-2 px-4 font-semibold text-sm text-gray-800 text-center">100%</th>
-                                    <th className="py-2 px-4 font-semibold text-sm text-gray-800 text-center">Total</th>
-                                    <th className="py-2 px-4 font-semibold text-sm text-gray-800 text-center">Grade</th>
-                                </tr>
+                                <>
+                                    <tr key={`row-${rowIndex}`} className="bg-gray-100 border-b border-gray-200">
+                                        <th className="py-2 px-4 font-semibold text-sm text-gray-800 text-center">SNo</th>
+                                        <th className="py-2 px-4 font-semibold text-sm text-gray-800 text-left whitespace-nowrap">Name</th>
+                                        <th className="py-2 px-4 font-semibold text-sm text-gray-800 text-center">Reg.No</th>
+                                        {recapHeads.map((h, index) => (
+                                            <th className="py-2 px-4 font-semibold text-sm text-gray-800 text-center" key={`cell-${rowIndex}-${index}`}>{h.head}</th>
+                                        ))}
+                                        <th className="py-2 px-4 font-semibold text-sm text-gray-800 text-center">100%</th>
+                                        <th className="py-2 px-4 font-semibold text-sm text-gray-800 text-center">Total</th>
+                                        <th className="py-2 px-4 font-semibold text-sm text-gray-800 text-center">Grade</th>
+                                    </tr>
+                                    <tr className="border-b border-gray-200 bg-white">
+                                        <td className="py-1.5 px-3 text-sm font-semibold text-gray-500 text-center"></td>
+                                        <td className="py-1.5 px-3 text-sm font-bold text-blue-600 text-left"></td>
+                                        <td className="py-1.5 px-3 text-sm font-semibold text-gray-500 text-center"></td>
+                                        {recapHeadRanges.map(({ head, start, end }) => {
+                                            const sum = data[2]
+                                                ? data[2].slice(start, end).reduce((total, mark) => total + (Number(mark) || 0), 0)
+                                                : 0;
+                                            return (
+                                                <td key={`recap-max-${head}`} className="py-1.5 px-3 text-md font-bold text-blue-600 text-center">
+                                                    {sum}
+                                                </td>
+                                            )
+                                        })}
+                                        {/* 100% Max Marks */}
+                                        <td className="py-1.5 px-3 text-sm font-bold text-blue-600 text-center">
+                                            {data[2] ? data[2].slice(3).reduce((total, mark) => total + (Number(mark) || 0), 0) : 0}
+                                        </td>
+                                        {/* Total Max Marks */}
+                                        <td className="py-1.5 px-3 text-sm font-bold text-blue-600 text-center">
+                                            {data[2] ? data[2].slice(3).reduce((total, mark) => total + (Number(mark) || 0), 0) : 0}
+                                        </td>
+                                        {/* Grade */}
+                                        <td className="py-1.5 px-3 text-sm text-center"></td>
+                                    </tr>
+                                </>
                             ) : (() => {
                                 const isWithdrawn = withdraws.includes(row[2])
                                     || withdraws.includes(String(row[2]))
@@ -34,7 +61,7 @@ export default function RecapSheetTable({ data, recapHeads, recapHeadRanges, wit
                                 return (
                                     <tr key={`row-${rowIndex}`} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
                                         <td className="py-1.5 px-3 text-sm text-gray-600 text-center">{row[0] ?? ''}</td>
-                                        <td className="py-1.5 px-3 text-sm text-gray-950 font-medium text-left">{row[1] ?? ''}</td>
+                                        <td className="py-1.5 px-3 text-sm text-gray-950 font-medium text-left whitespace-nowrap">{row[1] ?? ''}</td>
                                         <td className="py-1.5 px-3 text-sm text-gray-600 text-center">{row[2] ?? ''}</td>
                                         {recapHeadRanges.map(({ head, start, end }) => {
                                             const sum = row
