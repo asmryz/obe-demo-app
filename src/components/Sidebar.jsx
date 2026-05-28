@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import {
     Menu, ChevronDown, ChevronRight, Play, LayoutGrid, LayoutDashboard,
-    BookOpen, Search, Sparkles, Key, Settings, Zap, User
+    BookOpen, Search, Sparkles, Key, Settings, Zap, User, MoreVertical, LogOut
 } from 'lucide-react';
 import { store } from '../store';
 
@@ -13,6 +13,8 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
         Analytics: false,
         Documentation: false
     });
+
+
 
     const toggleMenu = (menu) => {
         setExpandedMenus(prev => ({ ...prev, [menu]: !prev[menu] }));
@@ -146,22 +148,6 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
                     </NavLink>
                 ))}
 
-                <div className="flex items-center p-2 rounded-lg cursor-pointer hover:bg-gray-200 text-gray-700" title={isCollapsed ? 'Profile' : ''}>
-                    <div className={`flex items-center justify-center ${isCollapsed ? 'mx-auto' : 'mr-3'}`}>
-                        <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold shadow-sm">
-                            JD
-                        </div>
-                    </div>
-                    {!isCollapsed && (
-                        <div className="flex-1 flex items-center justify-between overflow-hidden">
-                            <div className="truncate mr-2">
-                                <p className="text-xs font-bold text-gray-800 truncate">John Doe</p>
-                                <p className="text-[10px] text-gray-500 truncate">Pro Plan</p>
-                            </div>
-                            <ChevronRight size={14} className="text-gray-400" />
-                        </div>
-                    )}
-                </div>
             </div>
         </div>
     );

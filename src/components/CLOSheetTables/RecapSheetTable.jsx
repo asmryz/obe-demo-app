@@ -1,3 +1,4 @@
+import React, { Fragment } from 'react'
 import { grades } from './CLOSheetHelpers'
 
 export default function RecapSheetTable({ data, recapHeads, recapHeadRanges, withdraws }) {
@@ -16,8 +17,8 @@ export default function RecapSheetTable({ data, recapHeads, recapHeadRanges, wit
                     <tbody>
                         {data.map((row, rowIndex) => (
                             rowIndex === 1 || rowIndex === 2 ? null : rowIndex === 0 ? (
-                                <>
-                                    <tr key={`row-${rowIndex}`} className="bg-gray-100 border-b border-gray-200">
+                                <Fragment key={`recap-header-${rowIndex}`}>
+                                    <tr className="bg-gray-100 border-b border-gray-200">
                                         <th className="py-2 px-4 font-semibold text-sm text-gray-800 text-center">SNo</th>
                                         <th className="py-2 px-4 font-semibold text-sm text-gray-800 text-left whitespace-nowrap">Name</th>
                                         <th className="py-2 px-4 font-semibold text-sm text-gray-800 text-center">Reg.No</th>
@@ -53,7 +54,7 @@ export default function RecapSheetTable({ data, recapHeads, recapHeadRanges, wit
                                         {/* Grade */}
                                         <td className="py-1.5 px-3 text-sm text-center"></td>
                                     </tr>
-                                </>
+                                </Fragment>
                             ) : (() => {
                                 const isWithdrawn = withdraws.includes(row[2])
                                     || withdraws.includes(String(row[2]))
