@@ -8,10 +8,10 @@ import { store } from '../store';
 
 const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
     const [expandedMenus, setExpandedMenus] = useState({
-        Build: false,
+        Curriculum: false,
         Dashboard: false,
-        Analytics: false,
-        Documentation: false
+        Attainment: false,
+        Guidelines: false
     });
 
 
@@ -23,47 +23,47 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
     const menuItems = [
         { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/' },
         {
-            name: 'Build',
+            name: 'Curriculum',
             icon: <LayoutGrid size={20} />,
             children: [
                 { name: 'Recap Sheets', path: '/recap-sheets' },
-                { name: 'Apps', path: '/apps' },
-                { name: 'Gallery', path: '/gallery' },
-                { name: 'Templates', path: '/templates' }
+                { name: 'Assessment Apps', path: '/apps' },
+                { name: 'Attainment Gallery', path: '/gallery' },
+                { name: 'Course Templates', path: '/templates' }
             ]
         },
         {
-            name: 'Analytics',
+            name: 'Attainment',
             icon: <LayoutDashboard size={20} />,
             children: [
-                { name: 'Overview', path: '/overview' },
-                { name: 'Usage', path: '/usage' },
-                { name: 'Billing', path: '/billing' }
+                { name: 'Batch Performance', path: '/overview' },
+                { name: 'CLO/PLO Summary', path: '/usage' },
+                { name: 'Audit Logs', path: '/billing' }
             ]
         },
         {
-            name: 'Documentation',
+            name: 'Guidelines',
             icon: <BookOpen size={20} />,
             children: [
-                { name: 'Quick Start', path: '/quickstart' },
-                { name: 'API Reference', path: '/api-reference' },
-                { name: 'Guides', path: '/guides' }
+                { name: 'Washington Accord Guide', path: '/quickstart' },
+                { name: 'HEC Policy Manual', path: '/api-reference' },
+                { name: 'CQI Best Practices', path: '/guides' }
             ]
         }
     ];
 
     const bottomLinks = [
-        { name: 'Search', icon: <Search size={20} />, path: '/search' },
-        { name: 'What\'s new', icon: <Sparkles size={20} />, path: '/news' },
-        { name: 'Get API key', icon: <Key size={20} />, path: '/api-key' },
-        { name: 'Settings', icon: <Settings size={20} />, path: '/settings' }
+        { name: 'Search Records', icon: <Search size={20} />, path: '/search' },
+        { name: 'OBE Policy Updates', icon: <Sparkles size={20} />, path: '/news' },
+        { name: 'Get Faculty Token', icon: <Key size={20} />, path: '/api-key' },
+        { name: 'System Settings', icon: <Settings size={20} />, path: '/settings' }
     ];
 
     return (
         <div className={`flex flex-col h-full bg-gray-50/50 transition-all duration-300 overflow-hidden ${isCollapsed ? 'w-0 border-none opacity-0' : 'w-64 border-r border-gray-200 opacity-100'}`}>
             {/* Header */}
             <div className="flex items-center p-4 h-16 border-b border-transparent">
-                {!isCollapsed && <span className="font-semibold text-lg tracking-tight">AI Studio</span>}
+                {!isCollapsed && <span className="font-semibold text-lg tracking-tight">OBE Portal</span>}
             </div>
 
             {/* Main Navigation */}
@@ -126,9 +126,9 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
                 {!isCollapsed && (
                     <div className="p-3 mb-2 bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-lg">
                         <div className="flex items-center text-blue-800 font-medium text-sm mb-1">
-                            <Zap size={16} className="mr-1.5 fill-blue-600 text-blue-600" /> Upgrade plan
+                            <Zap size={16} className="mr-1.5 fill-blue-600 text-blue-600" /> Institution Plan
                         </div>
-                        <p className="text-xs text-blue-600/80 mb-2">Get more quota and features</p>
+                        <p className="text-xs text-blue-600/80 mb-2">Unlock advanced batch analytics</p>
                     </div>
                 )}
 

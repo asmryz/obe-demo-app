@@ -602,7 +602,7 @@ function CRRReport() {
                             const ploData = aggPLOs[`PLO${plo}`];
                             const notAchievedPercentage = ploData ? (ploData.notAchieved / (ploData.achieved + ploData.notAchieved) * 100) : 0;
                             //console.log( notAchievedPercentage, plo)
-                            // console.log(recap, cloSid, comments, report)
+                            console.log(recap, cloSid, comments, report)
                             return (
                                 <tr key={`plo-not-achieved-${plo}`} className="inl-123">
                                     <td width="26%" className="inl-124">

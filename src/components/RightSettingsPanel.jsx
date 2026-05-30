@@ -25,17 +25,17 @@ const RightSettingsPanel = ({ isOpen, onToggle }) => {
         outputLength: 2048
     });
 
-    const [selectedModel, setSelectedModel] = useState('Default (Gemini 3 Flash Preview)');
-    const [selectedThinkingLevel, setSelectedThinkingLevel] = useState('Standard');
+    const [selectedModel, setSelectedModel] = useState('Washington Accord Standard v3');
+    const [selectedThinkingLevel, setSelectedThinkingLevel] = useState('CLO-Level');
 
     const models = [
-        'Default (Gemini 3 Flash Preview)',
-        'Gemini 3.1 Flash Lite',
-        'Gemini 3 Flash Preview',
-        'Gemini 3.1 Pro Preview',
-        'Gemini Pro Latest',
-        'Gemini Flash Latest',
-        'Gemini Flash-Lite Latest'
+        'Washington Accord Standard v3',
+        'HEC Policy Guideline 2023',
+        'SZABIST Custom OBE Framework',
+        'Outcome-Based Assessment v2',
+        'Cognitive Focus Evaluator',
+        'Affective & Psychomotor Evaluator',
+        'Direct/Indirect Attainment Mode'
     ];
 
     const toggleSection = (section) => {
@@ -62,10 +62,10 @@ const RightSettingsPanel = ({ isOpen, onToggle }) => {
             <div className={`w-80 h-full bg-white flex flex-col transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none overflow-hidden'}`}>
                 {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b border-gray-200">
-                    <span className="font-semibold text-gray-800">Run settings</span>
+                    <span className="font-semibold text-gray-800">OBE Run Settings</span>
                     <div className="flex items-center gap-2">
                         <button className="flex items-center text-sm font-medium text-blue-600 hover:bg-blue-50 px-2 py-1 rounded">
-                            <Code size={16} className="mr-1.5" /> Get code
+                            <Code size={16} className="mr-1.5" /> Get OBE Report
                         </button>
                     </div>
                 </div>
@@ -73,23 +73,23 @@ const RightSettingsPanel = ({ isOpen, onToggle }) => {
                 <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
                     {/* Custom Model Dropdown */}
                     <Dropdown 
-                        label="Model"
+                        label="Evaluation Model"
                         options={models}
                         value={selectedModel}
                         onChange={setSelectedModel}
                         icon={Info}
-                        description="Multi-modal, reasoning, and high-performance code generation"
+                        description="Washington Accord aligned Direct/Indirect attainment evaluation"
                         className="mb-6"
                     />
 
                     {/* System Instructions */}
                     <div className="mb-6">
                         <div className="flex justify-between items-center mb-2">
-                            <span className="font-medium text-sm text-gray-800">System instructions</span>
+                            <span className="font-medium text-sm text-gray-800">OBE Directives & Instructions</span>
                             <button className="text-blue-600 hover:bg-blue-50 p-1 rounded"><Edit2 size={14} /></button>
                         </div>
                         <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm text-gray-500 h-20">
-                            Optional instructions for the model...
+                            Optional custom directives for OBE evaluation calculations...
                         </div>
                     </div>
 
@@ -99,7 +99,7 @@ const RightSettingsPanel = ({ isOpen, onToggle }) => {
                     <div className="space-y-5 mb-6">
                         <div>
                             <div className="flex justify-between items-center mb-2">
-                                <label className="text-sm font-medium text-gray-800">Temperature</label>
+                                <label className="text-sm font-medium text-gray-800">Calculation Threshold Weight</label>
                                 <input
                                     type="number"
                                     value={sliders.temperature}
@@ -118,8 +118,8 @@ const RightSettingsPanel = ({ isOpen, onToggle }) => {
                         </div>
 
                         <Dropdown 
-                            label="Thinking Level"
-                            options={['Standard', 'Deep']}
+                            label="Assessment Depth"
+                            options={['CLO-Level', 'PLO-Cohort Level']}
                             value={selectedThinkingLevel}
                             onChange={setSelectedThinkingLevel}
                         />
@@ -133,19 +133,19 @@ const RightSettingsPanel = ({ isOpen, onToggle }) => {
                             onClick={() => toggleSection('tools')}
                             className="flex items-center justify-between w-full font-medium text-sm text-gray-800 mb-3"
                         >
-                            Tools
+                            OBE Analytical Tools
                             {sections.tools ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
                         </button>
 
                         {sections.tools && (
                             <div className="space-y-3 pl-1">
                                 {[
-                                    { id: 'structured', label: 'Structured outputs' },
-                                    { id: 'code', label: 'Code execution' },
-                                    { id: 'function', label: 'Function calling' },
-                                    { id: 'search', label: 'Grounding with Search' },
-                                    { id: 'maps', label: 'Grounding with Maps' },
-                                    { id: 'url', label: 'URL context' }
+                                    { id: 'structured', label: 'Structured Washington Accord reports' },
+                                    { id: 'code', label: 'Automated attainment calculations' },
+                                    { id: 'function', label: 'Indirect survey feedback analysis' },
+                                    { id: 'search', label: 'Grounding with HEC Guidelines' },
+                                    { id: 'maps', label: 'Mapping with Course Objectives' },
+                                    { id: 'url', label: 'Web-based Course Folder import' }
                                 ].map(tool => (
                                     <div key={tool.id} className="flex items-center justify-between">
                                         <span className="text-sm text-gray-700">{tool.label}</span>
@@ -169,20 +169,20 @@ const RightSettingsPanel = ({ isOpen, onToggle }) => {
                             onClick={() => toggleSection('advanced')}
                             className="flex items-center justify-between w-full font-medium text-sm text-gray-800 mb-3"
                         >
-                            Advanced settings
+                            Advanced OBE Parameters
                             {sections.advanced ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
                         </button>
 
                         {sections.advanced && (
                             <div className="space-y-4 pl-1">
                                 <div>
-                                    <label className="text-xs text-gray-500 block mb-1">Stop sequence</label>
-                                    <input type="text" placeholder="Add sequence" className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:border-blue-500 outline-none" />
+                                    <label className="text-xs text-gray-500 block mb-1">Convergence Criteria</label>
+                                    <input type="text" placeholder="Add criteria" className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:border-blue-500 outline-none" />
                                 </div>
 
                                 <div>
                                     <div className="flex justify-between items-center mb-1">
-                                        <label className="text-xs text-gray-500">Output length</label>
+                                        <label className="text-xs text-gray-500">Max Student Cohort Size</label>
                                         <input
                                             type="number"
                                             value={sliders.outputLength}
@@ -194,7 +194,7 @@ const RightSettingsPanel = ({ isOpen, onToggle }) => {
 
                                 <div>
                                     <div className="flex justify-between items-center mb-1">
-                                        <label className="text-xs text-gray-500">Top P</label>
+                                        <label className="text-xs text-gray-500">Attainment Confidence Interval (Top P)</label>
                                         <input
                                             type="number"
                                             value={sliders.topP}
@@ -223,9 +223,9 @@ const RightSettingsPanel = ({ isOpen, onToggle }) => {
                             onClick={() => toggleSection('safety')}
                             className="flex items-center justify-between w-full font-medium text-sm text-gray-800 mb-1"
                         >
-                            Safety settings
+                            Academic Integrity Filters
                             <div className="flex items-center gap-2">
-                                <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">Block some</span>
+                                <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">Strict validation</span>
                                 {sections.safety ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
                             </div>
                         </button>

@@ -172,10 +172,11 @@ router.get("/closheet/:closid", async (req, res) => {
 
         const { rid, offid } = closheetResult.rows[0];
         const cloQuery = `
-            SELECT DISTINCT cl.*
+            SELECT DISTINCT cl.*, p.title
             FROM offered_courses oc
             INNER JOIN curriculum_courses cc ON cc.ccid = oc.ccid
             INNER JOIN clo cl ON cl.cid = cc.cid
+            LEFT JOIN plo p ON p.plo = cl.plo
             WHERE (
               $1::int IS NOT NULL AND oc.offid = $1
             ) OR (

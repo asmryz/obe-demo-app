@@ -3,13 +3,13 @@ import { X, Search, MoreVertical, Plus, Bot } from 'lucide-react';
 import Tabs from './Tabs';
 
 const AgentModal = ({ onClose }) => {
-    const [activeTab, setActiveTab] = useState('Agents');
+    const [activeTab, setActiveTab] = useState('OBE Faculty Agents');
     const [searchQuery, setSearchQuery] = useState('');
 
     const agents = [
-        { id: 1, name: 'Code Assistant', desc: 'Expert in React and Node.js', updated: '2 hours ago' },
-        { id: 2, name: 'Data Analyst', desc: 'Analyzes CSVs and generates charts', updated: '1 day ago' },
-        { id: 3, name: 'Copywriter', desc: 'Generates marketing copy', updated: '3 days ago' },
+        { id: 1, name: 'Course Evaluator', desc: 'Expert in CLO analysis & Washington Accord criteria', updated: '2 hours ago' },
+        { id: 2, name: 'Attainment Analyzer', desc: 'Calculates attainment metrics and compiles PLO summaries', updated: '1 day ago' },
+        { id: 3, name: 'CQI Advisor', desc: 'Generates Continuous Quality Improvement suggestions', updated: '3 days ago' },
     ];
 
     return (
@@ -17,7 +17,7 @@ const AgentModal = ({ onClose }) => {
             <div className="bg-white rounded-2xl w-full max-w-2xl shadow-xl overflow-hidden flex flex-col max-h-[85vh]">
                 {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b border-gray-100">
-                    <h2 className="text-lg font-medium text-gray-900">Select an Agent</h2>
+                    <h2 className="text-lg font-medium text-gray-900">Select an OBE Faculty Agent</h2>
                     <button onClick={onClose} className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors">
                         <X size={20} />
                     </button>
@@ -27,13 +27,13 @@ const AgentModal = ({ onClose }) => {
                 <div className="p-4 border-b border-gray-100">
                     <div className="flex items-center justify-between mb-4">
                         <Tabs
-                            tabs={['Models', 'Agents']}
+                            tabs={['OBE Domains', 'OBE Faculty Agents']}
                             activeTab={activeTab}
                             onTabChange={setActiveTab}
                         />
 
                         <button className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-colors">
-                            <Plus size={16} /> Create Agent
+                            <Plus size={16} /> Create OBE Agent
                         </button>
                     </div>
 
@@ -41,7 +41,7 @@ const AgentModal = ({ onClose }) => {
                         <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                         <input
                             type="text"
-                            placeholder="Search agents..."
+                            placeholder="Search OBE agents..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className="w-full bg-gray-50 border border-gray-200 rounded-lg pl-10 pr-4 py-2 text-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-colors"
@@ -51,7 +51,7 @@ const AgentModal = ({ onClose }) => {
 
                 {/* List Content */}
                 <div className="h-[250px] overflow-y-auto p-2 bg-gray-50/50">
-                    {activeTab === 'Agents' ? (
+                    {activeTab === 'OBE Faculty Agents' ? (
                         <div className="space-y-1 p-2">
                             {agents.map(agent => (
                                 <div key={agent.id} className="flex items-center justify-between p-3 rounded-xl hover:bg-white hover:shadow-sm border border-transparent hover:border-gray-100 transition-all cursor-pointer group">
@@ -77,7 +77,7 @@ const AgentModal = ({ onClose }) => {
                         </div>
                     ) : (
                         <div className="p-8 text-center text-gray-500 text-sm">
-                            Model selection is available in the run settings panel.
+                            OBE domain mapping selection is configured in the assessment panel.
                         </div>
                     )}
                 </div>

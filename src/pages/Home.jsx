@@ -10,7 +10,7 @@ import { store } from '../store';
 
 function Home() {
     const [isAgentModalOpen, setIsAgentModalOpen] = useState(false);
-    const [activeTab, setActiveTab] = useState('Models');
+    const [activeTab, setActiveTab] = useState('OBE Domains');
     const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
     const [isVisible, setIsVisible] = useState(false);
     const moreMenuRef = useRef(null);
@@ -41,7 +41,7 @@ function Home() {
                 <div className="flex items-center justify-between mb-6">
 
                     <Tabs
-                        tabs={['Models', 'Agents']}
+                        tabs={['OBE Domains', 'OBE Faculty Agents']}
                         activeTab={activeTab}
                         onTabChange={setActiveTab}
                     />
@@ -61,19 +61,19 @@ function Home() {
                             {isMoreMenuOpen && (
                                 <div className="absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded-xl shadow-md z-50 py-2 animate-in fade-in zoom-in duration-200 origin-top-right">
                                     <div className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                                        Playground Actions
+                                        OBE Dashboard Actions
                                     </div>
                                     <button className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors">
                                         <Settings size={18} className="text-gray-400" />
-                                        <span>View settings</span>
+                                        <span>View Dashboard Settings</span>
                                     </button>
                                     <button className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors">
                                         <Share2 size={18} className="text-gray-400" />
-                                        <span>Share playground</span>
+                                        <span>Share OBE Dashboard</span>
                                     </button>
                                     <button className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors">
                                         <Download size={18} className="text-gray-400" />
-                                        <span>Export configuration</span>
+                                        <span>Export OBE Configuration</span>
                                     </button>
 
                                     <div className="h-px bg-gray-100 my-2" />
@@ -94,7 +94,7 @@ function Home() {
 
                                     <button className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors">
                                         <Trash2 size={18} className="text-red-400" />
-                                        <span>Reset to default</span>
+                                        <span>Reset to Defaults</span>
                                     </button>
                                 </div>
                             )}
@@ -103,9 +103,9 @@ function Home() {
                 </div>
 
                 <div className="relative flex-1">
-                    {/* Models Content */}
+                    {/* OBE Domains Content */}
                     <div
-                        className={`transition-all duration-500 ease-in-out ${activeTab === 'Models'
+                        className={`transition-all duration-500 ease-in-out ${activeTab === 'OBE Domains'
                             ? 'translate-x-0 opacity-100'
                             : '-translate-x-8 opacity-0 pointer-events-none absolute inset-0'
                             }`}
@@ -114,9 +114,9 @@ function Home() {
                         {/* <Table /> */}
                     </div>
 
-                    {/* Agents Content */}
+                    {/* OBE Faculty Agents Content */}
                     <div
-                        className={`transition-all duration-500 ease-in-out ${activeTab === 'Agents'
+                        className={`transition-all duration-500 ease-in-out ${activeTab === 'OBE Faculty Agents'
                             ? 'translate-x-0 opacity-100'
                             : 'translate-x-8 opacity-0 pointer-events-none absolute inset-0'
                             }`}

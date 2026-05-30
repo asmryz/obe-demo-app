@@ -1,42 +1,42 @@
 import React from 'react';
-import { Sparkles, Code, Image as ImageIcon, Video, Music, Clock } from 'lucide-react';
+import { BookOpen, Cpu, Heart, Target, Award, RefreshCw } from 'lucide-react';
 
 const categories = [
   {
-    title: 'Featured',
-    icon: <Sparkles size={24} className="text-amber-500" />,
+    title: 'Cognitive Domain',
+    icon: <BookOpen size={24} className="text-amber-500" />,
     color: 'bg-amber-100',
-    description: 'Our most capable models for general tasks.'
+    description: 'Focuses on intellectual skills, knowledge acquisition, and mental processes.'
   },
   {
-    title: 'Code and Chat',
-    icon: <Code size={24} className="text-blue-500" />,
+    title: 'Psychomotor Domain',
+    icon: <Cpu size={24} className="text-blue-500" />,
     color: 'bg-blue-100',
-    description: 'Specialized for writing code and logical reasoning.'
+    description: 'Focuses on manual or physical skills, technical expertise, and practical execution.'
   },
   {
-    title: 'Image Generation',
-    icon: <ImageIcon size={24} className="text-purple-500" />,
+    title: 'Affective Domain',
+    icon: <Heart size={24} className="text-purple-500" />,
     color: 'bg-purple-100',
-    description: 'Create high-quality images from text descriptions.'
+    description: 'Focuses on feelings, values, appreciation, enthusiasm, and attitude towards learning.'
   },
   {
-    title: 'Video Generation',
-    icon: <Video size={24} className="text-pink-500" />,
+    title: 'Course Learning Outcomes (CLOs)',
+    icon: <Target size={24} className="text-pink-500" />,
     color: 'bg-pink-100',
-    description: 'Generate dynamic videos from prompts.'
+    description: 'Specific statements of what students should know and be able to do in each course.'
   },
   {
-    title: 'Speech and Music',
-    icon: <Music size={24} className="text-green-500" />,
+    title: 'Program Learning Outcomes (PLOs)',
+    icon: <Award size={24} className="text-green-500" />,
     color: 'bg-green-100',
-    description: 'Create audio, music, and voice generation.'
+    description: 'Graduate attributes aligned with Washington Accord representing key competencies.'
   },
   {
-    title: 'Real-time',
-    icon: <Clock size={24} className="text-teal-500" />,
+    title: 'Continuous Quality Improvement (CQI)',
+    icon: <RefreshCw size={24} className="text-teal-500" />,
     color: 'bg-teal-100',
-    description: 'Low-latency models for real-time interactions.'
+    description: 'Closing the loop with iterative reviews and actions for curriculum improvement.'
   }
 ];
 

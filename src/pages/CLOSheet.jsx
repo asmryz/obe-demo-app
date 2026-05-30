@@ -532,19 +532,19 @@ export default function CLOSheet() {
                                     {activeTab !== tabs[4] && (
                                         <>
                                             <div className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                                                Playground Actions
+                                                OBE Assessment Actions
                                             </div>
                                             <button className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors">
                                                 <Settings size={18} className="text-gray-400" />
-                                                <span>View settings</span>
+                                                <span>Modify Attainment KPI</span>
                                             </button>
                                             <button className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors">
                                                 <Share2 size={18} className="text-gray-400" />
-                                                <span>Share playground</span>
+                                                <span>Share Attainment Sheet</span>
                                             </button>
                                             <button className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors">
                                                 <Download size={18} className="text-gray-400" />
-                                                <span>Export configuration</span>
+                                                <span>Export OBE Layout</span>
                                             </button>
 
                                             <div className="h-px bg-gray-100 my-2" />
@@ -565,7 +565,7 @@ export default function CLOSheet() {
 
                                             <button className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors">
                                                 <Trash2 size={18} className="text-red-400" />
-                                                <span>Reset to default</span>
+                                                <span>Reset Attainment Mappings</span>
                                             </button>
                                         </>
                                     )}
