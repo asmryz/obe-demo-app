@@ -37,16 +37,16 @@ router.get("/recaps", async (req, res) => {
     const effectiveSearch = search.length >= 3 ? search : "";
       
         const query = `
-          SELECT voc.offid, voc.ccid, voc.batch, voc.title, voc."name", voc.semester, voc."year", cs.closid, voc.rid ,cs.offid csoffid 
+          SELECT voc.offid, voc.ccid, voc.batch, voc.code, voc.title, voc."name", voc.semester, voc."year", cs.closid, voc.rid ,cs.offid csoffid 
           FROM 
-            (SELECT oc.offid, oc.ccid, oc.batch, c.title, f."name", oc.semester, oc."year", oc.rid
+            (SELECT oc.offid, oc.ccid, oc.batch, c.code, c.title, f."name", oc.semester, oc."year", oc.rid
             FROM offered_courses oc
             LEFT OUTER JOIN curriculum_courses cc on oc.ccid = cc.ccid
             JOIN course c ON c.cid = cc.cid
             JOIN faculty f ON oc.fid = f.fid
             AND oc.ccid IS NOT NULL
             UNION
-            SELECT oc.offid, oc.ccid, oc.batch, vr.title, f."name", oc.semester, oc."year", oc.rid
+            SELECT oc.offid, oc.ccid, oc.batch, vr.code, vr.title, f."name", oc.semester, oc."year", oc.rid
             FROM offered_courses oc
             JOIN faculty f ON f.fid = oc.fid
             JOIN rcourse vr ON oc.rid = vr.rid
@@ -57,6 +57,7 @@ router.get("/recaps", async (req, res) => {
               to_tsvector(
                 'simple',
                 concat_ws(' ',
+                  coalesce(voc.code, ''),
                   coalesce(voc.title, ''),
                   coalesce(voc."name", ''),
                   coalesce(voc.semester::text, ''),
