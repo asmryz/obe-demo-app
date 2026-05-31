@@ -457,18 +457,18 @@ export default function CLOSheet() {
                     {/* Card and Tabs on Left */}
                     <div className="flex items-start gap-8">
                         {currentRecap ? (
-                            <div className="flex flex-col justify-center bg-gradient-to-r from-slate-50 to-indigo-50/20 border border-slate-200/60 rounded-2xl px-6 min-h-24 py-4 shadow-sm transition-all duration-200 hover:shadow-md hover:border-slate-300 min-w-[460px]">
+                            <div className="flex flex-col justify-center bg-linear-to-r from-slate-50 to-indigo-50/20 border border-slate-200/60 rounded-2xl px-6 min-h-24 py-4 shadow-sm transition-all duration-200 hover:shadow-md hover:border-slate-300 min-w-[460px]">
                                 {/* Row 1: Code & Title on left, Semester on right */}
                                 <div className="flex items-start justify-between gap-8">
                                     <div className="flex items-start gap-3">
-                                        <span className="px-2.5 py-1 rounded-lg bg-indigo-600 text-white font-mono text-xs font-bold tracking-wide shadow-sm shadow-indigo-100 flex-shrink-0">
+                                        <span className="px-2.5 py-1 rounded-lg bg-indigo-600 text-white font-mono text-xs font-bold tracking-wide shadow-sm shadow-indigo-100 shrink-0">
                                             {currentRecap.code}
                                         </span>
                                         <span className="font-extrabold text-slate-800 text-base inline-block max-w-[280px] whitespace-normal leading-snug" title={currentRecap.title}>
                                             {currentRecap.title}
                                         </span>
                                     </div>
-                                    <span className="text-sm font-bold text-indigo-600 whitespace-nowrap bg-indigo-50 px-3 py-1 rounded-lg border border-indigo-100/50 flex-shrink-0">
+                                    <span className="text-sm font-bold text-indigo-600 whitespace-nowrap bg-indigo-50 px-3 py-1 rounded-lg border border-indigo-100/50 shrink-0">
                                         {currentRecap.semester} {currentRecap.year}
                                     </span>
                                 </div>
@@ -483,7 +483,7 @@ export default function CLOSheet() {
                                         <span />
                                     )}
                                     {currentRecap.batch ? (
-                                        <span className="px-2.5 py-1 bg-slate-100 text-slate-500 rounded-lg text-xs font-bold border border-slate-200/50 whitespace-nowrap flex-shrink-0">
+                                        <span className="px-2.5 py-1 bg-slate-100 text-slate-500 rounded-lg text-xs font-bold border border-slate-200/50 whitespace-nowrap shrink-0">
                                             {currentRecap.batch}
                                         </span>
                                     ) : (

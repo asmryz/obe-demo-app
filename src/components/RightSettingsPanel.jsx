@@ -47,7 +47,7 @@ const RightSettingsPanel = ({ isOpen, onToggle }) => {
     };
 
     return (
-        <div className={`relative h-full transition-all duration-300 flex-shrink-0 ${isOpen ? 'w-80 border-l border-gray-200' : 'w-0 border-none'}`}>
+        <div className={`relative h-full transition-all duration-300 shrink-0 ${isOpen ? 'w-80 border-l border-gray-200' : 'w-0 border-none'}`}>
             {/* Tiny Sticky Toggle Button */}
             <div className="absolute top-4 -left-3.5 z-30">
                 <button
@@ -72,7 +72,7 @@ const RightSettingsPanel = ({ isOpen, onToggle }) => {
 
                 <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
                     {/* Custom Model Dropdown */}
-                    <Dropdown 
+                    <Dropdown
                         label="Evaluation Model"
                         options={models}
                         value={selectedModel}
@@ -117,7 +117,7 @@ const RightSettingsPanel = ({ isOpen, onToggle }) => {
                             />
                         </div>
 
-                        <Dropdown 
+                        <Dropdown
                             label="Assessment Depth"
                             options={['CLO-Level', 'PLO-Cohort Level']}
                             value={selectedThinkingLevel}

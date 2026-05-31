@@ -26,6 +26,7 @@ function CRRReport() {
         cloComments: '',
         ploComments: '',
     })
+    console.log(recap)
     const [KPI, setKPI] = useState(50)
     const course = recap?.course ?? ''
     const courseParts = course.split(' ')
@@ -382,7 +383,7 @@ function CRRReport() {
                                     <span lang="EN-US" className="inl-58">&nbsp;</span>
                                 </p>
                             </td>
-                            {gradeChart && Object.entries(gradeChart).map(([key], index) => (
+                            {gradeChart && Object.entries(gradeChart).filter(([key]) => key !== 'W').map(([key], index) => (
                                 <td key={index} width="5%" className="inl-59">
                                     <p className="MsoNormal inl-6" align="center">
                                         <span lang="EN-US" className="inl-58">{key}</span>
@@ -406,7 +407,7 @@ function CRRReport() {
                                     <span lang="EN-US" className="inl-77">Number of Students</span>
                                 </p>
                             </td>
-                            {gradeChart && Object.entries(gradeChart).map(([, value], index) => (
+                            {gradeChart && Object.entries(gradeChart).filter(([key]) => key !== 'W').map(([, value], index) => (
                                 <td key={index} width="5%" className="inl-59">
                                     <p className="MsoNormal inl-6" align="center">
                                         <span lang="EN-US" className="inl-58">{value !== 0 && index === Object.keys(gradeChart).length - 1 ? value - withdraws.length : value}</span>
