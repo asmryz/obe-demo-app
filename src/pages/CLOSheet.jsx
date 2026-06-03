@@ -144,27 +144,25 @@ export default function CLOSheet() {
         }
     }, []);
 
-    const {
-        closheet,
-        getCLOSheet,
-        recap,
-        recaps,
-        getRecaps,
-        setGradeChart,
-        setRecap,
-        setGroupedPlanTotals,
-        setCalCLOs,
-        setAggPLOs,
-        setCLOSid,
-        setWithdraws,
-        gradeChart: globalGradeChart,
-        recap: globalRecap,
-        groupedPlanTotals: globalGroupedPlanTotals,
-        calCLOs: globalCalCLOs,
-        aggPLOs: globalAggPLOs,
-        cloSid: globalCloSid,
-        withdraws: globalWithdraws
-    } = useStore();
+    const closheet = useStore((state) => state.closheet);
+    const getCLOSheet = useStore((state) => state.getCLOSheet);
+    const recap = useStore((state) => state.recap);
+    const recaps = useStore((state) => state.recaps);
+    const getRecaps = useStore((state) => state.getRecaps);
+    const setGradeChart = useStore((state) => state.setGradeChart);
+    const setRecap = useStore((state) => state.setRecap);
+    const setGroupedPlanTotals = useStore((state) => state.setGroupedPlanTotals);
+    const setCalCLOs = useStore((state) => state.setCalCLOs);
+    const setAggPLOs = useStore((state) => state.setAggPLOs);
+    const setCLOSid = useStore((state) => state.setCLOSid);
+    const setWithdraws = useStore((state) => state.setWithdraws);
+    const globalGradeChart = useStore((state) => state.gradeChart);
+    const globalRecap = useStore((state) => state.recap);
+    const globalGroupedPlanTotals = useStore((state) => state.groupedPlanTotals);
+    const globalCalCLOs = useStore((state) => state.calCLOs);
+    const globalAggPLOs = useStore((state) => state.aggPLOs);
+    const globalCloSid = useStore((state) => state.cloSid);
+    const globalWithdraws = useStore((state) => state.withdraws);
 
     useEffect(() => {
         const handlePrintShortcut = (event) => {

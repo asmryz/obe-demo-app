@@ -2,16 +2,30 @@
 import './CRRReport.css'
 import logo from '../../assets/logo.jpg'
 import { useStore } from '../../store/index.js'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { api } from '../../api/index.js'
 
 
 
 function CRRReport() {
-    const { cloSid, gradeChart, recap, groupedPlanTotals, cloSummary, calCLOs, aggPLOs, withdraws, report, setReport } = useStore()
-    const cloRows = Array.isArray(recap?.clo) ? recap.clo : []
-    const ploList = [...new Set(cloRows.map(c => c.plo).sort((a, b) => a - b))]
-    const cloSummaryRows = cloSummary(calCLOs, cloRows.map(c => c.clo))
+    const cloSid = useStore((state) => state.cloSid)
+    const gradeChart = useStore((state) => state.gradeChart)
+    const recap = useStore((state) => state.recap)
+    const groupedPlanTotals = useStore((state) => state.groupedPlanTotals)
+    const cloSummary = useStore((state) => state.cloSummary)
+    const calCLOs = useStore((state) => state.calCLOs)
+    const aggPLOs = useStore((state) => state.aggPLOs)
+    const withdraws = useStore((state) => state.withdraws)
+    const report = useStore((state) => state.report)
+    const setReport = useStore((state) => state.setReport)
+
+    const cloRows = useMemo(() => Array.isArray(recap?.clo) ? recap.clo : [], [recap?.clo])
+    const ploList = useMemo(() => [...new Set(cloRows.map(c => c.plo).sort((a, b) => a - b))], [cloRows])
+    const cloSummaryRows = useMemo(() => {
+        if (!cloSummary) return []
+        const cloNos = cloRows.map(c => c.clo)
+        return cloSummary(calCLOs, cloNos)
+    }, [cloSummary, calCLOs, cloRows])
 
     const [comments, setComments] = useState({
         reason: '',
@@ -26,7 +40,6 @@ function CRRReport() {
         cloComments: '',
         ploComments: '',
     })
-    console.log(recap)
     const [KPI, setKPI] = useState(50)
     const course = recap?.course ?? ''
     const courseParts = course.split(' ')
@@ -60,7 +73,6 @@ function CRRReport() {
         && Object.keys(report).length > 0
 
     useEffect(() => {
-        console.log('useEffect triggered in CRRReport, cloSid is:', cloSid);
         if (cloSid === null || cloSid === undefined) {
             return
         }
@@ -69,7 +81,6 @@ function CRRReport() {
             .then(({ data }) => {
                 const loadedReport = data?.report ?? {}
                 setReport(loadedReport)
-                console.log(loadedReport)
 
                 if (
                     loadedReport
@@ -602,8 +613,6 @@ function CRRReport() {
 
                             const ploData = aggPLOs[`PLO${plo}`];
                             const notAchievedPercentage = ploData ? (ploData.notAchieved / (ploData.achieved + ploData.notAchieved) * 100) : 0;
-                            //console.log( notAchievedPercentage, plo)
-                            console.log(recap, cloSid, comments, report)
                             return (
                                 <tr key={`plo-not-achieved-${plo}`} className="inl-123">
                                     <td width="26%" className="inl-124">

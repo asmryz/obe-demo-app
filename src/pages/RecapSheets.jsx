@@ -3,8 +3,8 @@ import Table from '../components/Table';
 import { store, useStore } from '../store';
 
 function RecapSheets() {
-    const { recaps, getRecaps } = useStore();
-    console.log(recaps);
+    const recaps = useStore((state) => state.recaps);
+    const getRecaps = useStore((state) => state.getRecaps);
     const [isVisible, setIsVisible] = useState(false);
 
     useEffect(() => {

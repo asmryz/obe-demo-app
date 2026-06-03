@@ -1,9 +1,10 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useStore } from '../../store';
 import { getArr, getClo, getHeadsCleaned, getPlan, ENUMS } from './CLOSheetHelpers';
 
 export default function PlanTable({ closid }) {
-    const { closheet, getCLOSheet } = useStore();
+    const closheet = useStore((state) => state.closheet);
+    const getCLOSheet = useStore((state) => state.getCLOSheet);
 
     useEffect(() => {
         if (closid) {
@@ -21,21 +22,30 @@ export default function PlanTable({ closid }) {
 
     if (!hasSheetData) return null;
 
-    const arr = getArr(data);
-    const clo = getClo(arr);
-    const headsCleaned = getHeadsCleaned(data);
-    const PLAN = getPlan(headsCleaned, data);
+    const { clo, planByHeadAndClo, cloHdr, PLAN } = useMemo(() => {
+        const arrVal = getArr(data);
+        const cloVal = getClo(arrVal);
+        const headsCleanedVal = getHeadsCleaned(data);
+        const PLANVal = getPlan(headsCleanedVal, data);
 
-    const planByHeadAndClo = PLAN.reduce((acc, item) => {
-        if (!acc[item.head]) acc[item.head] = {};
-        const cloKey = Number(item.clo);
-        if (!Number.isNaN(cloKey)) {
-            acc[item.head][cloKey] = (acc[item.head][cloKey] ?? 0) + (Number(item.total) || 0);
-        }
-        return acc;
-    }, {});
+        const planByHeadAndCloVal = PLANVal.reduce((acc, item) => {
+            if (!acc[item.head]) acc[item.head] = {};
+            const cloKey = Number(item.clo);
+            if (!Number.isNaN(cloKey)) {
+                acc[item.head][cloKey] = (acc[item.head][cloKey] ?? 0) + (Number(item.total) || 0);
+            }
+            return acc;
+        }, {});
 
-    const cloHdr = Object.entries(Object.groupBy(PLAN, ({ clo }) => clo));
+        const cloHdrVal = Object.entries(Object.groupBy(PLANVal, ({ clo }) => clo));
+
+        return {
+            clo: cloVal,
+            planByHeadAndClo: planByHeadAndCloVal,
+            cloHdr: cloHdrVal,
+            PLAN: PLANVal
+        };
+    }, [data]);
 
     return (
         <div className="mt-12 bg-white mx-auto">

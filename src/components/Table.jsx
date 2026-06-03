@@ -22,7 +22,8 @@ const Table = ({ data = [], onSearch, getRecapSheet }) => {
         return <span className="px-2 py-0.5 rounded bg-gray-100 text-gray-700 text-xs font-semibold border border-gray-200">{batch}</span>;
     };
 
-    const { recapPgNo, setRecapPgNo } = useStore();
+    const recapPgNo = useStore((state) => state.recapPgNo);
+    const setRecapPgNo = useStore((state) => state.setRecapPgNo);
     const {
         recapsPerPage = 10,
         currentPage = 1,
