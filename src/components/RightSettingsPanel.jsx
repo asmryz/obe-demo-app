@@ -26,8 +26,15 @@ const RightSettingsPanel = ({ isOpen, onToggle, args = {} }) => {
                 {args?.cid && (
                     <div className="mb-6 p-3 bg-blue-50 border border-blue-100 rounded-xl flex items-center gap-2.5 text-blue-800 text-sm font-medium">
                         <Info size={16} className="text-blue-500 shrink-0" />
-                        <pre>{JSON.stringify({ onToggle, isOpen })}</pre>
                         <span>Configuring Course ID: <strong className="font-bold">#{args.cid}</strong></span>
+                        <span className="ml-auto">
+                            <button
+                                onClick={onToggle}
+                                className="px-3 py-1 bg-white border border-blue-200 hover:bg-blue-100 text-blue-700 text-xs font-semibold rounded-lg cursor-pointer transition-colors"
+                            >
+                                Close
+                            </button>
+                        </span>
                     </div>
                 )}
 
