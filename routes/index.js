@@ -31,6 +31,52 @@ import { db } from "../db.js";
 //   return closheetColumnsReady;
 // }
 
+router.get("/programs", async (req, res) => {
+    try {
+        const result = await db.query("SELECT prgid, program FROM programs ORDER BY prgid");
+        res.json(result.rows);
+    } catch (err) {
+        console.error("Error fetching programs:", err);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
+router.get("/curriculums", async (req, res) => {
+    try {
+        const prgid = req.query.prgid ? Number(req.query.prgid) : null;
+        let query = "SELECT curid, year, prgid, kpi, cohort FROM curriculum";
+        const params = [];
+        if (prgid !== null && !isNaN(prgid)) {
+            query += " WHERE prgid = $1";
+            params.push(prgid);
+        }
+        query += " ORDER BY year DESC";
+        const result = await db.query(query, params);
+        res.json(result.rows);
+    } catch (err) {
+        console.error("Error fetching curriculums:", err);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
+router.get("/courses", async (req, res) => {
+    try {
+        const prgid = req.query.prgid ? Number(req.query.prgid) : null;
+        let query = "SELECT cid, code, title, theory, lab, prgid FROM course";
+        const params = [];
+        if (prgid !== null && !isNaN(prgid)) {
+            query += " WHERE prgid = $1";
+            params.push(prgid);
+        }
+        query += " ORDER BY code";
+        const result = await db.query(query, params);
+        res.json(result.rows);
+    } catch (err) {
+        console.error("Error fetching courses:", err);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
 router.get("/recaps", async (req, res) => {
     try {
         const search = (req.query.q || "").toString().trim();

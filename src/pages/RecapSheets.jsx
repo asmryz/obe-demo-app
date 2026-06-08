@@ -13,7 +13,7 @@ function RecapSheets() {
     }, []);
 
     const handleSearch = useCallback((query) => {
-        console.log(query);
+        // console.log(query);
         getRecaps(query);
     }, [getRecaps]);
 

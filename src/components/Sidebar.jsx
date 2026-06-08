@@ -4,11 +4,12 @@ import {
     Menu, ChevronDown, ChevronRight, Play, LayoutGrid, LayoutDashboard,
     BookOpen, Search, Sparkles, Key, Settings, Zap, User, MoreVertical, LogOut
 } from 'lucide-react';
-import { store } from '../store';
+import { store, useStore } from '../store';
 
 const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
+    const program = useStore((state) => state.program);
     const [expandedMenus, setExpandedMenus] = useState({
-        Curriculum: false,
+        Administrator: false,
         Dashboard: false,
         Attainment: false,
         Guidelines: false
@@ -23,9 +24,11 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
     const menuItems = [
         { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/' },
         {
-            name: 'Curriculum',
+            name: 'Administrator',
             icon: <LayoutGrid size={20} />,
             children: [
+                { name: 'Courses', path: '/courses' },
+                { name: 'Curriculum', path: '/curriculum' },
                 { name: 'Recap Sheets', path: '/recap-sheets' },
                 { name: 'Assessment Apps', path: '/apps' },
                 { name: 'Attainment Gallery', path: '/gallery' },
@@ -63,7 +66,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
         <div className={`flex flex-col h-full bg-gray-50/50 transition-all duration-300 overflow-hidden ${isCollapsed ? 'w-0 border-none opacity-0' : 'w-64 border-r border-gray-200 opacity-100'}`}>
             {/* Header */}
             <div className="flex items-center p-4 h-16 border-b border-transparent">
-                {!isCollapsed && <span className="font-semibold text-lg tracking-tight">OBE Portal</span>}
+                {!isCollapsed && <span className="font-semibold text-lg tracking-tight">OBE Portal for {program?.program || ''}</span>}
             </div>
 
             {/* Main Navigation */}

@@ -8,6 +8,7 @@ const Dropdown = ({
     onChange,
     icon: Icon,
     description,
+    placeholder = "Select...",
     showRoundedOutline = true,
     className = ""
 }) => {
@@ -24,6 +25,8 @@ const Dropdown = ({
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
+    const isDisplayEmpty = (val) => !val || val.trim() === '';
+
     return (
         <div className={`relative ${className}`} ref={dropdownRef}>
             {label && (
@@ -37,11 +40,11 @@ const Dropdown = ({
                 onClick={() => setIsOpen(!isOpen)}
                 className={`w-full flex items-center justify-between px-3 py-1.5 text-sm font-normal text-gray-800 transition-all active:scale-[0.98] 
                     ${showRoundedOutline
-                        ? `bg-white border border-gray-300 rounded-full hover:border-gray-400 ${isOpen ? 'ring-2 ring-blue-100 border-blue-400' : ''}`
+                        ? `bg-white border border-gray-300 rounded-lg hover:border-gray-400 ${isOpen ? 'ring-2 ring-blue-100 border-blue-400' : ''}`
                         : `bg-transparent hover:bg-gray-100 rounded-lg ${isOpen ? 'bg-gray-100' : ''}`
                     }`}
             >
-                <span className="truncate">{value}</span>
+                <span className="truncate">{isDisplayEmpty(value) ? placeholder : value}</span>
                 {isOpen ? <ChevronUp size={16} className="text-gray-500" /> : <ChevronDown size={16} className="text-gray-500" />}
             </button>
 
@@ -57,7 +60,7 @@ const Dropdown = ({
                                 }}
                                 className={`w-full text-left px-2 py-1 text-sm transition-colors hover:bg-gray-50 ${value === option ? 'bg-gray-100 font-medium text-gray-900' : 'text-gray-600'}`}
                             >
-                                {option}
+                                {isDisplayEmpty(option) ? placeholder : option}
                             </button>
                         ))}
                     </div>

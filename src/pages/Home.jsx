@@ -15,9 +15,18 @@ function Home() {
     const [isVisible, setIsVisible] = useState(false);
     const moreMenuRef = useRef(null);
     useEffect(() => {
-        const { initialized, } = store.getState();
+        const { initialized, getProgram, getCurriculum, programId } = store.getState();
         if (!initialized) {
-            store.setState({ initialized: true });
+            store.setState({ initialized: true, programId: 2 });
+            getProgram(2);
+            getCurriculum(2);
+        } else {
+            const activeId = programId === 1 ? 2 : (programId || 2);
+            if (programId === 1) {
+                store.setState({ programId: 2 });
+            }
+            getProgram(activeId);
+            getCurriculum(activeId);
         }
         setIsVisible(true);
     }, []);

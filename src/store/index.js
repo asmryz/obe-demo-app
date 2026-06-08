@@ -7,18 +7,18 @@ const createUseStore = (store) => (selector, equals) =>
     useZustandStore(store, selector, equals);
 
 const parseWithdraws = (value) => {
-  if (Array.isArray(value)) return value;
+    if (Array.isArray(value)) return value;
 
-  if (typeof value === "string") {
-    try {
-      const parsed = JSON.parse(value);
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return [];
+    if (typeof value === "string") {
+        try {
+            const parsed = JSON.parse(value);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch {
+            return [];
+        }
     }
-  }
 
-  return [];
+    return [];
 };
 
 export const store = createStore()(
@@ -30,30 +30,42 @@ export const store = createStore()(
             closheet: null,
             recaps: [],
             recapPgNo: { currentPage: 1, recapsPerPage: 10, selectedSemester: 'All', selectedYear: 'All', searchQuery: '' },
-            
+
             // CLO Sheet, PLO, and Report states
             cloSid: null,
+            programId: 2,
+            program: {},
+            programs: [],
+            curriculums: [],
             gradeChart: {},
             groupedPlanTotals: {},
             calCLOs: [],
             aggPLOs: {},
             withdraws: [],
             report: {},
+            courses: [],
 
             signIn: () => set({ signedIn: true }),
             signOut: () => set({ signedIn: false }),
             setRecaps: (recaps) => set({ recaps }),
             setRecap: (recap) => set({ recap }),
             setClosheet: (closheet) => set({ closheet }),
-            
+
             // Setters for sheet states
             setCLOSid: (cloSid) => set({ cloSid }),
+            setProgramId: (programId) => {
+                set({ programId });
+                get().getProgram(programId);
+                get().getCurriculum(programId);
+                get().getCourses(programId);
+            },
             setGradeChart: (gradeChart) => set({ gradeChart }),
             setGroupedPlanTotals: (groupedPlanTotals) => set({ groupedPlanTotals }),
             setCalCLOs: (calCLOs) => set({ calCLOs }),
             setAggPLOs: (aggPLOs) => set({ aggPLOs }),
             setWithdraws: (withdraws) => set({ withdraws: parseWithdraws(withdraws) }),
             setReport: (report) => set({ report: report ?? {} }),
+            setCourses: (courses) => set({ courses }),
 
             // CLO Summary calculation helper using withdraws
             cloSummary: (localCalCLOs = [], cloNumbers = []) => {
@@ -81,27 +93,62 @@ export const store = createStore()(
                 ]);
             },
 
-            setRecapPgNo: (recapPgNoUpdate) => set((state) => ({ 
-                recapPgNo: { ...(state.recapPgNo || { currentPage: 1, recapsPerPage: 10, selectedSemester: 'All', selectedYear: 'All', searchQuery: '' }), ...recapPgNoUpdate } 
+            setRecapPgNo: (recapPgNoUpdate) => set((state) => ({
+                recapPgNo: { ...(state.recapPgNo || { currentPage: 1, recapsPerPage: 10, selectedSemester: 'All', selectedYear: 'All', searchQuery: '' }), ...recapPgNoUpdate }
             })),
             getRecaps: (query = "") => {
-                return api.get(`/recaps?q=${encodeURIComponent(query)}`).then(res => {
+                return api.get(`/api/recaps?q=${encodeURIComponent(query)}`).then(res => {
                     set({ recaps: res.data });
                     return res.data;
                 });
             },
             getCLOSheet: (closid) => {
-                return api.get(`/closheet/${closid}`).then(res => {
+                return api.get(`/api/closheet/${closid}`).then(res => {
                     const data = res.data;
                     const parsedWithdraws = parseWithdraws(data?.withdraws);
                     const reportData = data?.report ?? {};
-                    set({ 
+                    set({
                         closheet: data,
                         withdraws: parsedWithdraws,
                         report: reportData,
                         cloSid: closid
                     });
                     return data;
+                });
+            },
+            getReport: (closid) => {
+                return api.get(`/api/closheet/${closid}/report`).then(res => {
+                    const reportData = res.data?.report ?? {};
+                    set({ report: reportData });
+                    return reportData;
+                });
+            },
+            getProgram: (prgid) => {
+                const targetId = prgid !== undefined ? prgid : get().programId;
+                return api.get('/api/programs').then(res => {
+                    const allPrograms = res.data;
+                    const selectedProgram = allPrograms.find(p => p.prgid === targetId) || null;
+                    set({
+                        programs: allPrograms,
+                        program: selectedProgram || {}
+                    });
+                    return allPrograms;
+                });
+            },
+            getCurriculum: (prgid) => {
+                const targetId = prgid !== undefined ? prgid : get().programId;
+                if (targetId === null || targetId === undefined) return Promise.resolve([]);
+                return api.get(`/api/curriculums?prgid=${targetId}`).then(res => {
+                    set({ curriculums: res.data });
+                    return res.data;
+                });
+            },
+            getCourses: (prgid) => {
+                const targetId = prgid !== undefined ? prgid : get().programId;
+                if (targetId === null || targetId === undefined) return Promise.resolve([]);
+                return api.get(`/api/courses?prgid=${targetId}`).then(res => {
+                    set({ courses: res.data });
+                    return res.data;
                 });
             }
         }),

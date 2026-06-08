@@ -74,7 +74,13 @@ export default function PlanTable({ closid }) {
                                     {clo.map((number, index) => {
                                         const val = planByHeadAndClo[h]?.[number] ?? 0;
                                         sumCLO += val;
-                                        return <td key={`key-${number}`} className={`py-2.5 px-4 text-lg text-gray-600 font-medium text-center ${index % 2 !== 0 ? 'bg-indigo-50/50' : ''}`}>{val || ''}</td>
+                                        return (
+                                            <td key={`key-${number}`} className={`p-1 text-lg text-gray-600 font-medium text-center ${index % 2 !== 0 ? 'bg-indigo-50/50' : ''}`}>
+                                                <div className="py-1.5 px-3 rounded hover:ring-1 hover:ring-gray-300 transition-all">
+                                                    {val || '\u00A0'}
+                                                </div>
+                                            </td>
+                                        )
                                     })}
                                     <td className="py-2.5 px-4 text-lg text-gray-600 font-medium text-center">{sumCLO}</td>
                                 </tr>
@@ -83,8 +89,10 @@ export default function PlanTable({ closid }) {
                         <tr className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
                             <td className="py-2.5 px-4 text-lg text-gray-800 font-bold">Total</td>
                             {cloHdr.map(([cloKey, items], index) => (
-                                <td key={`clo-${cloKey}-total`} className={`py-2.5 px-4 text-lg text-gray-800 font-bold text-center ${index % 2 !== 0 ? 'bg-indigo-50/50' : ''}`}>
-                                    {items.reduce((sum, item) => sum + (Number(item.total) || 0), 0)}
+                                <td key={`clo-${cloKey}-total`} className={`p-1 text-lg text-gray-800 font-bold text-center ${index % 2 !== 0 ? 'bg-indigo-50/50' : ''}`}>
+                                    <div className="py-1.5 px-3 rounded hover:ring-1 hover:ring-gray-300 transition-all">
+                                        {items.reduce((sum, item) => sum + (Number(item.total) || 0), 0)}
+                                    </div>
                                 </td>
                             ))}
                             <td className="py-2.5 px-4 text-lg text-gray-900 font-bold text-center">

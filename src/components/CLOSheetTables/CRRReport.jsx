@@ -18,6 +18,7 @@ function CRRReport() {
     const withdraws = useStore((state) => state.withdraws)
     const report = useStore((state) => state.report)
     const setReport = useStore((state) => state.setReport)
+    const getReport = useStore((state) => state.getReport)
 
     const cloRows = useMemo(() => Array.isArray(recap?.clo) ? recap.clo : [], [recap?.clo])
     const ploList = useMemo(() => [...new Set(cloRows.map(c => c.plo).sort((a, b) => a - b))], [cloRows])
@@ -77,11 +78,8 @@ function CRRReport() {
             return
         }
 
-        api.get(`/closheet/${cloSid}/report`)
-            .then(({ data }) => {
-                const loadedReport = data?.report ?? {}
-                setReport(loadedReport)
-
+        getReport(cloSid)
+            .then((loadedReport) => {
                 if (
                     loadedReport
                     && typeof loadedReport === 'object'
@@ -98,7 +96,7 @@ function CRRReport() {
             .catch((err) => {
                 console.error('Failed to load report:', err?.response?.data?.error || err.message)
             })
-    }, [cloSid, setReport, ploList.length])
+    }, [cloSid, getReport, ploList.length])
 
     function getCreditValue(course = '') {
         const plusCredit = course.match(/\((\d+)\s*\+\s*(\d+)\)/)
@@ -169,7 +167,7 @@ function CRRReport() {
         }
 
         try {
-            const { data } = await api.post(`/closheet/${cloSid}/report`, {
+            const { data } = await api.post(`/api/closheet/${cloSid}/report`, {
                 report: comments,
             })
             setReport(data?.closheet?.report ?? comments)

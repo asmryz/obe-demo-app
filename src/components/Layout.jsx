@@ -7,6 +7,7 @@ import { Menu, MoreVertical, User, Settings, LogOut } from 'lucide-react';
 function Layout() {
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
     const [isRightPanelOpen, setIsRightPanelOpen] = useState(false);
+    const [rightPanelArgs, setRightPanelArgs] = useState({});
     const [isMoreMenu, setIsMoreMenu] = useState(false);
     const moreMenuRef = useRef(null);
 
@@ -99,11 +100,11 @@ function Layout() {
 
                     {/* Scrollable Content Area */}
                     <main className="flex-1 overflow-hidden">
-                        <Outlet context={{ isSidebarCollapsed, isRightPanelOpen, setIsRightPanelOpen }} />
+                        <Outlet context={{ isSidebarCollapsed, isRightPanelOpen, setIsRightPanelOpen, rightPanelArgs, setRightPanelArgs }} />
                     </main>
                 </div>
 
-                <RightSettingsPanel isOpen={isRightPanelOpen} onToggle={() => setIsRightPanelOpen(!isRightPanelOpen)} />
+                <RightSettingsPanel isOpen={isRightPanelOpen} onToggle={() => setIsRightPanelOpen(!isRightPanelOpen)} args={rightPanelArgs} />
             </div>
         </div>
     );

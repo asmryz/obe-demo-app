@@ -6,6 +6,8 @@ import Apps from './pages/Apps';
 import RecapSheets from './pages/RecapSheets';
 import { store } from "./store";
 import CLOSheet from './pages/CLOSheet';
+import Curriculum from './pages/Curriculum';
+import Courses from './pages/Courses';
 
 const ErrorPage = () => {
     const error = useRouteError();
@@ -57,6 +59,8 @@ const router = createBrowserRouter([
             { index: true, element: <Home /> },
             { path: "apps", element: <Placeholder title="Assessment Apps" /> },
             { path: "recap-sheets", element: <RecapSheets /> },
+            { path: "curriculum", element: <Curriculum /> },
+            { path: "courses", element: <Courses /> },
             { path: "closheet/:closid", element: <CLOSheet /> },
             { path: "gallery", element: <Placeholder title="Attainment Gallery" /> },
             { path: "templates", element: <Placeholder title="Course Templates" /> },
