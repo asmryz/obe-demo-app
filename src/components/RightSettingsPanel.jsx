@@ -1,6 +1,6 @@
-import React from 'react';
-import { ChevronRight, ChevronLeft, Info } from 'lucide-react';
+import { ChevronRight, ChevronLeft } from 'lucide-react';
 import RightPanelComponent from './RightPanelComponent';
+import CourseUpdate from './CourseUpdate';
 
 const RightSettingsPanel = ({ isOpen, onToggle, args = {} }) => {
     return (
@@ -20,25 +20,23 @@ const RightSettingsPanel = ({ isOpen, onToggle, args = {} }) => {
             <div className={`w-lg h-full bg-white flex flex-col transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none overflow-hidden'}`}>
                 {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b border-gray-200">
-                    <span className="font-semibold text-gray-800">OBE Run Settings</span>
+                    <span className="font-semibold text-gray-800">
+                        {args?.course ? 'Update Course Details' : 'OBE Run Settings'}
+                    </span>
+                    <button
+                        onClick={onToggle}
+                        className="text-gray-400 hover:text-gray-600 p-1.5 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer outline-none"
+                        title="Close drawer"
+                    >
+                        <ChevronRight size={18} />
+                    </button>
                 </div>
 
-                {args?.cid && (
-                    <div className="mb-6 p-3 bg-blue-50 border border-blue-100 rounded-xl flex items-center gap-2.5 text-blue-800 text-sm font-medium">
-                        <Info size={16} className="text-blue-500 shrink-0" />
-                        <span>Configuring Course ID: <strong className="font-bold">#{args.cid}</strong></span>
-                        <span className="ml-auto">
-                            <button
-                                onClick={onToggle}
-                                className="px-3 py-1 bg-white border border-blue-200 hover:bg-blue-100 text-blue-700 text-xs font-semibold rounded-lg cursor-pointer transition-colors"
-                            >
-                                Close
-                            </button>
-                        </span>
-                    </div>
+                {args?.course ? (
+                    <CourseUpdate key={args.course.cid} course={args.course} onCancel={onToggle} />
+                ) : (
+                    <RightPanelComponent />
                 )}
-
-                <RightPanelComponent />
             </div>
         </div>
     );

@@ -44,7 +44,7 @@ function Courses() {
     return (
         <div className={`h-full overflow-y-auto px-16 py-6 custom-scrollbar flex flex-col transition-all duration-300 ease-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
             {/* Header Row */}
-            <div className="max-w-7xl w-full flex flex-row items-center justify-between pb-4 mb-8">
+            <div className="max-w-7xl w-full flex flex-row items-center justify-between pb-4 mb-4">
                 <h2 className="text-3xl font-normal text-gray-900">Courses</h2>
             </div>
 
@@ -96,29 +96,29 @@ function Courses() {
                                         const totalCredits = theoryCredits + labCredits;
                                         return (
                                             <tr key={course.cid} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                                                <td className="py-2.5 px-4 text-sm text-gray-600 font-medium">
+                                                <td className="py-1.5 px-3 text-sm text-gray-600 font-medium">
                                                     #{(currentPage - 1) * coursesPerPage + idx + 1}
                                                 </td>
-                                                <td className="py-2.5 px-4 text-sm font-semibold text-gray-800">
+                                                <td className="py-1.5 px-3 text-sm font-semibold text-gray-800">
                                                     {course.code}
                                                 </td>
                                                 <td
-                                                    className="py-2.5 px-4 text-sm font-semibold text-blue-600 hover:text-blue-800 hover:underline cursor-pointer truncate"
+                                                    className="py-1.5 px-3 text-sm font-semibold text-blue-600 hover:text-blue-800 hover:underline cursor-pointer truncate"
                                                     title={course.title}
                                                     onClick={() => {
-                                                        setRightPanelArgs({ cid: course.cid });
+                                                        setRightPanelArgs({ course });
                                                         setIsRightPanelOpen(true);
                                                     }}
                                                 >
                                                     {course.title}
                                                 </td>
-                                                <td className="py-2.5 px-4 text-sm text-gray-600 text-center">
+                                                <td className="py-1.5 px-3 text-sm text-gray-600 text-center">
                                                     {course.theory !== null ? course.theory : '-'}
                                                 </td>
-                                                <td className="py-2.5 px-4 text-sm text-gray-600 text-center">
+                                                <td className="py-1.5 px-3 text-sm text-gray-600 text-center">
                                                     {course.lab !== null ? course.lab : '-'}
                                                 </td>
-                                                <td className="py-2.5 px-4 text-sm text-gray-800 font-semibold text-center">
+                                                <td className="py-1.5 px-3 text-sm text-gray-800 font-semibold text-center">
                                                     {course.theory !== null || course.lab !== null ? totalCredits : '-'}
                                                 </td>
                                             </tr>

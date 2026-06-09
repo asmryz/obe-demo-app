@@ -77,6 +77,41 @@ router.get("/courses", async (req, res) => {
     }
 });
 
+router.put("/courses/:cid", async (req, res) => {
+    try {
+        const cid = Number(req.params.cid);
+        const { code, title, theory, lab, prgid } = req.body;
+
+        if (!Number.isInteger(cid)) {
+            return res.status(400).json({ error: "Invalid course id" });
+        }
+
+        const query = `
+            UPDATE course
+            SET code = $1, title = $2, theory = $3, lab = $4, prgid = $5
+            WHERE cid = $6
+            RETURNING cid, code, title, theory, lab, prgid;
+        `;
+        const result = await db.query(query, [
+            code,
+            title,
+            theory !== null && theory !== undefined ? Number(theory) : null,
+            lab !== null && lab !== undefined ? Number(lab) : null,
+            prgid !== null && prgid !== undefined ? Number(prgid) : null,
+            cid
+        ]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: "Course not found" });
+        }
+
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error("Error updating course:", err);
+        res.status(500).json({ error: "Failed to update course" });
+    }
+});
+
 router.get("/recaps", async (req, res) => {
     try {
         const search = (req.query.q || "").toString().trim();

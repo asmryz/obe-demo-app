@@ -150,6 +150,15 @@ export const store = createStore()(
                     set({ courses: res.data });
                     return res.data;
                 });
+            },
+            updateCourse: (cid, courseData) => {
+                return api.put(`/api/courses/${cid}`, courseData).then(res => {
+                    const updatedCourse = res.data;
+                    set(state => ({
+                        courses: state.courses.map(c => c.cid === cid ? updatedCourse : c)
+                    }));
+                    return updatedCourse;
+                });
             }
         }),
         {
