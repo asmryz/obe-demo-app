@@ -4,7 +4,7 @@ import CourseUpdate from './CourseUpdate';
 
 const RightSettingsPanel = ({ isOpen, onToggle, args = {} }) => {
     return (
-        <div className={`absolute right-0 top-0 h-full transition-all duration-300 z-40 ${isOpen ? 'w-lg border-l border-gray-200 shadow-xl' : 'w-0 border-none'}`}>
+        <div className={`absolute right-0 top-0 h-full transition-all duration-300 z-40 ${isOpen ? 'w-md border-l border-gray-200 shadow-xl' : 'w-0 border-none'}`}>
             {/* Tiny Sticky Toggle Button */}
             {Object.entries(args).length === 0 &&
                 <div className="absolute top-4 -left-3.5 z-30">
@@ -17,7 +17,7 @@ const RightSettingsPanel = ({ isOpen, onToggle, args = {} }) => {
                     </button>
                 </div>
             }
-            <div className={`w-lg h-full bg-white flex flex-col transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none overflow-hidden'}`}>
+            <div className={`w-md h-full bg-white flex flex-col transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none overflow-hidden'}`}>
                 {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b border-gray-200">
                     <span className="font-semibold text-gray-800">
@@ -33,7 +33,7 @@ const RightSettingsPanel = ({ isOpen, onToggle, args = {} }) => {
                 </div>
 
                 {args?.course ? (
-                    <CourseUpdate key={args.course.cid} course={args.course} onCancel={onToggle} />
+                    <CourseUpdate key={`${args.course.cid}-${isOpen}`} course={args.course} onCancel={onToggle} />
                 ) : (
                     <RightPanelComponent />
                 )}

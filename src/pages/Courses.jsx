@@ -42,7 +42,7 @@ function Courses() {
     const paginatedCourses = filteredCourses.slice(startIndex, endIndex);
 
     return (
-        <div className={`h-full overflow-y-auto px-16 py-6 custom-scrollbar flex flex-col transition-all duration-300 ease-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+        <div className={`h-full overflow-y-auto px-16 py-6 custom-scrollbar flex flex-col items-center transition-all duration-300 ease-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
             {/* Header Row */}
             <div className="max-w-7xl w-full flex flex-row items-center justify-between pb-4 mb-4">
                 <h2 className="text-3xl font-normal text-gray-900">Courses</h2>

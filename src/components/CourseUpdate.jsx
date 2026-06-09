@@ -8,15 +8,41 @@ const CourseUpdate = ({ course, onCancel }) => {
     const programs = useStore((state) => state.programs) || [];
     const getProgram = useStore((state) => state.getProgram);
 
-    const [code, setCode] = useState(course?.code || '');
-    const [title, setTitle] = useState(course?.title || '');
-    const [theory, setTheory] = useState(course?.theory ?? 0);
-    const [lab, setLab] = useState(course?.lab ?? 0);
-    const [prgid, setPrgid] = useState(course?.prgid || 2);
+    // const [code, setCode] = useState(course?.code || '');
+    // const [title, setTitle] = useState(course?.title || '');
+    // const [theory, setTheory] = useState(course?.theory ?? 0);
+    // const [lab, setLab] = useState(course?.lab ?? 0);
+    // const [prgid, setPrgid] = useState(course?.prgid || 2);
+
+    const [selectedCourse, setSelectedCourse] = useState({
+        ...course,
+        code: course?.code || '',
+        title: course?.title || '',
+        theory: course?.theory ?? 0,
+        lab: course?.lab ?? 0,
+        prgid: course?.prgid || 0
+    });
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
+
+    // Sync state with course prop when it changes
+    useEffect(() => {
+        setSelectedCourse({
+            ...course,
+            code: course?.code || '',
+            title: course?.title || '',
+            theory: course?.theory ?? 0,
+            lab: course?.lab ?? 0,
+            prgid: course?.prgid || 0
+        });
+        setSuccess(false);
+        setLoading(false);
+        setError('');
+    }, [course]);
+
+    console.log(selectedCourse)
 
     // Fetch programs if not already loaded in the store
     const programsLength = programs.length;
@@ -27,37 +53,37 @@ const CourseUpdate = ({ course, onCancel }) => {
     }, [programsLength, getProgram]);
 
     const programOptions = programs.map((p) => p.program);
-    const currentProgramName = programs.find((p) => p.prgid === prgid)?.program || '';
+    const currentProgramName = programs.find((p) => p.prgid === selectedCourse.prgid)?.program || '';
 
     const handleProgramChange = (programName) => {
         const selectedProg = programs.find((p) => p.program === programName);
         if (selectedProg) {
-            setPrgid(selectedProg.prgid);
+            setSelectedCourse({ ...selectedCourse, prgid: selectedProg.prgid });
         }
     };
 
     const handleSave = async (e) => {
         e.preventDefault();
-        if (!code.trim()) {
+        if (!selectedCourse.code.trim()) {
             setError('Course code is required');
             return;
         }
-        if (!title.trim()) {
+        if (!selectedCourse.title.trim()) {
             setError('Course title is required');
             return;
         }
 
         setLoading(true);
         setError('');
-        setSuccess(false);
+        // setSuccess(false);
 
         try {
-            await updateCourse(course.cid, {
-                code: code.trim(),
-                title: title.trim(),
-                theory: Number(theory),
-                lab: Number(lab),
-                prgid: Number(prgid),
+            await updateCourse(selectedCourse.cid, {
+                code: selectedCourse.code.trim(),
+                title: selectedCourse.title.trim(),
+                theory: Number(selectedCourse.theory),
+                lab: Number(selectedCourse.lab),
+                prgid: Number(selectedCourse.prgid),
             });
             setSuccess(true);
             // Hide success state and close panel after a brief moment
@@ -107,10 +133,10 @@ const CourseUpdate = ({ course, onCancel }) => {
                         </label>
                         <input
                             type="text"
-                            value={code}
-                            onChange={(e) => setCode(e.target.value)}
+                            value={selectedCourse.code}
+                            onChange={(e) => setSelectedCourse({ ...selectedCourse, code: e.target.value })}
                             placeholder="e.g. CSC-101"
-                            className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none bg-white text-gray-800 placeholder-gray-400 transition-shadow"
+                            className="w-full border border-gray-300 rounded-md p-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none bg-white text-gray-800 placeholder-gray-400 transition-shadow"
                             disabled={loading || success}
                             required
                         />
@@ -120,17 +146,70 @@ const CourseUpdate = ({ course, onCancel }) => {
                         <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-2">
                             Course Title
                         </label>
-                        <input
+                        <textarea
                             type="text"
-                            value={title}
-                            onChange={(e) => setTitle(e.target.value)}
+                            name='title'
+                            value={selectedCourse.title}
+                            onChange={(e) => setSelectedCourse({ ...selectedCourse, title: e.target.value })}
                             placeholder="e.g. Software Engineering"
-                            className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none bg-white text-gray-800 placeholder-gray-400 transition-shadow"
+                            rows={2}
+                            cols={30}
+                            style={{ backgroundColor: 'white' }}
+                            className="w-full border border-gray-300 bg-white rounded-md p-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-gray-800 placeholder-gray-400 transition-shadow"
+                            // disabled={loading || success}
+                            required
+                        />
+                    </div>
+                </div>
+
+
+
+
+
+                {/* Credits Input Fields */}
+                <div className="space-y-4">
+                    {/* Theory Credits */}
+                    <div>
+                        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-2">
+                            Theory Credits
+                        </label>
+                        <input
+                            type="number"
+                            value={selectedCourse.theory}
+                            onChange={(e) =>
+                                setSelectedCourse({ ...selectedCourse, theory: Math.max(0, Math.min(4, parseInt(e.target.value) || 0)) })
+                            }
+                            placeholder="0"
+                            className="w-full border border-gray-300 bg-white rounded-md p-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-gray-800 placeholder-gray-400 transition-shadow"
+                            min="0"
+                            max="3"
+                            disabled={loading || success}
+                            required
+                        />
+                    </div>
+
+                    {/* Lab Credits */}
+                    <div>
+                        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-2">
+                            Lab Credits
+                        </label>
+                        <input
+                            type="number"
+                            value={selectedCourse.lab}
+                            onChange={(e) =>
+                                setSelectedCourse({ ...selectedCourse, lab: Math.max(0, Math.min(4, parseInt(e.target.value) || 0)) })
+                            }
+                            placeholder="0"
+                            className="w-full border border-gray-300 bg-white rounded-md p-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-gray-800 placeholder-gray-400 transition-shadow"
+                            min="0"
+                            max="1"
                             disabled={loading || success}
                             required
                         />
                     </div>
                 </div>
+
+                <hr className="border-gray-200" />
 
                 {/* Program Dropdown */}
                 {programs.length > 0 && (
@@ -140,76 +219,16 @@ const CourseUpdate = ({ course, onCancel }) => {
                         value={currentProgramName}
                         onChange={handleProgramChange}
                         description="Select the academic program this course belongs to"
+                        disabled={true}
                     />
                 )}
-
-                <hr className="border-gray-200" />
-
-                {/* Sliders */}
-                <div className="space-y-5">
-                    {/* Theory Credits */}
-                    <div>
-                        <div className="flex justify-between items-center mb-2">
-                            <label className="text-sm font-medium text-gray-800">Theory Credits</label>
-                            <input
-                                type="number"
-                                value={theory}
-                                onChange={(e) =>
-                                    setTheory(Math.max(0, Math.min(4, parseInt(e.target.value) || 0)))
-                                }
-                                className="w-14 text-right border border-gray-300 rounded p-1 text-sm bg-gray-50 font-medium text-gray-800"
-                                min="0"
-                                max="4"
-                                disabled={loading || success}
-                            />
-                        </div>
-                        <input
-                            type="range"
-                            min="0"
-                            max="4"
-                            step="1"
-                            value={theory}
-                            onChange={(e) => setTheory(parseInt(e.target.value) || 0)}
-                            className="w-full accent-blue-600 cursor-pointer"
-                            disabled={loading || success}
-                        />
-                    </div>
-
-                    {/* Lab Credits */}
-                    <div>
-                        <div className="flex justify-between items-center mb-2">
-                            <label className="text-sm font-medium text-gray-800">Lab Credits</label>
-                            <input
-                                type="number"
-                                value={lab}
-                                onChange={(e) =>
-                                    setLab(Math.max(0, Math.min(4, parseInt(e.target.value) || 0)))
-                                }
-                                className="w-14 text-right border border-gray-300 rounded p-1 text-sm bg-gray-50 font-medium text-gray-800"
-                                min="0"
-                                max="4"
-                                disabled={loading || success}
-                            />
-                        </div>
-                        <input
-                            type="range"
-                            min="0"
-                            max="4"
-                            step="1"
-                            value={lab}
-                            onChange={(e) => setLab(parseInt(e.target.value) || 0)}
-                            className="w-full accent-blue-600 cursor-pointer"
-                            disabled={loading || success}
-                        />
-                    </div>
-                </div>
 
                 <hr className="border-gray-200" />
 
                 {/* Total Credits Info Card */}
                 <div className="flex justify-between items-center bg-blue-50/50 border border-blue-100 rounded-xl p-3.5 text-sm">
                     <span className="font-semibold text-blue-900">Total Course Credits</span>
-                    <span className="font-bold text-blue-600 text-lg">{theory + lab}</span>
+                    <span className="font-bold text-blue-600 text-lg">{selectedCourse.theory + selectedCourse.lab}</span>
                 </div>
             </div>
 
@@ -218,14 +237,14 @@ const CourseUpdate = ({ course, onCancel }) => {
                 <button
                     type="button"
                     onClick={onCancel}
-                    className="px-4 py-2 border border-gray-300 hover:bg-gray-50 text-gray-700 text-sm font-medium rounded-lg cursor-pointer transition-colors outline-none active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-4 py-2 border border-gray-300 hover:bg-gray-50 text-gray-700 text-sm font-medium rounded-md cursor-pointer transition-colors outline-none active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                     disabled={loading || success}
                 >
                     Cancel
                 </button>
                 <button
                     type="submit"
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg cursor-pointer transition-colors flex items-center gap-2 outline-none active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md cursor-pointer transition-colors flex items-center gap-2 outline-none active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                     disabled={loading || success}
                 >
                     {loading ? (

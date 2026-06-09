@@ -10,7 +10,8 @@ const Dropdown = ({
     description,
     placeholder = "Select...",
     showRoundedOutline = true,
-    className = ""
+    className = "",
+    disabled = false
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef(null);
@@ -37,11 +38,16 @@ const Dropdown = ({
             )}
 
             <button
-                onClick={() => setIsOpen(!isOpen)}
-                className={`w-full flex items-center justify-between px-3 py-1.5 text-sm font-normal text-gray-800 transition-all active:scale-[0.98] 
-                    ${showRoundedOutline
-                        ? `bg-white border border-gray-300 rounded-lg hover:border-gray-400 ${isOpen ? 'ring-2 ring-blue-100 border-blue-400' : ''}`
-                        : `bg-transparent hover:bg-gray-100 rounded-lg ${isOpen ? 'bg-gray-100' : ''}`
+                type="button"
+                onClick={() => !disabled && setIsOpen(!isOpen)}
+                disabled={disabled}
+                className={`w-full flex items-center justify-between px-3 py-1.5 text-sm font-normal transition-all 
+                    ${disabled
+                        ? `bg-gray-50 border border-gray-200 text-gray-400 cursor-not-allowed ${showRoundedOutline ? 'rounded-md' : ''}`
+                        : `text-gray-800 active:scale-[0.98] ${showRoundedOutline
+                            ? `bg-white border border-gray-300 rounded-md hover:border-gray-400 ${isOpen ? 'ring-2 ring-blue-100 border-blue-400' : ''}`
+                            : `bg-transparent hover:bg-gray-100 rounded-md ${isOpen ? 'bg-gray-100' : ''}`
+                        }`
                     }`}
             >
                 <span className="truncate">{isDisplayEmpty(value) ? placeholder : value}</span>
@@ -49,11 +55,12 @@ const Dropdown = ({
             </button>
 
             {isOpen && (
-                <div className="absolute left-0 right-0 mt-1 z-50 bg-white border border-gray-200 rounded-lg shadow-xl overflow-hidden animate-in fade-in zoom-in duration-200 origin-top">
+                <div className="absolute left-0 right-0 mt-1 z-50 bg-white border border-gray-200 rounded-md shadow-xl overflow-hidden animate-in fade-in zoom-in duration-200 origin-top">
                     <div className="max-h-60 overflow-y-auto custom-scrollbar py-1">
                         {options.map((option) => (
                             <button
                                 key={option}
+                                type="button"
                                 onClick={() => {
                                     onChange(option);
                                     setIsOpen(false);
