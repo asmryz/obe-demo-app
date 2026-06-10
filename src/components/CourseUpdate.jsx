@@ -42,7 +42,7 @@ const CourseUpdate = ({ course, onCancel }) => {
         setError('');
     }, [course]);
 
-    console.log(selectedCourse)
+    // console.log(selectedCourse)
 
     // Fetch programs if not already loaded in the store
     const programsLength = programs.length;
@@ -136,7 +136,7 @@ const CourseUpdate = ({ course, onCancel }) => {
                             value={selectedCourse.code}
                             onChange={(e) => setSelectedCourse({ ...selectedCourse, code: e.target.value })}
                             placeholder="e.g. CSC-101"
-                            className="w-full border border-gray-300 rounded-md p-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none bg-white text-gray-800 placeholder-gray-400 transition-shadow"
+                            className="w-full border border-gray-300 rounded-md p-1 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none bg-white text-gray-800 placeholder-gray-400 transition-shadow"
                             disabled={loading || success}
                             required
                         />
@@ -155,7 +155,7 @@ const CourseUpdate = ({ course, onCancel }) => {
                             rows={2}
                             cols={30}
                             style={{ backgroundColor: 'white' }}
-                            className="w-full border border-gray-300 bg-white rounded-md p-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-gray-800 placeholder-gray-400 transition-shadow"
+                            className="w-full border border-gray-300 bg-white rounded-md p-1 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-gray-800 placeholder-gray-400 transition-shadow"
                             // disabled={loading || success}
                             required
                         />
@@ -163,11 +163,8 @@ const CourseUpdate = ({ course, onCancel }) => {
                 </div>
 
 
-
-
-
                 {/* Credits Input Fields */}
-                <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
                     {/* Theory Credits */}
                     <div>
                         <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-2">
@@ -180,7 +177,7 @@ const CourseUpdate = ({ course, onCancel }) => {
                                 setSelectedCourse({ ...selectedCourse, theory: Math.max(0, Math.min(4, parseInt(e.target.value) || 0)) })
                             }
                             placeholder="0"
-                            className="w-full border border-gray-300 bg-white rounded-md p-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-gray-800 placeholder-gray-400 transition-shadow"
+                            className="w-full border border-gray-300 bg-white rounded-md p-1 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-gray-800 placeholder-gray-400 transition-shadow"
                             min="0"
                             max="3"
                             disabled={loading || success}
@@ -200,7 +197,7 @@ const CourseUpdate = ({ course, onCancel }) => {
                                 setSelectedCourse({ ...selectedCourse, lab: Math.max(0, Math.min(4, parseInt(e.target.value) || 0)) })
                             }
                             placeholder="0"
-                            className="w-full border border-gray-300 bg-white rounded-md p-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-gray-800 placeholder-gray-400 transition-shadow"
+                            className="w-full border border-gray-300 bg-white rounded-md p-1 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-gray-800 placeholder-gray-400 transition-shadow"
                             min="0"
                             max="1"
                             disabled={loading || success}

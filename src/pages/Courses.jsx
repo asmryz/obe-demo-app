@@ -12,7 +12,7 @@ function Courses() {
     const [isVisible, setIsVisible] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
-    const [coursesPerPage, setCoursesPerPage] = useState(10);
+    const [coursesPerPage, setCoursesPerPage] = useState(20);
 
     useEffect(() => {
         // Always use programId 2 for this page (BSCS)
