@@ -117,16 +117,8 @@ const CourseUpdate = ({ course, onCancel }) => {
                     </div>
                 )}
 
-                {/* Course ID Indicator */}
-                <div className="p-3 bg-gray-50 border border-gray-200 rounded-xl flex items-center justify-between text-gray-700 text-xs font-semibold">
-                    <span>Course Identity</span>
-                    <span className="bg-gray-200 text-gray-800 px-2.5 py-0.5 rounded-full font-mono text-[10px]">
-                        ID #{course?.cid}
-                    </span>
-                </div>
-
-                {/* Course Code & Title Inputs */}
-                <div className="space-y-4">
+                {/* Course ID & Code Row */}
+                <div className="grid grid-cols-3 gap-4">
                     <div>
                         <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-2">
                             Course Code
@@ -141,30 +133,52 @@ const CourseUpdate = ({ course, onCancel }) => {
                             required
                         />
                     </div>
-
+                    <div>
+                        {/* Program Dropdown */}
+                        {programs.length > 0 && (
+                            <Dropdown
+                                label="Program"
+                                options={programOptions}
+                                value={currentProgramName}
+                                onChange={handleProgramChange}
+                                // description="Select the academic program this course belongs to"
+                                disabled={true}
+                            />
+                        )}
+                    </div>
                     <div>
                         <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-2">
-                            Course Title
+                            &nbsp;
                         </label>
-                        <textarea
-                            type="text"
-                            name='title'
-                            value={selectedCourse.title}
-                            onChange={(e) => setSelectedCourse({ ...selectedCourse, title: e.target.value })}
-                            placeholder="e.g. Software Engineering"
-                            rows={2}
-                            cols={30}
-                            style={{ backgroundColor: 'white' }}
-                            className="w-full border border-gray-300 bg-white rounded-md p-1 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-gray-800 placeholder-gray-400 transition-shadow"
-                            // disabled={loading || success}
-                            required
-                        />
+                        <div className="w-full border border-gray-200 bg-gray-50 rounded-md p-1.5 text-sm text-gray-600 font-semibold text-center font-mono">
+                            Course Id #{course?.cid}
+                        </div>
                     </div>
+                </div>
+
+                {/* Course Title Input */}
+                <div>
+                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-2">
+                        Course Title
+                    </label>
+                    <textarea
+                        type="text"
+                        name='title'
+                        value={selectedCourse.title}
+                        onChange={(e) => setSelectedCourse({ ...selectedCourse, title: e.target.value })}
+                        placeholder="e.g. Software Engineering"
+                        rows={2}
+                        cols={30}
+                        style={{ backgroundColor: 'white' }}
+                        className="w-full border border-gray-300 bg-white rounded-md p-1 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-gray-800 placeholder-gray-400 transition-shadow"
+                        // disabled={loading || success}
+                        required
+                    />
                 </div>
 
 
                 {/* Credits Input Fields */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-3 gap-4">
                     {/* Theory Credits */}
                     <div>
                         <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-2">
@@ -204,29 +218,24 @@ const CourseUpdate = ({ course, onCancel }) => {
                             required
                         />
                     </div>
+                    {/* Total Credits Info Card */}
+                    <div>
+                        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-2">
+                            &nbsp;
+                        </label>
+                        <div className="w-full border border-gray-200 bg-gray-50 rounded-md p-1.5 text-sm text-gray-600 font-semibold text-center font-mono">
+                            Total : {selectedCourse.theory + selectedCourse.lab}
+                        </div>
+                    </div>
                 </div>
 
                 <hr className="border-gray-200" />
 
-                {/* Program Dropdown */}
-                {programs.length > 0 && (
-                    <Dropdown
-                        label="Program Allocation"
-                        options={programOptions}
-                        value={currentProgramName}
-                        onChange={handleProgramChange}
-                        description="Select the academic program this course belongs to"
-                        disabled={true}
-                    />
-                )}
 
-                <hr className="border-gray-200" />
 
-                {/* Total Credits Info Card */}
-                <div className="flex justify-between items-center bg-blue-50/50 border border-blue-100 rounded-xl p-3.5 text-sm">
-                    <span className="font-semibold text-blue-900">Total Course Credits</span>
-                    <span className="font-bold text-blue-600 text-lg">{selectedCourse.theory + selectedCourse.lab}</span>
-                </div>
+
+
+
             </div>
 
             {/* Form Action Buttons */}

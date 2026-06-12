@@ -40,8 +40,8 @@ function Layout() {
                                 HMA
                             </div>
                             <div className="text-left leading-tight hidden sm:block">
-                                <p className="text-sm font-bold text-gray-800">Dr. Husnain Mansoor Ali</p>
-                                <p className="text-sm text-gray-500">Faculty</p>
+                                <p className="text-sm font-bold text-gray-800">Dr. Muhammad Umar Sidduqui</p>
+                                <p className="text-sm text-gray-500">Admin</p>
                             </div>
                             {/* <MoreVertical size={16} className="text-gray-400 hover:text-gray-600 transition-colors" /> */}
                         </button>
