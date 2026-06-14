@@ -37,7 +37,7 @@ function Layout() {
                                 }`}
                         >
                             <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold shadow-sm">
-                                HMA
+                                MUS
                             </div>
                             <div className="text-left leading-tight hidden sm:block">
                                 <p className="text-sm font-bold text-gray-800">Dr. Muhammad Umar Sidduqui</p>

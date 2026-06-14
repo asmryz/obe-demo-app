@@ -3,7 +3,7 @@ import { useStore } from '../store';
 import { Loader2, Save, AlertCircle, CheckCircle2 } from 'lucide-react';
 import Dropdown from './Dropdown';
 
-const CourseUpdate = ({ course, onCancel }) => {
+const CourseUpdate = ({ course, clos, onCancel }) => {
     const updateCourse = useStore((state) => state.updateCourse);
     const programs = useStore((state) => state.programs) || [];
     const getProgram = useStore((state) => state.getProgram);
@@ -232,7 +232,69 @@ const CourseUpdate = ({ course, onCancel }) => {
                 <hr className="border-gray-200" />
 
 
+                {/* CLO Cards */}
+                {clos && clos.length > 0 && (
+                    <div className="space-y-3">
+                        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-1">
+                            Course Learning Outcomes (CLOs)
+                        </label>
+                        <div className="grid grid-cols-1 gap-3.5 overflow-y-auto max-h-[380px] pr-1.5 custom-scrollbar">
+                            {clos.map((clo, index) => {
+                                const getDomainColor = (dom) => {
+                                    switch (dom?.toLowerCase()) {
+                                        case 'cognitive': return 'bg-blue-50 text-blue-700 border-blue-100';
+                                        case 'affective': return 'bg-emerald-50 text-emerald-700 border-emerald-100';
+                                        case 'psychomotor': return 'bg-amber-50 text-amber-700 border-amber-100';
+                                        default: return 'bg-gray-50 text-gray-700 border-gray-100';
+                                    }
+                                };
+                                const prefix = clo.domain ? clo.domain.charAt(0).toUpperCase() : '';
+                                const taxCode = prefix ? `${prefix}${clo.taxonomy || ''}` : '';
+                                const domainColor = getDomainColor(clo.domain);
 
+                                return (
+                                    <div
+                                        key={clo.cloid}
+                                        className="relative overflow-hidden bg-white border border-gray-200/80 rounded-xl p-4 shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-200 group flex flex-col gap-2.5 text-xs text-gray-700"
+                                    >
+                                        {/* Left accent indicator */}
+                                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500 rounded-l-xl group-hover:w-1.5 transition-all" />
+
+                                        {/* Header Row */}
+                                        <div className="flex items-center justify-between pl-1">
+                                            <span className="font-semibold text-gray-900 text-sm">
+                                                CLO {clo.clo}
+                                            </span>
+                                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-gray-100 text-gray-700 border border-gray-200">
+                                                PLO {clo.plo}
+                                            </span>
+                                        </div>
+
+                                        {/* Statement */}
+                                        <p className="text-gray-600 leading-relaxed font-medium pl-1 break-words">
+                                            {clo.statment}
+                                        </p>
+
+                                        {/* Badges Footer */}
+                                        <div className="flex items-center gap-2 mt-0.5 pl-1 flex-wrap">
+                                            {clo.domain && (
+                                                <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold border ${domainColor}`}>
+                                                    {clo.domain}
+                                                </span>
+                                            )}
+                                            {taxCode && (
+                                                <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                                                    Level: {taxCode}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                        <pre>{JSON.stringify(clos, null, 2)}</pre>
+                    </div>
+                )}
 
 
 

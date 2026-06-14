@@ -44,12 +44,15 @@ export const store = createStore()(
             withdraws: [],
             report: {},
             courses: [],
+            selectedCourse: {},
+            clos: [],
 
             signIn: () => set({ signedIn: true }),
             signOut: () => set({ signedIn: false }),
             setRecaps: (recaps) => set({ recaps }),
             setRecap: (recap) => set({ recap }),
             setClosheet: (closheet) => set({ closheet }),
+            setSelectedCourse: (selectedCourse) => set({ selectedCourse }),
 
             // Setters for sheet states
             setCLOSid: (cloSid) => set({ cloSid }),
@@ -58,6 +61,7 @@ export const store = createStore()(
                 get().getProgram(programId);
                 get().getCurriculum(programId);
                 get().getCourses(programId);
+                // get().getCLOs()
             },
             setGradeChart: (gradeChart) => set({ gradeChart }),
             setGroupedPlanTotals: (groupedPlanTotals) => set({ groupedPlanTotals }),
@@ -66,6 +70,7 @@ export const store = createStore()(
             setWithdraws: (withdraws) => set({ withdraws: parseWithdraws(withdraws) }),
             setReport: (report) => set({ report: report ?? {} }),
             setCourses: (courses) => set({ courses }),
+            setCLOs: (clos) => set({ clos }),
 
             // CLO Summary calculation helper using withdraws
             cloSummary: (localCalCLOs = [], cloNumbers = []) => {
@@ -147,16 +152,28 @@ export const store = createStore()(
                 const targetId = prgid !== undefined ? prgid : get().programId;
                 if (targetId === null || targetId === undefined) return Promise.resolve([]);
                 return api.get(`/api/courses?prgid=${targetId}`).then(res => {
-                    set({ courses: res.data });
+                    const courses = Array.isArray(res.data?.courses) ? res.data.courses : [];
+                    const clos = Array.isArray(res.data?.clos) ? res.data.clos : [];
+                    set({ courses, clos });
+                    return res.data;
+                });
+            },
+            getCLOs: () => {
+                return api.get('/api/clolist').then(res => {
+                    const clos = Array.isArray(res.data) ? res.data : [];
+                    set({ clos });
                     return res.data;
                 });
             },
             updateCourse: (cid, courseData) => {
                 return api.put(`/api/courses/${cid}`, courseData).then(res => {
                     const updatedCourse = res.data;
-                    set(state => ({
-                        courses: state.courses.map(c => c.cid === cid ? updatedCourse : c)
-                    }));
+                    set(state => {
+                        const currentCourses = Array.isArray(state.courses) ? state.courses : [];
+                        return {
+                            courses: currentCourses.map(c => c.cid === cid ? updatedCourse : c)
+                        };
+                    });
                     return updatedCourse;
                 });
             }

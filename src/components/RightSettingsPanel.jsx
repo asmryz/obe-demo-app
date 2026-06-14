@@ -33,7 +33,7 @@ const RightSettingsPanel = ({ isOpen, onToggle, args = {} }) => {
                 </div>
 
                 {args?.course ? (
-                    <CourseUpdate key={`${args.course.cid}-${isOpen}`} course={args.course} onCancel={onToggle} />
+                    <CourseUpdate key={`${args.course.cid}-${isOpen}`} course={args.course} clos={args.clos} onCancel={onToggle} />
                 ) : (
                     <RightPanelComponent />
                 )}

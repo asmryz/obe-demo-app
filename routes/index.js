@@ -63,14 +63,18 @@ router.get("/courses", async (req, res) => {
     try {
         const prgid = req.query.prgid ? Number(req.query.prgid) : null;
         let query = "SELECT cid, code, title, theory, lab, prgid FROM course";
+        let cloQuery = "SELECT * FROM clo";
         const params = [];
         if (prgid !== null && !isNaN(prgid)) {
             query += " WHERE prgid = $1";
+            cloQuery += " WHERE cid IN (SELECT cid FROM course WHERE prgid = $1)";
             params.push(prgid);
         }
+        cloQuery += " ORDER BY cloid";
         query += " ORDER BY code";
-        const result = await db.query(query, params);
-        res.json(result.rows);
+        const courses = await db.query(query, params);
+        const clos = await db.query(cloQuery, params);
+        res.json({ courses: courses.rows, clos: clos.rows });
     } catch (err) {
         console.error("Error fetching courses:", err);
         res.status(500).json({ error: "Internal Server Error" });

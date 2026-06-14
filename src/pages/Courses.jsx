@@ -5,7 +5,13 @@ import { store, useStore } from '../store';
 
 function Courses() {
     const { setIsRightPanelOpen, setRightPanelArgs } = useOutletContext();
-    const courses = useStore((state) => state.courses) || [];
+    const rawCourses = useStore((state) => state.courses);
+    const courses = Array.isArray(rawCourses) ? rawCourses : [];
+    const setSelectedCourse = useStore((state) => state.setSelectedCourse);
+    const selectedCourse = useStore((state) => state.selectedCourse) || {};
+    const rawClos = useStore((state) => state.clos);
+    const closList = Array.isArray(rawClos) ? rawClos : [];
+    const clos = closList.filter(clo => clo.cid === selectedCourse?.cid);
     const getCourses = useStore((state) => state.getCourses);
     const programId = useStore((state) => state.programId);
 
@@ -106,8 +112,9 @@ function Courses() {
                                                     className="py-1.5 px-3 text-sm font-semibold text-blue-600 hover:text-blue-800 hover:underline cursor-pointer truncate"
                                                     title={course.title}
                                                     onClick={() => {
-                                                        setRightPanelArgs({ course });
+                                                        setRightPanelArgs({ course, clos });
                                                         setIsRightPanelOpen(true);
+                                                        setSelectedCourse(course);
                                                     }}
                                                 >
                                                     {course.title}
