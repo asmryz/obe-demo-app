@@ -238,7 +238,7 @@ const CourseUpdate = ({ course, clos, onCancel }) => {
                         <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-1">
                             Course Learning Outcomes (CLOs)
                         </label>
-                        <div className="grid grid-cols-1 gap-3.5 overflow-y-auto max-h-[380px] pr-1.5 custom-scrollbar">
+                        <div className="grid grid-cols-1 gap-3.5 overflow-y-auto max-h-[400px] pr-1.5 custom-scrollbar">
                             {clos.map((clo, index) => {
                                 const getDomainColor = (dom) => {
                                     switch (dom?.toLowerCase()) {
@@ -249,7 +249,7 @@ const CourseUpdate = ({ course, clos, onCancel }) => {
                                     }
                                 };
                                 const prefix = clo.domain ? clo.domain.charAt(0).toUpperCase() : '';
-                                const taxCode = prefix ? `${prefix}${clo.taxonomy || ''}` : '';
+                                const taxCode = prefix ? `${prefix} ${clo.level || ''}` : '';
                                 const domainColor = getDomainColor(clo.domain);
 
                                 return (
@@ -271,7 +271,7 @@ const CourseUpdate = ({ course, clos, onCancel }) => {
                                         </div>
 
                                         {/* Statement */}
-                                        <p className="text-gray-600 leading-relaxed font-medium pl-1 break-words">
+                                        <p className="text-gray-600 leading-relaxed font-medium pl-1 wrap-break-word">
                                             {clo.statment}
                                         </p>
 
@@ -292,7 +292,7 @@ const CourseUpdate = ({ course, clos, onCancel }) => {
                                 );
                             })}
                         </div>
-                        <pre>{JSON.stringify(clos, null, 2)}</pre>
+                        {/* <pre style={{ fontSize: '10px' }}>{JSON.stringify(clos, null, 2)}</pre> */}
                     </div>
                 )}
 

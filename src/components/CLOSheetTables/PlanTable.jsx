@@ -15,6 +15,7 @@ export default function PlanTable({ closid }) {
     if (!closheet || !closheet.data) return <div className="p-8 text-center text-gray-500 animate-pulse font-medium">Loading Plan Table...</div>;
 
     const data = closheet.data;
+    // console.log(`data >> ${JSON.stringify(data)}`)
     const hasSheetData = Array.isArray(data)
         && Array.isArray(data[ENUMS.HEADS])
         && Array.isArray(data[ENUMS.CLO])
@@ -46,6 +47,9 @@ export default function PlanTable({ closid }) {
             PLAN: PLANVal
         };
     }, [data]);
+
+    console.log(PLAN)
+    // console.log(Object.entries(Object.groupBy(PLAN, ({ head }) => head)))
 
     return (
         <div className="mt-12 bg-white mx-auto">

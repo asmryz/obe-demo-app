@@ -19,6 +19,7 @@ function CRRReport() {
     const report = useStore((state) => state.report)
     const setReport = useStore((state) => state.setReport)
     const getReport = useStore((state) => state.getReport)
+    const closheet = useStore((state) => state.closheet)
 
     const cloRows = useMemo(() => Array.isArray(recap?.clo) ? recap.clo : [], [recap?.clo])
     const ploList = useMemo(() => [...new Set(cloRows.map(c => c.plo).sort((a, b) => a - b))], [cloRows])
@@ -67,7 +68,7 @@ function CRRReport() {
 
     const creditValue = getCreditValue(course)
     const contactHours = creditValue ? Number(creditValue) * 16 : ''
-    const studentCount = Array.isArray(recap?.data) ? Math.max(recap.data.length - 2, 0) : ''
+    const studentCount = calCLOs.length || (Array.isArray(closheet?.data) ? Math.max(closheet.data.length - 3, 0) : '')
     const hasSavedReport = report
         && typeof report === 'object'
         && !Array.isArray(report)
@@ -512,7 +513,7 @@ function CRRReport() {
                             const cloLabel = clo[0].replace(/^CLO/, 'CLO ')
                             const cloNumber = Number(clo[0].replace(/^CLO/, ''))
                             const matchedCLO = cloRows.find((c) => c.clo === cloNumber)
-                            const cloDetails = matchedCLO ? `${matchedCLO.domain.slice(0, 1)} - ${matchedCLO.taxonomy}` : ''
+                            const cloDetails = matchedCLO && typeof matchedCLO.domain === 'string' ? `${matchedCLO.domain.slice(0, 1)} - ${matchedCLO.taxonomy || ''}` : ''
                             const achievedCount = clo[1][0]
                             const notAchievedCount = clo[1][1]
                             const totalCount = achievedCount + notAchievedCount

@@ -63,14 +63,19 @@ router.get("/courses", async (req, res) => {
     try {
         const prgid = req.query.prgid ? Number(req.query.prgid) : null;
         let query = "SELECT cid, code, title, theory, lab, prgid FROM course";
-        let cloQuery = "SELECT * FROM clo";
+        let cloQuery = `
+            SELECT cl.*, d.domain, l.level, l.name AS taxonomy
+            FROM clo cl
+            LEFT JOIN domain d ON d.did = cl.did
+            LEFT JOIN level l ON l.lid = cl.lid
+        `;
         const params = [];
         if (prgid !== null && !isNaN(prgid)) {
             query += " WHERE prgid = $1";
-            cloQuery += " WHERE cid IN (SELECT cid FROM course WHERE prgid = $1)";
+            cloQuery += " WHERE cl.cid IN (SELECT cid FROM course WHERE prgid = $1)";
             params.push(prgid);
         }
-        cloQuery += " ORDER BY cloid";
+        cloQuery += " ORDER BY cl.cloid";
         query += " ORDER BY code";
         const courses = await db.query(query, params);
         const clos = await db.query(cloQuery, params);
@@ -163,9 +168,11 @@ router.get("/recaps", async (req, res) => {
 
 router.get("/clolist", async (req, res) => {
     const query = `
-        SELECT c.cid, c.code, c.title, clo.clo, clo.statment, clo."domain", clo.taxonomy, clo.plo 
+        SELECT c.cid, c.code, c.title, clo.clo, clo.statment, d.domain, l.name AS taxonomy, clo.plo 
         FROM course c
         JOIN clo ON clo.cid = c.cid
+        LEFT JOIN domain d ON d.did = clo.did
+        LEFT JOIN level l ON l.lid = clo.lid
         ORDER BY c.code, clo.clo;
     `;
     try {
@@ -194,11 +201,13 @@ router.get("/recaps/:rid", async (req, res) => {
             WHERE rid = $1;
         `;
         const cloQuery = `
-            SELECT cl.*, p.title, cu.kpi, cu.cohort 
+            SELECT cl.*, d.domain, l.name AS taxonomy, p.title, cu.kpi, cu.cohort 
             FROM offered_courses oc
             INNER JOIN curriculum_courses cc ON cc.ccid = oc.ccid
             INNER JOIN clo cl ON cl.cid = cc.cid
             INNER JOIN course c ON c.cid = cl.cid
+            LEFT JOIN domain d ON d.did = cl.did
+            LEFT JOIN level l ON l.lid = cl.lid
             INNER JOIN plo p ON p.plo = cl.plo
             INNER JOIN curriculum cu ON cu.curid = p.curid
             WHERE oc.rid = $1
@@ -257,10 +266,12 @@ router.get("/closheet/:closid", async (req, res) => {
 
         const { rid, offid } = closheetResult.rows[0];
         const cloQuery = `
-            SELECT DISTINCT cl.*, p.title
+            SELECT DISTINCT cl.*, d.domain, l.name AS taxonomy, p.title
             FROM offered_courses oc
             INNER JOIN curriculum_courses cc ON cc.ccid = oc.ccid
             INNER JOIN clo cl ON cl.cid = cc.cid
+            LEFT JOIN domain d ON d.did = cl.did
+            LEFT JOIN level l ON l.lid = cl.lid
             LEFT JOIN plo p ON p.plo = cl.plo
             WHERE (
               $1::int IS NOT NULL AND oc.offid = $1
