@@ -143,14 +143,14 @@ const Table = ({ data = [], onSearch, getRecapSheet }) => {
                     <tbody>
                         {paginatedData.map((recap, idx) => (
                             <tr key={idx} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                                <td className="py-2.5 px-4 text-sm text-gray-600 font-medium">#{(currentPage - 1) * recapsPerPage + idx + 1}</td>
+                                <td className="py-2.5 px-4 text-sm text-gray-600 font-medium">#{(currentPage - 1) * recapsPerPage + idx + 1}&nbsp;&nbsp;[{recap.closid}]</td>
                                 <td className="py-2.5 px-4 text-sm">
                                     {renderBatchTag(recap.batch)}
                                 </td>
-                                <td className={`py-2.5 px-4 text-sm font-semibold truncate ${recap.ccid === null ? "text-gray-400 italic" : recap.closid !== null ? "text-green-600" : "text-amber-600"}`} title={recap.title}>
+                                <td className={`py-2.5 px-4 text-sm font-semibold truncate ${recap.ccid === null ? "text-gray-400 italic" : recap.status === 0 ? "text-indigo-600" : recap.closid !== null ? "text-green-600" : "text-amber-600"}`} title={recap.title}>
                                     {recap.code}
                                 </td>
-                                <td className={`py-2.5 px-4 text-sm font-semibold truncate cursor-pointer ${recap.ccid === null ? "text-gray-400 italic" : recap.closid !== null ? "text-green-600" : "text-amber-600"}`} title={recap.title}
+                                <td className={`py-2.5 px-4 text-sm font-semibold truncate cursor-pointer ${recap.ccid === null ? "text-gray-400 italic" : recap.status === 0 ? "text-indigo-600" : recap.closid !== null ? "text-green-600" : "text-amber-600"}`} title={recap.title}
                                     onClick={() => {
                                         handleSelectCourse(recap);
                                     }}

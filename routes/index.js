@@ -127,7 +127,7 @@ router.get("/recaps", async (req, res) => {
         const effectiveSearch = search.length >= 3 ? search : "";
 
         const query = `
-          SELECT voc.offid, voc.ccid, voc.batch, voc.code, voc.title, voc."name", voc.semester, voc."year", cs.closid, voc.rid ,cs.offid csoffid 
+          SELECT voc.offid, voc.ccid, voc.batch, voc.code, voc.title, voc."name", voc.semester, voc."year", cs.closid, voc.rid, cs.offid csoffid, cs.status
           FROM 
             (SELECT oc.offid, oc.ccid, oc.batch, c.code, c.title, f."name", oc.semester, oc."year", oc.rid
             FROM offered_courses oc
@@ -253,7 +253,8 @@ router.get("/closheet/:closid", async (req, res) => {
         const closheetQuery = `
             SELECT closid, rid, offid, data,
                    COALESCE(withdraws, '[]'::jsonb) AS withdraws,
-                   COALESCE(report, '{}'::jsonb) AS report
+                   COALESCE(report, '{}'::jsonb) AS report, 
+                   status
             FROM closheet
             WHERE closid = $1;
         `;

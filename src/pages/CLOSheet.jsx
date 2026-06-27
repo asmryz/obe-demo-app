@@ -8,6 +8,7 @@ import { useRef } from "react";
 import { MoreVertical, Trash2, MessageSquare, HelpCircle, Download, Share2, Settings, Printer } from "lucide-react";
 import CRRReport from "../components/CLOSheetTables/CRRReport";
 import { useReactToPrint } from 'react-to-print';
+import CreatePlan from "../components/CLOSheetTables/CreatePlan";
 
 
 if (typeof window !== 'undefined' && !window.customElements.get('leo-navdots')) {
@@ -122,8 +123,6 @@ export default function CLOSheet() {
     const [isVisible, setIsVisible] = useState(false);
     const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
     const moreMenuRef = useRef(null);
-    const tabs = ['Plan', 'CLO Sheet', 'Recap Sheet', 'PLO (Cohort)', 'CRR Report']
-    const [activeTab, setActiveTab] = useState(tabs[0]);
     const [kpi, setKpi] = useState(50);
     const [activeDot, setActiveDot] = useState(1);
     const printRef = useRef();
@@ -221,6 +220,15 @@ export default function CLOSheet() {
         }
         return null;
     }, [recap, recaps, closid, sheetClo]);
+
+    const tabs = useMemo(() => {
+        if (currentRecap?.status === 0) {
+            return ['Plan'];
+        }
+        return ['Plan', 'CLO Sheet', 'Recap Sheet', 'PLO (Cohort)', 'CRR Report'];
+    }, [currentRecap]);
+
+    const [activeTab, setActiveTab] = useState('Plan');
     const hasSheetData = Array.isArray(rawData)
         && Array.isArray(rawData[ENUMS.HEADS])
         && Array.isArray(rawData[ENUMS.CLO])
@@ -445,6 +453,7 @@ export default function CLOSheet() {
         globalWithdraws,
         setWithdraws
     ]);
+
     return (
         <div className={`h-full overflow-y-auto px-16 py-6 custom-scrollbar flex flex-col transition-all duration-300 ease-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
             <div className="max-w-full w-full flex-1 flex flex-col">
@@ -581,7 +590,12 @@ export default function CLOSheet() {
                             : '-translate-x-8 opacity-0 pointer-events-none absolute inset-0 invisible h-0 overflow-hidden'
                             }`}
                     >
-                        <div className="flex justify-center"><PlanTable closid={closid} /></div>
+
+                        <div className="flex justify-center">
+                            {currentRecap?.status === 0
+                                ? <CreatePlan closid={closid} />
+                                : <PlanTable closid={closid} />}
+                        </div>
                         {/* <ModelCards /> */}
                         {/* <Table /> */}
                     </div>
