@@ -1,14 +1,12 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useStore } from '../../store';
 import { getArr, getClo, getHeadsCleaned, getPlan, ENUMS } from './CLOSheetHelpers';
-
-let scheme = [];
-window.scheme = scheme;
 
 export default function CreatePlan({ closid }) {
     const closheet = useStore((state) => state.closheet);
     const getCLOSheet = useStore((state) => state.getCLOSheet);
     const setClosheet = useStore((state) => state.setClosheet);
+    const [scheme, setScheme] = useState([])
 
 
 
@@ -124,21 +122,21 @@ export default function CreatePlan({ closid }) {
                                             const targetHead = id.split(':')[0];
                                             const targetClo = Number(id.split(':')[1]);
 
-                                            const headTotal = scheme.reduce((acc, item) => acc + item.total, 0)
+                                            const headTotal = scheme.reduce((acc, item) => item.head === targetHead ? acc + item.total : acc, 0)
                                             const planHeadTotal = PLAN.reduce((acc, item) => item.head === targetHead ? acc + item.total : acc, 0)
                                             if (headTotal + Number(val) > planHeadTotal) {
                                                 //scheme = scheme.filter(item => item.head !== targetHead || item.clo !== targetClo);
-                                                alert("Total of heads exceeds the total of plan")
+                                                alert(`Total of heads exceeds the total of plan,  ${targetHead}, `);
                                                 e.target.innerText = isMapped ? currentVal : '';
                                                 return;
                                             }
 
                                             // Filter out any existing item with the same head and clo
-                                            scheme = scheme.filter(item => item.head !== targetHead || item.clo !== targetClo);
+                                            setScheme(scheme.filter(item => item.head !== targetHead || item.clo !== targetClo));
 
                                             const numVal = Number(val);
                                             if (val !== '' && !Number.isNaN(numVal) && numVal !== 0) {
-                                                scheme.push({ head: targetHead, clo: targetClo, total: numVal });
+                                                setScheme([...scheme, { head: targetHead, clo: targetClo, total: numVal }]);
                                             }
                                             console.log(scheme);
                                         };
@@ -151,7 +149,7 @@ export default function CreatePlan({ closid }) {
                                         };
 
                                         return (
-                                            <td key={`key-${number}`} className={`p-1 text-lg text-gray-600 font-medium text-center ${index % 2 !== 0 ? 'bg-indigo-50/50' : ''}`}>
+                                            <td key={`key-${number}`} className={`p-1 text-lg text-gray-600 font-medium text-center w-[56.5px] ${index % 2 !== 0 ? 'bg-indigo-50/50' : ''}`}>
                                                 <div
                                                     id={`${head}:${number}`}
                                                     contentEditable="true"
@@ -172,9 +170,10 @@ export default function CreatePlan({ closid }) {
                         <tr className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
                             <td className="py-2.5 px-4 text-lg text-gray-800 font-bold">Total</td>
                             {CLOs.map(clo => clo.clo).map((number, index) => {
-                                const group = cloHdr.find(([cloKey]) => Number(cloKey) === Number(number));
-                                const items = group ? group[1] : [];
-                                const total = items.reduce((sum, item) => sum + (Number(item.total) || 0), 0);
+                                // const group = cloHdr.find(([cloKey]) => Number(cloKey) === Number(number));
+                                // const items = group ? group[1] : [];
+                                const total = scheme.reduce((sum, item) => item.clo === number ? sum + item.total : sum, 0);
+                                console.log(number, total)
                                 return (
                                     <td key={`clo-${number}-total`} className={`p-1 text-lg text-gray-800 font-bold text-center ${index % 2 !== 0 ? 'bg-indigo-50/50' : ''}`}>
                                         <div className="py-1.5 px-3 rounded hover:ring-1 hover:ring-gray-300 transition-all">
