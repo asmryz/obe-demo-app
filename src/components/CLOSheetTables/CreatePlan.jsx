@@ -1,14 +1,16 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useStore } from '../../store';
 import { getArr, getClo, getHeadsCleaned, getPlan, ENUMS } from './CLOSheetHelpers';
+import { PlusCircle } from 'lucide-react';
 
 export default function CreatePlan({ closid }) {
     const closheet = useStore((state) => state.closheet);
     const getCLOSheet = useStore((state) => state.getCLOSheet);
     const setClosheet = useStore((state) => state.setClosheet);
     const [scheme, setScheme] = useState([])
+    const [tableRows, setTableRows] = useState([]);
 
-
+    window.scheme = scheme;
 
     useEffect(() => {
         if (closid) {
@@ -16,10 +18,8 @@ export default function CreatePlan({ closid }) {
         }
     }, [closid, getCLOSheet]);
 
-    if (!closheet || !closheet.data) return <div className="p-8 text-center text-gray-500 animate-pulse font-medium">Loading Plan Table...</div>;
-
-    const rawData = closheet.data;
-    const CLOs = closheet.clo || [];
+    const rawData = closheet?.data;
+    const CLOs = closheet?.clo || [];
 
     const getCreatePlan = (sheetData) => {
         if (!Array.isArray(sheetData) || sheetData.length < 3) return sheetData;
@@ -44,9 +44,9 @@ export default function CreatePlan({ closid }) {
         && Array.isArray(data[ENUMS.CLO])
         && Array.isArray(data[ENUMS.MAX]);
 
-    if (!hasSheetData) return null;
-
     const { clo, planByHeadAndClo, cloHdr, PLAN } = useMemo(() => {
+        if (!hasSheetData) return { clo: [], planByHeadAndClo: {}, cloHdr: [], PLAN: [] };
+
         const arrVal = getArr(data);
         const cloVal = getClo(arrVal);
         const headsCleanedVal = getHeadsCleaned(data);
@@ -77,9 +77,64 @@ export default function CreatePlan({ closid }) {
             cloHdr: cloHdrVal,
             PLAN: PLANVal
         };
-    }, [data]);
+    }, [data, hasSheetData]);
 
     window.PLAN = PLAN;
+
+    useEffect(() => {
+        if (PLAN && PLAN.length > 0) {
+            setTableRows(PLAN.map(item => ({
+                ...item,
+                isCustom: false
+            })));
+        }
+    }, [PLAN]);
+
+    if (!closheet || !closheet.data) return <div className="p-8 text-center text-gray-500 animate-pulse font-medium">Loading Plan Table...</div>;
+    if (!hasSheetData) return null;
+
+    const addEmptyRow = (index, headName = '') => {
+        const newRow = {
+            sno: `custom-${Date.now()}-${Math.random()}`,
+            head: headName,
+            total: '',
+            isCustom: true
+        };
+        const updatedRows = [...tableRows];
+
+        let insertIndex = index;
+        for (let i = tableRows.length - 1; i >= index; i--) {
+            if (tableRows[i].head === headName) {
+                insertIndex = i;
+                break;
+            }
+        }
+
+        updatedRows.splice(insertIndex + 1, 0, newRow);
+        setTableRows(updatedRows);
+    };
+
+    const handleHeadNameChange = (sno, newHeadName) => {
+        const rowToUpdate = tableRows.find(r => r.sno === sno);
+        if (!rowToUpdate) return;
+        const oldHeadName = rowToUpdate.head;
+
+        setTableRows(prev => prev.map(row => {
+            if (row.sno === sno) {
+                return { ...row, head: newHeadName };
+            }
+            return row;
+        }));
+
+        if (oldHeadName) {
+            setScheme(prevScheme => prevScheme.map(item => {
+                if (item.head === oldHeadName) {
+                    return { ...item, head: newHeadName };
+                }
+                return item;
+            }));
+        }
+    };
 
 
 
@@ -104,41 +159,65 @@ export default function CreatePlan({ closid }) {
                         </tr>
                     </thead>
                     <tbody>
-                        {PLAN.map((item) => {
-                            const { head, total, ...rest } = item;
-                            let sumCLO = 0;
-                            // console.log(head, total, rest)
+                        {tableRows.map((item, idx) => {
+                            const { head, total, isCustom } = item;
                             const cleanHead = typeof head === 'string' ? head.replace(/\s*Paper\s*1/g, '') : head;
+                            const displayTotal = isCustom ? '' : total;
+
                             return (
-                                <tr key={head} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                                    <td className="py-2.5 px-4 text-lg text-gray-900 font-semibold">{cleanHead}</td>
+                                <tr key={item.sno} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
+                                    <td className="py-2.5 px-4 text-lg text-gray-900 font-semibold">
+                                        <div className="flex items-center gap-2">
+                                            {!isCustom && (
+                                                <button
+                                                    onClick={() => addEmptyRow(idx, head)}
+                                                    className="text-gray-400 hover:text-indigo-600 transition-all hover:scale-110 active:scale-95 focus:outline-none cursor-pointer shrink-0"
+                                                    title="Add empty row below"
+                                                >
+                                                    <PlusCircle size={16} />
+                                                </button>
+                                            )}
+                                            <span>{isCustom ? '' : cleanHead}</span>
+                                        </div>
+                                    </td>
                                     {CLOs.map(clo => clo.clo).map((number, index) => {
-                                        const isMapped = number === Number(total);
-                                        const currentVal = isMapped ? (data[ENUMS.MAX][item.sno + 2] ?? '') : '';
+                                        const isMapped = isCustom
+                                            ? (scheme.some(s => s.sno === item.sno && s.clo === number))
+                                            : (number === Number(total));
+                                        const schemeItem = scheme.find(s => s.sno === item.sno && s.clo === number);
+                                        const currentVal = schemeItem
+                                            ? schemeItem.total
+                                            : (isMapped ? (data[ENUMS.MAX][item.sno + 2] ?? '') : '');
 
                                         const handleCellBlur = (e) => {
                                             const val = e.target.innerText.trim();
-                                            const id = e.target.id;
+                                            const id = e.target.getAttribute('data');
                                             const targetHead = id.split(':')[0];
                                             const targetClo = Number(id.split(':')[1]);
 
-                                            const headTotal = scheme.reduce((acc, item) => item.head === targetHead ? acc + item.total : acc, 0)
+                                            const headTotal = scheme.reduce((acc, s) => {
+                                                if (s.sno === item.sno && s.clo === targetClo) {
+                                                    return acc;
+                                                }
+                                                return s.head === targetHead ? acc + s.total : acc;
+                                            }, 0);
                                             const planHeadTotal = PLAN.reduce((acc, item) => item.head === targetHead ? acc + item.total : acc, 0)
-                                            if (headTotal + Number(val) > planHeadTotal) {
-                                                //scheme = scheme.filter(item => item.head !== targetHead || item.clo !== targetClo);
+
+                                            if (planHeadTotal > 0 && (headTotal + Number(val) > planHeadTotal)) {
                                                 alert(`Total of heads exceeds the total of plan,  ${targetHead}, `);
-                                                e.target.innerText = isMapped ? currentVal : '';
+                                                e.target.innerText = schemeItem ? schemeItem.total : (isMapped ? (data[ENUMS.MAX][item.sno + 2] ?? '') : '');
                                                 return;
                                             }
 
-                                            // Filter out any existing item with the same head and clo
-                                            setScheme(scheme.filter(item => item.head !== targetHead || item.clo !== targetClo));
+                                            // Filter out any existing item with the same sno and clo
+                                            const filteredScheme = scheme.filter(s => s.sno !== item.sno || s.clo !== targetClo);
 
                                             const numVal = Number(val);
                                             if (val !== '' && !Number.isNaN(numVal) && numVal !== 0) {
-                                                setScheme([...scheme, { head: targetHead, clo: targetClo, total: numVal }]);
+                                                setScheme([...filteredScheme, { head: targetHead, clo: targetClo, total: numVal, sno: item.sno }]);
+                                            } else {
+                                                setScheme(filteredScheme);
                                             }
-                                            console.log(scheme);
                                         };
 
                                         const handleKeyDown = (e) => {
@@ -151,7 +230,7 @@ export default function CreatePlan({ closid }) {
                                         return (
                                             <td key={`key-${number}`} className={`p-1 text-lg text-gray-600 font-medium text-center w-[56.5px] ${index % 2 !== 0 ? 'bg-indigo-50/50' : ''}`}>
                                                 <div
-                                                    id={`${head}:${number}`}
+                                                    data={`${head}:${number}`}
                                                     contentEditable="true"
                                                     suppressContentEditableWarning={true}
                                                     onBlur={handleCellBlur}
@@ -163,7 +242,7 @@ export default function CreatePlan({ closid }) {
                                             </td>
                                         );
                                     })}
-                                    <td className="py-2.5 px-4 text-lg text-gray-600 font-medium text-center">{total}</td>
+                                    <td className="py-2.5 px-4 text-lg text-gray-600 font-medium text-center">{displayTotal}</td>
                                 </tr>
                             )
                         })}
@@ -173,7 +252,7 @@ export default function CreatePlan({ closid }) {
                                 // const group = cloHdr.find(([cloKey]) => Number(cloKey) === Number(number));
                                 // const items = group ? group[1] : [];
                                 const total = scheme.reduce((sum, item) => item.clo === number ? sum + item.total : sum, 0);
-                                console.log(number, total)
+
                                 return (
                                     <td key={`clo-${number}-total`} className={`p-1 text-lg text-gray-800 font-bold text-center ${index % 2 !== 0 ? 'bg-indigo-50/50' : ''}`}>
                                         <div className="py-1.5 px-3 rounded hover:ring-1 hover:ring-gray-300 transition-all">
@@ -193,6 +272,7 @@ export default function CreatePlan({ closid }) {
                     </tbody>
                 </table>
             </div>
+            {/* <pre style={{ fontSize: '12px' }}>{JSON.stringify({ scheme }, null, 2)}</pre> */}
         </div>
     )
 }
