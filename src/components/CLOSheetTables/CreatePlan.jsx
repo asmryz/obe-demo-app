@@ -262,17 +262,16 @@ export default function CreatePlan({ closid }) {
                                 );
                             })}
                             <td className="py-2.5 px-4 text-lg text-gray-900 font-bold text-center">
-                                {CLOs.map(clo => clo.clo).reduce((grandTotal, number) => {
-                                    const group = cloHdr.find(([cloKey]) => Number(cloKey) === Number(number));
-                                    const items = group ? group[1] : [];
-                                    return grandTotal + items.reduce((sum, item) => sum + (Number(item.total) || 0), 0);
+                                {scheme.reduce((grandTotal, item) => grandTotal + item.total, 0)} /
+                                {PLAN.map(item => Number(item.total)).reduce((grandTotal, number) => {
+                                    return grandTotal + number;
                                 }, 0)}
                             </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
-            {/* <pre style={{ fontSize: '12px' }}>{JSON.stringify({ scheme }, null, 2)}</pre> */}
+            {/* <pre style={{ fontSize: '12px' }}>{JSON.stringify({ scheme, PLAN }, null, 2)}</pre> */}
         </div>
     )
 }
