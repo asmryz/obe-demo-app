@@ -5,7 +5,8 @@ import { getArr, getClo, getHeadsCleaned, getPlan, ENUMS, getHdr, getRecapHeads,
 import Tabs from "../components/Tabs";
 import { useStore } from "../store";
 import { useRef } from "react";
-import { MoreVertical, Trash2, MessageSquare, HelpCircle, Download, Share2, Settings, Printer } from "lucide-react";
+import { MoreVertical, Trash2, MessageSquare, HelpCircle, Download, Share2, Settings, Printer, DownloadIcon, UploadIcon } from "lucide-react";
+
 import CRRReport from "../components/CLOSheetTables/CRRReport";
 import { useReactToPrint } from 'react-to-print';
 import CreatePlan from "../components/CLOSheetTables/CreatePlan";
@@ -227,6 +228,12 @@ export default function CLOSheet() {
         }
         return ['Plan', 'CLO Sheet', 'Recap Sheet', 'PLO (Cohort)', 'CRR Report'];
     }, [currentRecap]);
+
+
+    const [menu, setMenu] = useState({
+        download: false,
+        upload: false,
+    });
 
     const [activeTab, setActiveTab] = useState('Plan');
     const hasSheetData = Array.isArray(rawData)
@@ -523,6 +530,24 @@ export default function CLOSheet() {
                             {isMoreMenuOpen && (
                                 <div className="absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded-xl shadow-md z-50 py-2 animate-in fade-in zoom-in duration-200 origin-top-right">
 
+
+                                    {activeTab === tabs[0] && (
+                                        <>
+                                            <div className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                                                Options
+                                            </div>
+                                            <button disabled={!menu.upload} onClick={() => { if (menu.upload) alert("Uploading Excel."); }} className={`w-full text-left px-4 py-2.5 text-sm ${menu.upload ? 'text-gray-700' : 'text-gray-400'} hover:bg-gray-50 flex items-center gap-3 transition-colors`}>
+                                                <UploadIcon size={18} className="text-gray-400" />
+                                                <span>Upload Excel</span>
+                                            </button>
+                                            <button disabled={!menu.download} onClick={() => { if (menu.download) alert("Downloading Excel."); }} className={`w-full text-left px-4 py-2.5 text-sm ${menu.download ? 'text-gray-700' : 'text-gray-400'} hover:bg-gray-50 flex items-center gap-3 transition-colors`}>
+                                                <DownloadIcon size={18} className="text-gray-400" />
+                                                <span>Download Excel</span>
+                                            </button>
+
+                                        </>
+                                    )}
+
                                     {activeTab === tabs[4] && (
                                         <>
                                             <div className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
@@ -536,7 +561,7 @@ export default function CLOSheet() {
                                         </>
                                     )}
 
-                                    {activeTab !== tabs[4] && (
+                                    {(activeTab !== tabs[4] && activeTab !== tabs[0]) && (
                                         <>
                                             <div className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
                                                 OBE Assessment Actions
@@ -593,7 +618,7 @@ export default function CLOSheet() {
 
                         <div className="flex justify-center">
                             {currentRecap?.status === 0
-                                ? <CreatePlan closid={closid} />
+                                ? <CreatePlan closid={closid} setMenu={setMenu} />
                                 : <PlanTable closid={closid} />}
                         </div>
                         {/* <ModelCards /> */}

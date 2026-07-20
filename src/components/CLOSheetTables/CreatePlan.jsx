@@ -3,7 +3,7 @@ import { useStore } from '../../store';
 import { getArr, getClo, getHeadsCleaned, getPlan, ENUMS } from './CLOSheetHelpers';
 import { PlusCircle } from 'lucide-react';
 
-export default function CreatePlan({ closid }) {
+export default function CreatePlan({ closid, setMenu }) {
     const closheet = useStore((state) => state.closheet);
     const getCLOSheet = useStore((state) => state.getCLOSheet);
     const setClosheet = useStore((state) => state.setClosheet);
@@ -17,6 +17,12 @@ export default function CreatePlan({ closid }) {
             getCLOSheet(closid);
         }
     }, [closid, getCLOSheet]);
+
+    useEffect(() => {
+        scheme.reduce((grandTotal, item) => grandTotal + item.total, 0) === 100
+            ? setMenu(prev => ({ ...prev, upload: true, download: true }))
+            : setMenu(prev => ({ ...prev, upload: false, download: false }))
+    }, [scheme])
 
     const rawData = closheet?.data;
     const CLOs = closheet?.clo || [];
@@ -136,13 +142,11 @@ export default function CreatePlan({ closid }) {
         }
     };
 
-
-
     //console.log(data, PLAN, CLOs)
     // console.log(Object.entries(Object.groupBy(PLAN, ({ head }) => head)))
 
     return (
-        <div className="mt-12 bg-white mx-auto">
+        <div className="mt-2 bg-white mx-auto">
             <div className="w-fit overflow-x-auto pr-8">
                 <table className="w-auto text-left border-collapse min-w-max">
                     <caption className="caption-top text-left pb-4 px-1">
