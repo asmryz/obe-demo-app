@@ -10,6 +10,9 @@ import { MoreVertical, Trash2, MessageSquare, HelpCircle, Download, Share2, Sett
 import CRRReport from "../components/CLOSheetTables/CRRReport";
 import { useReactToPrint } from 'react-to-print';
 import CreatePlan from "../components/CLOSheetTables/CreatePlan";
+import * as XLSX from "xlsx";
+
+
 
 
 if (typeof window !== 'undefined' && !window.customElements.get('leo-navdots')) {
@@ -163,6 +166,88 @@ export default function CLOSheet() {
     const globalAggPLOs = useStore((state) => state.aggPLOs);
     const globalCloSid = useStore((state) => state.cloSid);
     const globalWithdraws = useStore((state) => state.withdraws);
+    const [scheme, setScheme] = useState([])
+    const [students, setStudents] = useState([])
+
+    function createXLSX(sheetData) {
+        try {
+            const semester = currentRecap?.semester || "semester";
+            const code = currentRecap?.code || "code";
+            const title = currentRecap?.title || "title";
+            const faculty = currentRecap?.name || "faculty";
+            const batch = currentRecap?.batch || "batch";
+
+            const filename = `${semester}-${code}-${title}-${faculty}-${batch}.xlsx`;
+
+            const workbook = XLSX.utils.book_new();
+            const worksheet = XLSX.utils.aoa_to_sheet(sheetData);
+
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+            
+            // Generate binary string and trigger download in browser
+            const wbout = XLSX.write(workbook, { bookType: 'xlsx', type: 'binary' });
+            
+            const s2ab = (s) => {
+                const buf = new ArrayBuffer(s.length);
+                const view = new Uint8Array(buf);
+                for (let i = 0; i < s.length; i++) {
+                    view[i] = s.charCodeAt(i) & 0xFF;
+                }
+                return buf;
+            };
+
+            const blob = new Blob([s2ab(wbout)], { type: "application/octet-stream" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            console.log(`Successfully downloaded ${filename}`);
+        } catch (error) {
+            console.error("Error generating/downloading XLSX:", error);
+        }
+    }
+
+
+
+    const getScheme = (planScheme, students) => {
+        setScheme(planScheme);
+        setStudents(students);
+        console.log(planScheme, students)
+    }
+
+
+    const handleDownloadExcel = () => {
+
+        const ENUMS = { HEADS: 0, CLO: 1, TOTAL: 2 }
+        let sheet = [[], [], []]
+
+        Object.keys(ENUMS).forEach(key => {
+            sheet[ENUMS[key]].push(null, null, null);
+        });
+
+        scheme.forEach(item => {
+            sheet[ENUMS.HEADS].push(item.head);
+            sheet[ENUMS.CLO].push(item.clo);
+            sheet[ENUMS.TOTAL].push(item.total);
+        });
+
+        sheet = [...sheet, ...students];
+
+        createXLSX(sheet)
+
+        if (menu.download) {
+            console.log(sheet);
+            //console.log(JSON.stringify(sheet))
+            //console.log(Object.entries(scheme).length)
+            // console.log(Object.entries(window.scheme).map(([key, value]) => ({ key, value })))
+        };
+
+    }
 
     useEffect(() => {
         const handlePrintShortcut = (event) => {
@@ -461,6 +546,7 @@ export default function CLOSheet() {
         setWithdraws
     ]);
 
+
     return (
         <div className={`h-full overflow-y-auto px-16 py-6 custom-scrollbar flex flex-col transition-all duration-300 ease-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
             <div className="max-w-full w-full flex-1 flex flex-col">
@@ -540,7 +626,9 @@ export default function CLOSheet() {
                                                 <UploadIcon size={18} className="text-gray-400" />
                                                 <span>Upload Excel</span>
                                             </button>
-                                            <button disabled={!menu.download} onClick={() => { if (menu.download) alert("Downloading Excel."); }} className={`w-full text-left px-4 py-2.5 text-sm ${menu.download ? 'text-gray-700' : 'text-gray-400'} hover:bg-gray-50 flex items-center gap-3 transition-colors`}>
+                                            <button disabled={!menu.download}
+                                                onClick={handleDownloadExcel}
+                                                className={`w-full text-left px-4 py-2.5 text-sm ${menu.download ? 'text-gray-700' : 'text-gray-400'} hover:bg-gray-50 flex items-center gap-3 transition-colors`}>
                                                 <DownloadIcon size={18} className="text-gray-400" />
                                                 <span>Download Excel</span>
                                             </button>
@@ -618,7 +706,7 @@ export default function CLOSheet() {
 
                         <div className="flex justify-center">
                             {currentRecap?.status === 0
-                                ? <CreatePlan closid={closid} setMenu={setMenu} />
+                                ? <CreatePlan closid={closid} setMenu={setMenu} getScheme={getScheme} />
                                 : <PlanTable closid={closid} />}
                         </div>
                         {/* <ModelCards /> */}

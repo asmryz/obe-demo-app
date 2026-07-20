@@ -3,7 +3,7 @@ import { useStore } from '../../store';
 import { getArr, getClo, getHeadsCleaned, getPlan, ENUMS } from './CLOSheetHelpers';
 import { PlusCircle } from 'lucide-react';
 
-export default function CreatePlan({ closid, setMenu }) {
+export default function CreatePlan({ closid, setMenu, getScheme }) {
     const closheet = useStore((state) => state.closheet);
     const getCLOSheet = useStore((state) => state.getCLOSheet);
     const setClosheet = useStore((state) => state.setClosheet);
@@ -20,12 +20,20 @@ export default function CreatePlan({ closid, setMenu }) {
 
     useEffect(() => {
         scheme.reduce((grandTotal, item) => grandTotal + item.total, 0) === 100
-            ? setMenu(prev => ({ ...prev, upload: true, download: true }))
+            ? (() => {
+                setMenu(prev => ({ ...prev, upload: true, download: true }))
+                getScheme(scheme, students);
+            })()
             : setMenu(prev => ({ ...prev, upload: false, download: false }))
     }, [scheme])
 
+
+
     const rawData = closheet?.data;
     const CLOs = closheet?.clo || [];
+    const students = rawData.slice(2).map(row => row.slice(0, 3));
+
+    console.log(rawData)
 
     const getCreatePlan = (sheetData) => {
         if (!Array.isArray(sheetData) || sheetData.length < 3) return sheetData;
@@ -100,8 +108,13 @@ export default function CreatePlan({ closid, setMenu }) {
     if (!hasSheetData) return null;
 
     const addEmptyRow = (index, headName = '') => {
+        const parentRow = tableRows[index];
+        const parentSno = parentRow ? parentRow.sno : index + 1;
+        const existingCustomCount = tableRows.filter(row => row.head === headName && row.isCustom).length;
+        const newSno = Number(`${parentSno}.${existingCustomCount + 1}`);
+
         const newRow = {
-            sno: `custom-${Date.now()}-${Math.random()}`,
+            sno: newSno,
             head: headName,
             total: '',
             isCustom: true
@@ -133,11 +146,9 @@ export default function CreatePlan({ closid, setMenu }) {
         }));
 
         if (oldHeadName) {
-            setScheme(prevScheme => prevScheme.map(item => {
-                if (item.head === oldHeadName) {
-                    return { ...item, head: newHeadName };
-                }
-                return item;
+            setScheme(prevScheme => prevScheme.map((item, idx) => {
+                const updatedItem = item.head === oldHeadName ? { ...item, head: newHeadName } : item;
+                return { ...updatedItem, sno: idx + 1 };
             }));
         }
     };
@@ -186,9 +197,9 @@ export default function CreatePlan({ closid, setMenu }) {
                                     </td>
                                     {CLOs.map(clo => clo.clo).map((number, index) => {
                                         const isMapped = isCustom
-                                            ? (scheme.some(s => s.sno === item.sno && s.clo === number))
+                                            ? (scheme.some(s => s.rowSno === item.sno && s.clo === number))
                                             : (number === Number(total));
-                                        const schemeItem = scheme.find(s => s.sno === item.sno && s.clo === number);
+                                        const schemeItem = scheme.find(s => s.rowSno === item.sno && s.clo === number);
                                         const currentVal = schemeItem
                                             ? schemeItem.total
                                             : (isMapped ? (data[ENUMS.MAX][item.sno + 2] ?? '') : '');
@@ -200,7 +211,7 @@ export default function CreatePlan({ closid, setMenu }) {
                                             const targetClo = Number(id.split(':')[1]);
 
                                             const headTotal = scheme.reduce((acc, s) => {
-                                                if (s.sno === item.sno && s.clo === targetClo) {
+                                                if (s.rowSno === item.sno && s.clo === targetClo) {
                                                     return acc;
                                                 }
                                                 return s.head === targetHead ? acc + s.total : acc;
@@ -213,14 +224,15 @@ export default function CreatePlan({ closid, setMenu }) {
                                                 return;
                                             }
 
-                                            // Filter out any existing item with the same sno and clo
-                                            const filteredScheme = scheme.filter(s => s.sno !== item.sno || s.clo !== targetClo);
+                                            // Filter out any existing item with the same rowSno and clo
+                                            const filteredScheme = scheme.filter(s => s.rowSno !== item.sno || s.clo !== targetClo);
 
                                             const numVal = Number(val);
                                             if (val !== '' && !Number.isNaN(numVal) && numVal !== 0) {
-                                                setScheme([...filteredScheme, { head: targetHead, clo: targetClo, total: numVal, sno: item.sno }]);
+                                                const newScheme = [...filteredScheme, { head: targetHead, clo: targetClo, total: numVal, rowSno: item.sno, isCustom: item.isCustom }];
+                                                setScheme(newScheme.map((s, idx) => ({ ...s, sno: idx + 1 })));
                                             } else {
-                                                setScheme(filteredScheme);
+                                                setScheme(filteredScheme.map((s, idx) => ({ ...s, sno: idx + 1 })));
                                             }
                                         };
 
