@@ -11,36 +11,68 @@ import CRRReport from "../components/CLOSheetTables/CRRReport";
 import { useReactToPrint } from 'react-to-print';
 import CreatePlan from "../components/CLOSheetTables/CreatePlan";
 import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
 
 
 
+export default function CLOSheet() {
+    const { closid } = useParams();
+    const [isVisible, setIsVisible] = useState(false);
+    const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
+    const moreMenuRef = useRef(null);
+    const [kpi, setKpi] = useState(50);
+    const [activeDot, setActiveDot] = useState(1);
+    const printRef = useRef();
 
-if (typeof window !== 'undefined' && !window.customElements.get('leo-navdots')) {
-    window.customElements.define('leo-navdots', class extends HTMLElement {
-        static get observedAttributes() { return ['activedot', 'dotcount']; }
-        constructor() {
-            super();
-            this.attachShadow({ mode: 'open', delegatesFocus: true });
-        }
-        attributeChangedCallback() {
-            this.render();
-        }
-        connectedCallback() {
-            this.render();
-        }
-        render() {
-            const activeDot = parseInt(this.getAttribute('activedot') || '1', 10);
-            const dotCount = parseInt(this.getAttribute('dotcount') || '2', 10);
-            const currentDotIndex = activeDot - 1;
 
-            const dotsHtml = Array.from({ length: dotCount }, (_, i) => {
-                const isActive = i === currentDotIndex;
-                return `<li class="svelte-1i791e4">
+    const closheet = useStore((state) => state.closheet);
+    const getCLOSheet = useStore((state) => state.getCLOSheet);
+    const recap = useStore((state) => state.recap);
+    const recaps = useStore((state) => state.recaps);
+    const getRecaps = useStore((state) => state.getRecaps);
+    const setGradeChart = useStore((state) => state.setGradeChart);
+    const setRecap = useStore((state) => state.setRecap);
+    const setGroupedPlanTotals = useStore((state) => state.setGroupedPlanTotals);
+    const setCalCLOs = useStore((state) => state.setCalCLOs);
+    const setAggPLOs = useStore((state) => state.setAggPLOs);
+    const setCLOSid = useStore((state) => state.setCLOSid);
+    const setWithdraws = useStore((state) => state.setWithdraws);
+    const globalGradeChart = useStore((state) => state.gradeChart);
+    const globalRecap = useStore((state) => state.recap);
+    const globalGroupedPlanTotals = useStore((state) => state.groupedPlanTotals);
+    const globalCalCLOs = useStore((state) => state.calCLOs);
+    const globalAggPLOs = useStore((state) => state.aggPLOs);
+    const globalCloSid = useStore((state) => state.cloSid);
+    const globalWithdraws = useStore((state) => state.withdraws);
+    const [scheme, setScheme] = useState([])
+    const [students, setStudents] = useState([])
+
+    if (typeof window !== 'undefined' && !window.customElements.get('leo-navdots')) {
+        window.customElements.define('leo-navdots', class extends HTMLElement {
+            static get observedAttributes() { return ['activedot', 'dotcount']; }
+            constructor() {
+                super();
+                this.attachShadow({ mode: 'open', delegatesFocus: true });
+            }
+            attributeChangedCallback() {
+                this.render();
+            }
+            connectedCallback() {
+                this.render();
+            }
+            render() {
+                const activeDot = parseInt(this.getAttribute('activedot') || '1', 10);
+                const dotCount = parseInt(this.getAttribute('dotcount') || '2', 10);
+                const currentDotIndex = activeDot - 1;
+
+                const dotsHtml = Array.from({ length: dotCount }, (_, i) => {
+                    const isActive = i === currentDotIndex;
+                    return `<li class="svelte-1i791e4">
                     <button class="dot svelte-1i791e4 ${isActive ? 'active' : ''}" aria-current="${isActive ? 'true' : 'false'}" aria-label="Page ${i + 1}" data-index="${i}"></button>
                 </li>`;
-            }).join('');
+                }).join('');
 
-            this.shadowRoot.innerHTML = `
+                this.shadowRoot.innerHTML = `
                 <style>
                     :root{--leo-direction:1}:root[dir=rtl]{--leo-direction:-1}:host{display:block}
                     .leo-navdots.svelte-1i791e4{
@@ -107,29 +139,21 @@ if (typeof window !== 'undefined' && !window.customElements.get('leo-navdots')) 
                 </nav>
             `;
 
-            this.shadowRoot.querySelectorAll('.dot').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    const idx = parseInt(button.getAttribute('data-index'), 10);
-                    this.setAttribute('activedot', String(idx + 1));
-                    this.dispatchEvent(new CustomEvent('dotchange', {
-                        detail: { activeDot: idx + 1 },
-                        bubbles: true,
-                        composed: true
-                    }));
+                this.shadowRoot.querySelectorAll('.dot').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const idx = parseInt(button.getAttribute('data-index'), 10);
+                        this.setAttribute('activedot', String(idx + 1));
+                        this.dispatchEvent(new CustomEvent('dotchange', {
+                            detail: { activeDot: idx + 1 },
+                            bubbles: true,
+                            composed: true
+                        }));
+                    });
                 });
-            });
-        }
-    });
-}
+            }
+        });
+    }
 
-export default function CLOSheet() {
-    const { closid } = useParams();
-    const [isVisible, setIsVisible] = useState(false);
-    const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
-    const moreMenuRef = useRef(null);
-    const [kpi, setKpi] = useState(50);
-    const [activeDot, setActiveDot] = useState(1);
-    const printRef = useRef();
     const handlePrint = useReactToPrint({
         contentRef: printRef,
         // documentTitle: "My Document",
@@ -147,29 +171,54 @@ export default function CLOSheet() {
         }
     }, []);
 
-    const closheet = useStore((state) => state.closheet);
-    const getCLOSheet = useStore((state) => state.getCLOSheet);
-    const recap = useStore((state) => state.recap);
-    const recaps = useStore((state) => state.recaps);
-    const getRecaps = useStore((state) => state.getRecaps);
-    const setGradeChart = useStore((state) => state.setGradeChart);
-    const setRecap = useStore((state) => state.setRecap);
-    const setGroupedPlanTotals = useStore((state) => state.setGroupedPlanTotals);
-    const setCalCLOs = useStore((state) => state.setCalCLOs);
-    const setAggPLOs = useStore((state) => state.setAggPLOs);
-    const setCLOSid = useStore((state) => state.setCLOSid);
-    const setWithdraws = useStore((state) => state.setWithdraws);
-    const globalGradeChart = useStore((state) => state.gradeChart);
-    const globalRecap = useStore((state) => state.recap);
-    const globalGroupedPlanTotals = useStore((state) => state.groupedPlanTotals);
-    const globalCalCLOs = useStore((state) => state.calCLOs);
-    const globalAggPLOs = useStore((state) => state.aggPLOs);
-    const globalCloSid = useStore((state) => state.cloSid);
-    const globalWithdraws = useStore((state) => state.withdraws);
-    const [scheme, setScheme] = useState([])
-    const [students, setStudents] = useState([])
 
-    function createXLSX(sheetData) {
+    // function createXLSX(sheetData) {
+    //     try {
+    //         const semester = currentRecap?.semester || "semester";
+    //         const year = currentRecap?.year || "year";
+    //         const code = currentRecap?.code || "code";
+    //         const title = currentRecap?.title || "title";
+    //         const faculty = currentRecap?.name || "faculty";
+    //         const batch = currentRecap?.batch || "batch";
+
+    //         const filename = `${semester} ${year}-${code} ${title}-${faculty}-${batch}.xlsx`;
+
+    //         const workbook = XLSX.utils.book_new();
+    //         const worksheet = XLSX.utils.aoa_to_sheet(sheetData);
+
+    //         XLSX.utils.book_append_sheet(workbook, worksheet, "CLO Sheet");
+
+    //         // Generate binary string and trigger download in browser
+    //         const wbout = XLSX.write(workbook, { bookType: 'xlsx', type: 'binary' });
+
+    //         const s2ab = (s) => {
+    //             const buf = new ArrayBuffer(s.length);
+    //             const view = new Uint8Array(buf);
+    //             for (let i = 0; i < s.length; i++) {
+    //                 view[i] = s.charCodeAt(i) & 0xFF;
+    //             }
+    //             return buf;
+    //         };
+
+    //         const blob = new Blob([s2ab(wbout)], { type: "application/octet-stream" });
+    //         const url = URL.createObjectURL(blob);
+    //         const a = document.createElement("a");
+    //         a.href = url;
+    //         a.download = filename;
+    //         document.body.appendChild(a);
+    //         a.click();
+    //         document.body.removeChild(a);
+    //         URL.revokeObjectURL(url);
+
+    //         console.log(`Successfully downloaded ${filename}`);
+    //     } catch (error) {
+    //         console.error("Error generating/downloading XLSX:", error);
+    //     }
+    // }
+
+
+
+    async function createXLSX(sheetData) {
         try {
             const semester = currentRecap?.semester || "semester";
             const year = currentRecap?.year || "year";
@@ -180,25 +229,44 @@ export default function CLOSheet() {
 
             const filename = `${semester} ${year}-${code} ${title}-${faculty}-${batch}.xlsx`;
 
-            const workbook = XLSX.utils.book_new();
-            const worksheet = XLSX.utils.aoa_to_sheet(sheetData);
+            const workbook = new ExcelJS.Workbook();
+            const worksheet = workbook.addWorksheet("CLO Sheet", {
+                views: [{ state: 'frozen', xSplit: 3, ySplit: 3 }]
+            });
 
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+            // Load the rows array
+            worksheet.addRows(sheetData);
 
-            // Generate binary string and trigger download in browser
-            const wbout = XLSX.write(workbook, { bookType: 'xlsx', type: 'binary' });
+            // Lock all cells first
+            worksheet.eachRow((row) => {
+                row.eachCell({ includeEmpty: true }, (cell) => {
+                    cell.protection = { locked: true };
+                });
+            });
 
-            const s2ab = (s) => {
-                const buf = new ArrayBuffer(s.length);
-                const view = new Uint8Array(buf);
-                for (let i = 0; i < s.length; i++) {
-                    view[i] = s.charCodeAt(i) & 0xFF;
+            // Unlock and style the first 3 rows (ExcelJS rows are 1-indexed) so ONLY they can be changed
+            for (let i = 1; i <= 3; i++) {
+                const row = worksheet.getRow(i);
+                row.font = { bold: true, color: { argb: i === 2 ? '2563eb' : i === 3 ? 'A10000' : '000000' } };
+                row.alignment = { horizontal: "center", vertical: "middle" };
+            }
+
+            // Set 2nd column width to content width
+            const col2 = worksheet.getColumn(2);
+            let maxLength = 0;
+            col2.eachCell({ includeEmpty: true }, (cell) => {
+                const columnLength = cell.value ? String(cell.value).length : 0;
+                if (columnLength > maxLength) {
+                    maxLength = columnLength;
                 }
-                return buf;
-            };
+            });
+            col2.width = maxLength > 0 ? maxLength + 3 : 10; // Add padding of 3
 
-            const blob = new Blob([s2ab(wbout)], { type: "application/octet-stream" });
+            // Write to a buffer and trigger browser download
+            const buffer = await workbook.xlsx.writeBuffer();
+            const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
             const url = URL.createObjectURL(blob);
+
             const a = document.createElement("a");
             a.href = url;
             a.download = filename;
@@ -214,7 +282,6 @@ export default function CLOSheet() {
     }
 
 
-
     const getScheme = (planScheme, students) => {
         setScheme(planScheme);
         setStudents(students);
@@ -228,20 +295,19 @@ export default function CLOSheet() {
 
         // Sort each group's array by the 'clo' property
         let sorted = Object.values(grouped).map(group => group.sort((a, b) => a.clo - b.clo));
-
-        console.log(sorted)
-
         sorted = Object.values(sorted).flat();
-
-        console.log(sorted)
-
 
         const ENUMS = { HEADS: 0, CLO: 1, TOTAL: 2 }
         let sheet = [[], [], []]
 
         Object.keys(ENUMS).forEach(key => {
-            sheet[ENUMS[key]].push(null, null, null);
+            key === "HEADS" ? sheet[ENUMS[key]].push('SNo', 'Name', 'Reg.No')
+                : sheet[ENUMS[key]].push(null, null, null);
         });
+
+        sheet[ENUMS.HEADS][0] = "SNo";
+        sheet[ENUMS.HEADS][1] = "Name";
+        sheet[ENUMS.HEADS][2] = "Reg.No";
 
         sorted.forEach(item => {
             sheet[ENUMS.HEADS].push(item.head);
@@ -249,17 +315,11 @@ export default function CLOSheet() {
             sheet[ENUMS.TOTAL].push(item.total);
         });
 
-
-
-
         sheet = [...sheet, ...students];
 
-
-
-
-        createXLSX(sheet)
-
         if (menu.download) {
+            createXLSX(sheet)
+            setIsMoreMenuOpen(false);
             console.log(sheet);
             //console.log(JSON.stringify(sheet))
             //console.log(Object.entries(scheme).length)
@@ -564,7 +624,6 @@ export default function CLOSheet() {
         globalWithdraws,
         setWithdraws
     ]);
-
 
     return (
         <div className={`h-full overflow-y-auto px-16 py-6 custom-scrollbar flex flex-col transition-all duration-300 ease-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
