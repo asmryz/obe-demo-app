@@ -172,21 +172,22 @@ export default function CLOSheet() {
     function createXLSX(sheetData) {
         try {
             const semester = currentRecap?.semester || "semester";
+            const year = currentRecap?.year || "year";
             const code = currentRecap?.code || "code";
             const title = currentRecap?.title || "title";
             const faculty = currentRecap?.name || "faculty";
             const batch = currentRecap?.batch || "batch";
 
-            const filename = `${semester}-${code}-${title}-${faculty}-${batch}.xlsx`;
+            const filename = `${semester} ${year}-${code} ${title}-${faculty}-${batch}.xlsx`;
 
             const workbook = XLSX.utils.book_new();
             const worksheet = XLSX.utils.aoa_to_sheet(sheetData);
 
             XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
-            
+
             // Generate binary string and trigger download in browser
             const wbout = XLSX.write(workbook, { bookType: 'xlsx', type: 'binary' });
-            
+
             const s2ab = (s) => {
                 const buf = new ArrayBuffer(s.length);
                 const view = new Uint8Array(buf);
@@ -223,6 +224,18 @@ export default function CLOSheet() {
 
     const handleDownloadExcel = () => {
 
+        const grouped = Object.groupBy(scheme, ({ head }) => head);
+
+        // Sort each group's array by the 'clo' property
+        let sorted = Object.values(grouped).map(group => group.sort((a, b) => a.clo - b.clo));
+
+        console.log(sorted)
+
+        sorted = Object.values(sorted).flat();
+
+        console.log(sorted)
+
+
         const ENUMS = { HEADS: 0, CLO: 1, TOTAL: 2 }
         let sheet = [[], [], []]
 
@@ -230,13 +243,19 @@ export default function CLOSheet() {
             sheet[ENUMS[key]].push(null, null, null);
         });
 
-        scheme.forEach(item => {
+        sorted.forEach(item => {
             sheet[ENUMS.HEADS].push(item.head);
             sheet[ENUMS.CLO].push(item.clo);
             sheet[ENUMS.TOTAL].push(item.total);
         });
 
+
+
+
         sheet = [...sheet, ...students];
+
+
+
 
         createXLSX(sheet)
 
